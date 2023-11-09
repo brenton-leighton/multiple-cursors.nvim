@@ -7,22 +7,15 @@ local move_special = require("multiple-cursors.move_special")
 -- Character to insert
 local char = nil
 
--- For executing a delete command without modifying the register
-local function normal_bang_delete(cmd)
-  local register_info = vim.fn.getreginfo('"')
-  vim.cmd("normal! " .. cmd)
-  vim.fn.setreg('"', register_info)
-end
-
 -- Delete a charater if in replace mode
 local function delete_if_replace_mode(vc)
   if common.is_mode("R") then
     -- ToDo save and restore register info
     if vc.col == common.get_length_of_line(vc.lnum) then
-      normal_bang_delete("x")
+      vim.cmd("normal! \"_x")
       common.set_cursor_to_virtual_cursor(vc)
     elseif vc.col < common.get_length_of_line(vc.lnum) then
-      normal_bang_delete("x")
+      vim.cmd("normal! \"_x")
     end
   end
 end
@@ -136,9 +129,9 @@ local function insert_mode_virtual_cursor_bs(vc)
     local count = vim.fn.max({1, count_spaces_back(vc.lnum, vc.col)})
 
     if vc.col == common.get_max_col(vc.lnum) then -- End of the line
-      for i = 1, count do normal_bang_delete("x") end
+      for i = 1, count do vim.cmd("normal! \"_x") end
     else -- Anywhere else on the line
-      for i = 1, count do normal_bang_delete("X") end
+      for i = 1, count do vim.cmd("normal! \"_X") end
     end
     vc.col = vc.col - count
     vc.curswant = vc.col
@@ -194,7 +187,7 @@ local function virtual_cursor_del(vc)
     -- Join next line
     vim.cmd("normal! gJ")
   else -- Anywhere else on the line
-    normal_bang_delete("x")
+    vim.cmd("normal! \"_x")
   end
 
   -- Cursor doesn't change
@@ -224,7 +217,7 @@ function M.virtual_cursor_cr(vc)
   else
     -- Special case for EOL: add a character to auto indent, then delete it
     vim.api.nvim_put({"", "x"}, "c", false, true)
-    normal_bang_delete("==^x")
+    vim.cmd("normal! ==^\"_x")
     common.set_virtual_cursor_from_cursor(vc)
     vc.col = common.get_col(vc.lnum, vc.col + 1) -- Shift cursor 1 right limited to max col
     vc.curswant = vc.col
@@ -322,7 +315,7 @@ local function virtual_cursor_replace_paste(lines, vc)
     -- If there are multiple paste lines
     if #lines ~= 1 then
       -- Delete to the end of the line and put paste lines after the cursor
-      normal_bang_delete("D")
+      vim.cmd("normal! \"_D")
       vim.api.nvim_put(lines, "c", true, false)
     else -- Single paste line
       local paste_line_length = #lines[1]
@@ -331,11 +324,11 @@ local function virtual_cursor_replace_paste(lines, vc)
       -- The length of the paste line is less than being overwritten
       if paste_line_length < overwrite_length then
         -- Delete the paste line length and put the paste line before the cursor
-        normal_bang_delete(tostring(paste_line_length) .. "dl")
+        vim.cmd("normal! \"_" .. tostring(paste_line_length) .. "dl")
         vim.api.nvim_put(lines, "c", false, false)
       else
         -- Delete to the end of the line and put paste line after the cursor
-        normal_bang_delete("D")
+        vim.cmd("normal! \"_D")
         vim.api.nvim_put(lines, "c", true, false)
       end
     end
