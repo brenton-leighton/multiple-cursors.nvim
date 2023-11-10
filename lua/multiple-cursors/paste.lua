@@ -64,35 +64,6 @@ local function virtual_cursor_visual_mode_paste(lines, vc)
 
 end
 
--- For split pasting, reorder the given lines to match the postional order of
--- the cursors
--- The line for the real cursor is last
--- This function should only be used when the number of lines is one less than
--- the number of editable virtual cursors within the buffer
-local function reorder_lines_for_split_pasting(lines)
-
-  local indices = virtual_cursors.get_cursor_order()
-
-  local real_cursor_line = nil
-
-  local new_lines = {}
-
-  for lines_idx = 1, #indices do
-    local cursor_idx = indices[lines_idx]
-
-    if cursor_idx == 0 then
-      real_cursor_line = lines[lines_idx]
-    else
-      table.insert(new_lines, lines[lines_idx])
-    end
-  end
-
-  table.insert(new_lines, real_cursor_line)
-
-  return new_lines
-
-end
-
 -- Paste handler
 local function paste(lines)
 
@@ -100,7 +71,7 @@ local function paste(lines)
 
   if split_paste then
     -- Reorder lines
-    lines = reorder_lines_for_split_pasting(lines)
+    virtual_cursors.reorder_lines_for_split_pasting(lines)
   end
 
   if common.is_mode("n") then

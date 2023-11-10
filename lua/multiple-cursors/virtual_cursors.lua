@@ -48,6 +48,53 @@ function M.get_num_virtual_cursors()
   return #virtual_cursors
 end
 
+-- Get the positions of the visual area in a forward direction
+local function get_normalised_visual_area(vc)
+  -- Get start and end positions for the extmarks representing the visual area
+  local lnum1 = vc.visual_start_lnum
+  local col1 = vc.visual_start_col
+  local lnum2 = vc.lnum
+  local col2 = vc.col
+
+  if not common.is_visual_area_forward(vc) then
+    lnum1 = vc.lnum
+    col1 = vc.col
+    lnum2 = vc.visual_start_lnum
+    col2 = vc.visual_start_col
+  end
+
+  return lnum1, col1, lnum2, col2
+end
+
+-- Sort virtual cursors by position
+function M.sort()
+  table.sort(virtual_cursors, function(vc1, vc2)
+
+--    -- If not visual mode
+--    if vc.visual_start_lnum == 0 then
+
+      if vc1.lnum == vc2.lnum then
+        return vc1.col < vc2.col
+      else
+        return vc1.lnum < vc2.lnum
+      end
+
+--    else -- Visual mode
+
+--      -- Normalise first
+--      local vc1_lnum, vc1_col = get_normalised_visual_area(vc1)
+--      local vc2_lnum, vc2_col = get_normalised_visual_area(vc2)
+
+--      if vc1_lnum == vc2_lnum then
+--        return vc1_col < vc2_col
+--      else
+--        return vc1_lnum < vc2_lnum
+--      end
+
+--    end
+  end)
+end
+
 -- Add a new virtual cursor
 function M.add(lnum, col, curswant)
 
@@ -358,24 +405,6 @@ function M.visual_other()
   end
 end
 
--- Get the positions of the visual area in a forward direction
-local function get_normalised_visual_area(vc)
-  -- Get start and end positions for the extmarks representing the visual area
-  local lnum1 = vc.visual_start_lnum
-  local col1 = vc.visual_start_col
-  local lnum2 = vc.lnum
-  local col2 = vc.col
-
-  if not common.is_visual_area_forward(vc) then
-    lnum1 = vc.lnum
-    col1 = vc.col
-    lnum2 = vc.visual_start_lnum
-    col2 = vc.visual_start_col
-  end
-
-  return lnum1, col1, lnum2, col2
-end
-
 -- Get visual area text to put into regcontents
 local function visual_area_to_register_info(lnum1, col1, lnum2, col2, cmd)
 
@@ -541,39 +570,40 @@ function M.can_split_paste(num_lines)
   return count + 1 == num_lines
 end
 
--- Get indices of virtual cursors and the real cursor (represented by 0) ordered
--- by position
-function M.get_cursor_order()
+-- Move the line for the real cursor to the end of lines
+-- Modifies lines
+function M.reorder_lines_for_split_pasting(lines)
 
-  -- Table to store {index, lnum, col} for each cursor
-  local tmp = {}
+  -- Ensure virtual_cursors is sorted
+  M.sort()
 
-  -- Real cursor
-  local cursor_pos = vim.fn.getcursorcharpos()
-  table.insert(tmp, {0, cursor_pos[2], cursor_pos[3]})
+  -- Move real cursor line to the end
+  local real_cursor_pos = vim.fn.getcursorcharpos() -- [0, lnum, col, off, curswant]
+
+  local cursor_line_idx = 0
 
   for idx = 1, #virtual_cursors do
     local vc = virtual_cursors[idx]
-    if vc.within_buffer and vc.editable then
-      table.insert(tmp, {idx, vc.lnum, vc.col})
-    end
-  end
 
-  table.sort(tmp, function(vc1, vc2)
-    if vc1[2] == vc2[2] then -- Same lnum
-      return vc1[3] < vc2[3] -- vc1.col < vc2.col
+    if vc.lnum == real_cursor_pos[2] then
+      if vc.col > real_cursor_pos[3] then
+        cursor_line_idx = idx
+        break
+      end
     else
-      return vc1[2] < vc2[2] -- vc1.lnum < vc2.lnum
+      if vc.lnum > real_cursor_pos[2] then
+        cursor_line_idx = idx
+        break
+      end
     end
-  end)
 
-  local indices = {}
-
-  for idx = 1, #tmp do
-    table.insert(indices, tmp[idx][1])
   end
 
-  return indices
+  if cursor_line_idx ~= 0 then
+    -- Move the line for the real cursor to the end
+    local real_cursor_line = table.remove(lines, cursor_line_idx)
+    table.insert(lines, real_cursor_line)
+  end
 
 end
 
