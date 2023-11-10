@@ -1,6 +1,6 @@
 local M = {}
 
-local normal_edit = require("multiple-cursors.normal_edit")
+local virtual_cursors = require("multiple-cursors.virtual_cursors")
 
 -- A table of key maps
 -- mode(s), key(s), function
@@ -123,6 +123,15 @@ function M.restore_existing()
 
 end
 
+-- Function to execute a custom key map
+local function custom_function(func)
+  -- Call func for the real cursor
+  func()
+
+  -- Call func for each virtual cursor and set the virtual cursor position
+  virtual_cursors.edit(func, true)
+end
+
 -- Set any custom key maps
 -- This is a separate function because it's also used by the LazyLoad autocmd
 function M.set_custom()
@@ -133,7 +142,7 @@ function M.set_custom()
 
     for j=1, #custom_modes do
       for k=1, #custom_keys do
-        vim.keymap.set(custom_modes[j], custom_keys[k], function() normal_edit.custom_function(func) end)
+        vim.keymap.set(custom_modes[j], custom_keys[k], function() custom_function(func) end)
       end
     end
   end

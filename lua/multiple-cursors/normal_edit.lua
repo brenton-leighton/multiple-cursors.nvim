@@ -3,14 +3,6 @@ local M = {}
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
 
-function M.custom_function(func)
-  -- Call func for the real cursor
-  func()
-
-  -- Call func for each virtual cursor and set the virtual cursor position
-  virtual_cursors.edit(func, true)
-end
-
 -- Indentation
 function M.indent()
   common.feedkeys(">>", vim.v.count)
