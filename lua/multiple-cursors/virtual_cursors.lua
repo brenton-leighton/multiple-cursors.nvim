@@ -48,20 +48,6 @@ function M.get_num_virtual_cursors()
   return #virtual_cursors
 end
 
--- Get the number of editable virtual cursors
-function M.get_num_editable_cursors()
-  local count = 0
-
-  for idx = 1, #virtual_cursors do
-    local vc = virtual_cursors[idx]
-    if vc.within_buffer and vc.editable then
-      count = count + 1
-    end
-  end
-
-  return count
-end
-
 -- Add a new virtual cursor
 function M.add(lnum, col, curswant)
 
@@ -537,11 +523,29 @@ function M.visual_delete()
 
 end
 
--- Paste line per cursor -------------------------------------------------------
+-- Pasting ---------------------------------------------------------------------
+
+-- Does the number of lines match the number of editable cursors + 1 (for the
+-- real cursor)
+function M.can_split_paste(num_lines)
+  -- Get the number of editable virtual cursors
+  local count = 0
+
+  for idx = 1, #virtual_cursors do
+    local vc = virtual_cursors[idx]
+    if vc.within_buffer and vc.editable then
+      count = count + 1
+    end
+  end
+
+  return count + 1 == num_lines
+end
 
 -- Get indices of virtual cursors and the real cursor (represented by 0) ordered
 -- by position
-local function get_cursor_order()
+function M.get_cursor_order()
+
+  -- Table to store {index, lnum, col} for each cursor
   local tmp = {}
 
   -- Real cursor
@@ -555,11 +559,11 @@ local function get_cursor_order()
     end
   end
 
-  table.sort(tmp, function(a, b)
-    if a[2] == b[2] then
-      return a[3] < b[3]
+  table.sort(tmp, function(vc1, vc2)
+    if vc1[2] == vc2[2] then -- Same lnum
+      return vc1[3] < vc2[3] -- vc1.col < vc2.col
     else
-      return a[2] < b[2]
+      return vc1[2] < vc2[2] -- vc1.lnum < vc2.lnum
     end
   end)
 
@@ -573,55 +577,41 @@ local function get_cursor_order()
 
 end
 
--- Call func on each line from lines on each virtual cursor, and return the line
--- for the real cursor
--- #lines must match #virtual_cursors + 1 (for the real cursor)
-function M.split_paste(lines, func, set_position)
+-- Call func to paste at each cursor
+function M.paste(lines, func, split_paste, set_position)
 
   ignore_cursor_movement = true
 
   extmarks.save_cursor()
 
-  local indices = get_cursor_order()
+  for idx = 1, #virtual_cursors do
 
-  if #lines ~= #indices then
-    print("Error: #lines ~= #indices")
-    return
-  end
+    local vc = virtual_cursors[idx]
 
-  local real_cursor_line = nil
+    if vc.within_buffer and vc.editable then
 
-  for _idx = 1, #indices do
-    local line = lines[_idx]
-    local idx = indices[_idx]
+      -- Set virtual cursor position from extmark in case there were any changes
+      extmarks.update_virtual_cursor_position(vc)
 
-    if idx == 0 then -- Real cursor
-      real_cursor_line = line
-    else
-      local vc = virtual_cursors[idx]
+      if not vc.delete then
+        -- Set real cursor to virtual cursor position
+        common.set_cursor_to_virtual_cursor(vc)
 
-      if vc.within_buffer and vc.editable then
-        -- Set virtual cursor position from extmark in case there were any changes
-        extmarks.update_virtual_cursor_position(vc)
-
-        if not vc.delete then
-          -- Set real cursor to virtual cursor position
-          common.set_cursor_to_virtual_cursor(vc)
-
-          -- Call func with the line
-          func({line}, vc)
-
-          if set_position then
-            -- Set virtual cursor position from real cursor
-            common.set_virtual_cursor_from_cursor(vc)
-          end
-
-          -- Update extmark
-          extmarks.update_virtual_cursor_extmarks(vc)
+        if split_paste then
+          func({lines[idx]}, vc)
+        else
+          func(lines, vc)
         end
+
+        if set_position then
+          -- Set virtual cursor position from real cursor
+          common.set_virtual_cursor_from_cursor(vc)
+        end
+
+        -- Update extmark
+        extmarks.update_virtual_cursor_extmarks(vc)
       end
     end
-
   end
 
   clean_up()
@@ -630,8 +620,6 @@ function M.split_paste(lines, func, set_position)
   extmarks.restore_cursor()
 
   ignore_cursor_movement = false
-
-  return real_cursor_line
 
 end
 

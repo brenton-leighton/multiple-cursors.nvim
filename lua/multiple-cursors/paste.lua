@@ -10,40 +10,26 @@ function M.setup(_enable_split_paste)
   enable_split_paste = _enable_split_paste
 end
 
--- Override the paste handler
-function M.override_handler()
+-- Paste in normal mode for a virtual cursor
+local function virtual_cursor_normal_mode_paste(lines, vc)
+  local move_afterwards = vc.col < common.get_max_col(vc.lnum)
 
-  -- Save the original paste handler
-  original_paste_function = vim.paste
+  -- Put the line(s) after the cursor
+  vim.api.nvim_put(lines, "c", true, true)
 
-  -- Override
-  vim.paste = (function(overridden)
-      return function(lines, phase)
-        if enable_split_paste and
-            #lines == virtual_cursors.get_num_editable_cursors() + 1 then
-          local line = split_paste(lines)
-          return overridden({line}, phase)
-        else
-          paste(lines)
-          return overridden(lines, phase)
-        end
-      end
-  end)(vim.paste)
+  if move_afterwards then
+    vim.cmd("normal! h")
+  end
 end
 
--- Revert the paste handler
-function M.revert_handler()
-  vim.paste = original_paste_function
-end
-
--- Paste line(s) at a virtual cursor in insert mode
-local function virtual_cursor_insert_paste(lines, vc)
+-- Paste in insert mode for a virtual cursor
+local function virtual_cursor_insert_mode_paste(lines, vc)
   -- Put the line(s) before the cursor
   vim.api.nvim_put(lines, "c", false, true)
 end
 
--- Paste line(s) at a virtual cursor in replace mode
-local function virtual_cursor_replace_paste(lines, vc)
+-- Paste in replace mode for a virtual cursor
+local function virtual_cursor_replace_mode_paste(lines, vc)
 
   -- If the cursor is at the end of the line
   if vc.col == common.get_max_col(vc.lnum) then
@@ -74,26 +60,100 @@ local function virtual_cursor_replace_paste(lines, vc)
 
 end
 
--- Paste
-function paste(lines)
-  if common.is_mode("R") then
-    virtual_cursors.edit(function(vc)
-      virtual_cursor_replace_paste(lines, vc)
-    end, false)
-  else
-    virtual_cursors.edit(function(vc)
-      virtual_cursor_insert_paste(lines, vc)
-    end, true)
-  end
+local function virtual_cursor_visual_mode_paste(lines, vc)
+
 end
 
--- Split the paste lines so that one is put to each cursor
--- The final line for the real cursor is returned
-function split_paste(lines)
-  if common.is_mode("R") then
-    return virtual_cursors.split_paste(lines, virtual_cursor_replace_paste, false)
+-- For split pasting, reorder the given lines to match the postional order of
+-- the cursors
+-- The line for the real cursor is last
+-- This function should only be used when the number of lines is one less than
+-- the number of editable virtual cursors within the buffer
+local function reorder_lines_for_split_pasting(lines)
+
+  local indices = virtual_cursors.get_cursor_order()
+
+  local real_cursor_line = nil
+
+  local new_lines = {}
+
+  for lines_idx = 1, #indices do
+    local cursor_idx = indices[lines_idx]
+
+    if cursor_idx == 0 then
+      real_cursor_line = lines[lines_idx]
+    else
+      table.insert(new_lines, lines[lines_idx])
+    end
   end
-    return virtual_cursors.split_paste(lines, virtual_cursor_insert_paste, true)
+
+  table.insert(new_lines, real_cursor_line)
+
+  return new_lines
+
+end
+
+-- Paste handler
+local function paste(lines)
+
+  local split_paste = enable_split_paste and virtual_cursors.can_split_paste(#lines)
+
+  if split_paste then
+    -- Reorder lines
+    lines = reorder_lines_for_split_pasting(lines)
+  end
+
+  if common.is_mode("n") then
+
+    virtual_cursors.paste(lines, function(lines, vc)
+      virtual_cursor_normal_mode_paste(lines, vc)
+    end, split_paste, true)
+
+  elseif common.is_mode("i") then
+
+    virtual_cursors.paste(lines, function(lines, vc)
+      virtual_cursor_insert_mode_paste(lines, vc)
+    end, split_paste, true)
+
+  elseif common.is_mode("R") then
+
+    virtual_cursors.paste(lines, function(lines, vc)
+      virtual_cursor_replace_mode_paste(lines, vc)
+    end, split_paste, false)
+
+  elseif common.is_mode("x") then
+    vim.print("visual")
+  else
+    vim.print("Error: unknown mode")
+  end
+
+  if split_paste then
+    -- Return the last line for pasting to the real cursor
+    return {lines[#lines]}
+  else
+    -- Return the original lines for pasting to the real cursor
+    return lines
+  end
+
+end
+
+-- Override the paste handler
+function M.override_handler()
+
+  -- Save the original paste handler
+  original_paste_function = vim.paste
+
+  -- Override
+  vim.paste = (function(overridden)
+      return function(lines, phase)
+        return overridden(paste(lines), phase)
+      end
+  end)(vim.paste)
+end
+
+-- Revert the paste handler
+function M.revert_handler()
+  vim.paste = original_paste_function
 end
 
 return M
