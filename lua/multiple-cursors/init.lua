@@ -10,12 +10,10 @@ local normal_edit = require("multiple-cursors.normal_edit")
 local normal_to_insert = require("multiple-cursors.normal_to_insert")
 local insert_mode = require("multiple-cursors.insert_mode")
 local visual_mode = require("multiple-cursors.visual_mode")
+local paste = require("multiple-cursors.paste")
 
 local initialised = false
 local autocmd_group_id = nil
-local original_paste_function = nil
-
-local enable_split_paste = true
 
 default_key_maps = {
   -- Left/right motion in normal/visual modes
@@ -150,31 +148,13 @@ local function create_autocmds()
 
 end
 
--- Override the paste handler
-local function override_paste_handler()
-  original_paste_function = vim.paste
-
-  vim.paste = (function(overridden)
-      return function(lines, phase)
-        if enable_split_paste and
-            #lines == virtual_cursors.get_num_editable_cursors() + 1 then
-          local line = insert_mode.split_paste(lines)
-          return overridden({line}, phase)
-        else
-          insert_mode.paste(lines)
-          return overridden(lines, phase)
-        end
-      end
-  end)(vim.paste)
-end
-
 -- Initialise
 local function init()
   if not initialised then
     key_maps.save_existing()
     key_maps.set()
     create_autocmds()
-    override_paste_handler()
+    paste.override_handler()
 
     initialised = true
   end
@@ -187,7 +167,7 @@ local function deinit()
     key_maps.delete()
     key_maps.restore_existing()
     vim.api.nvim_clear_autocmds({group = autocmd_group_id}) -- Clear autocmds
-    vim.paste = original_paste_function -- Revert the paste handler
+    paste.revert_handler()
 
     initialised = false
   end
@@ -246,15 +226,18 @@ function M.setup(opts)
   -- Options
   opts = opts or {}
 
-  enable_split_paste = opts.enable_split_paste or true
   local disabled_default_key_maps = opts.disabled_default_key_maps or {}
   local custom_key_maps = opts.custom_key_maps or {}
+  local enable_split_paste = opts.enable_split_paste or true
 
   -- Set up extmarks
   extmarks.setup()
 
   -- Set up key maps
   key_maps.setup(default_key_maps, disabled_default_key_maps, custom_key_maps)
+
+  -- Set up paste
+  paste.setup(enable_split_paste)
 
   -- Autocmds
   autocmd_group_id = vim.api.nvim_create_augroup("MultipleCursors", {})
