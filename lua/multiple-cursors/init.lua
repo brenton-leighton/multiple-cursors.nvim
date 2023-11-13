@@ -15,6 +15,9 @@ local paste = require("multiple-cursors.paste")
 local initialised = false
 local autocmd_group_id = nil
 
+local pre_hook = nil
+local post_hook = nil
+
 default_key_maps = {
   -- Left/right motion in normal/visual modes
   {{"n", "x"}, {"h", "<Left>"}, move.normal_h},
@@ -151,6 +154,7 @@ end
 -- Initialise
 local function init()
   if not initialised then
+    if pre_hook then pre_hook() end
     key_maps.save_existing()
     key_maps.set()
     create_autocmds()
@@ -168,6 +172,7 @@ local function deinit()
     key_maps.restore_existing()
     vim.api.nvim_clear_autocmds({group = autocmd_group_id}) -- Clear autocmds
     paste.revert_handler()
+    if post_hook then post_hook() end
 
     initialised = false
   end
@@ -229,6 +234,9 @@ function M.setup(opts)
   local disabled_default_key_maps = opts.disabled_default_key_maps or {}
   local custom_key_maps = opts.custom_key_maps or {}
   local enable_split_paste = opts.enable_split_paste or true
+
+  pre_hook = opts.pre_hook or nil
+  post_hook = opts.post_hook or nil
 
   -- Set up extmarks
   extmarks.setup()

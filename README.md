@@ -84,6 +84,8 @@ opts = {
   custom_key_maps = {
     {{"n", "i"}, "<C-/>", function() vim.cmd("ExampleCommand") end},
   },
+  pre_hook = function() vim.print("Hello") end,
+  post_hook = function() vim.print("Goodbye") end,
 },
 keys = {
   {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i"}},
@@ -94,13 +96,13 @@ keys = {
 },
 ```
 
-### enable_split_paste
+### `enable_split_paste`
 
 Default value: `true`
 
 This option allows for disabling the "split pasting" function, where if the number of lines in the paste text matches the number of cursors, each line of the text will be inserted at each cursor.
 
-### disabled_default_key_maps
+### `disabled_default_key_maps`
 
 Default value: `{}`
 
@@ -109,7 +111,7 @@ This option can be used to disabled any of the default key maps. Each element in
 - Mode (string|table): Mode short-name string (`"n"`, `"i"`, or `"v"`), or a table of mode short-name strings
 - Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
 
-### custom_key_maps
+### `custom_key_maps`
 
 Default value: `{}`
 
@@ -121,11 +123,18 @@ This option allows for mapping keys to custom functions for use with multiple cu
 
 When a mapping is executed the given function will be called at each cursor.
 
+### `pre_hook` and `post_hook`
+
+Default values: `nil`
+
+These options are to provide functions that are called a the start of initialisation and at the end of de-initialisation respectively.
+
 ## Notes and known issues
 
 - Anything other than the functionality listed above probably won't work correctly
 - This plugin has been developed and tested with Neovim 0.9.1 and there may be issues with other versions
 - `d` and `y` in normal mode are not implemented, visual mode can be used instead
+-  Using named registers is not implemented
 - This plugin hasn't been tested with completion and it will probably not behave correctly
 - In insert or replace mode, anything to do with tabs may not behave correctly, in particular if you are using less common options
 - Please use the [Issues](https://github.com/brenton-leighton/multiple-cursors.nvim/issues) page to report issues, and please include any relevant Neovim options
