@@ -38,8 +38,8 @@ end
 -- End-of-Line command for a virtual cursor
 -- This isn't local because it's used by normal_to_insert
 function M.virtual_cursor_eol(vc)
-  vc.col = common.get_col(vc.lnum, 2147483647)
-  vc.curswant = 2147483647
+  vc.col = common.get_col(vc.lnum, vim.v.maxcol)
+  vc.curswant = vim.v.maxcol
 end
 
 -- End-of-Line command for all virtual cursors

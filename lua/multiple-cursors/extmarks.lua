@@ -313,8 +313,8 @@ function M.update_virtual_cursor_position(vc)
       vc.lnum = extmark_pos[1] + 1
       vc.col = extmark_pos[2] + 1
 
-      -- Maintain curswant = 2147483647 if the cursor is still at the end of the line
-      if vc.curswant < 2147483647 and vc.col < common.get_max_col(vc.lnum) then
+      -- Maintain curswant = vim.v.maxcol if the cursor is still at the end of the line
+      if vc.curswant < vim.v.maxcol and vc.col < common.get_max_col(vc.lnum) then
         vc.curswant = vc.col
       end
     else
