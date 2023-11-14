@@ -191,7 +191,7 @@ end
 -- Visitors --------------------------------------------------------------------
 
 -- Visit all virtual cursors
-function M.visit_all(func, ...)
+function M.visit_all(func)
 
   for idx = 1, #virtual_cursors do
     local vc = virtual_cursors[idx]
@@ -203,7 +203,7 @@ function M.visit_all(func, ...)
 
     if not vc.delete then
       -- Call the function
-      func(vc, unpack(arg))
+      func(vc, idx)
 
       -- Update extmarks
       extmarks.update_virtual_cursor_extmarks(vc)
@@ -217,26 +217,26 @@ function M.visit_all(func, ...)
 end
 
 -- Visit virtual cursors within buffer
-function M.visit_in_buffer(func, ...)
+function M.visit_in_buffer(func)
 
-  M.visit_all(function(vc, ...)
+  M.visit_all(function(vc, idx)
     if vc.within_buffer then
-      func(vc, unpack(arg))
+      func(vc, idx)
     end
   end)
 
 end
 
 -- Visit virtual cursors within the buffer with the real cursor
-function M.visit_with_cursor(func, ...)
+function M.visit_with_cursor(func)
 
   -- Save cursor position
   ignore_cursor_movement = true
   local cursor_pos = vim.fn.getcursorcharpos()
 
-  M.visit_in_buffer(function(vc, ...)
+  M.visit_in_buffer(function(vc, idx)
     common.set_cursor_to_virtual_cursor(vc)
-    func(vc, unpack(arg))
+    func(vc, idx)
   end)
 
   -- Restore cursor
@@ -264,15 +264,15 @@ end
 
 -- Call func to perform an edit at each virtual cursor
 -- The virtual cursor position is not set after calling func
-function M.edit(func, ...)
+function M.edit(func)
 
   -- Save cursor position with extmark
   ignore_cursor_movement = true
   extmarks.save_cursor()
 
-  M.visit_in_buffer(function(vc, ...)
+  M.visit_in_buffer(function(vc, idx)
     if vc.editable then
-      func(vc, unpack(arg))
+      func(vc, idx)
     end
   end)
 
@@ -284,11 +284,11 @@ end
 
 -- Call func to perform an edit at each virtual cursor using the real cursor
 -- The virtual cursor position is not set after calling func
-function M.edit_with_cursor(func, ...)
+function M.edit_with_cursor(func)
 
-  M.edit(function(vc, ...)
+  M.edit(function(vc, idx)
     common.set_cursor_to_virtual_cursor(vc)
-    func(vc, unpack(arg))
+    func(vc, idx)
   end)
 
 end
@@ -571,7 +571,7 @@ function M.visual_delete()
 
 end
 
--- Pasting ---------------------------------------------------------------------
+-- Split pasting ---------------------------------------------------------------------
 
 -- Does the number of lines match the number of editable cursors + 1 (for the
 -- real cursor)
@@ -623,52 +623,6 @@ function M.reorder_lines_for_split_pasting(lines)
     local real_cursor_line = table.remove(lines, cursor_line_idx)
     table.insert(lines, real_cursor_line)
   end
-
-end
-
--- Call func to paste at each cursor
-function M.paste(lines, func, split_paste, set_position)
-
-  ignore_cursor_movement = true
-
-  extmarks.save_cursor()
-
-  for idx = 1, #virtual_cursors do
-
-    local vc = virtual_cursors[idx]
-
-    if vc.within_buffer and vc.editable then
-
-      -- Set virtual cursor position from extmark in case there were any changes
-      extmarks.update_virtual_cursor_position(vc)
-
-      if not vc.delete then
-        -- Set real cursor to virtual cursor position
-        common.set_cursor_to_virtual_cursor(vc)
-
-        if split_paste then
-          func({lines[idx]}, vc)
-        else
-          func(lines, vc)
-        end
-
-        if set_position then
-          -- Set virtual cursor position from real cursor
-          common.set_virtual_cursor_from_cursor(vc)
-        end
-
-        -- Update extmark
-        extmarks.update_virtual_cursor_extmarks(vc)
-      end
-    end
-  end
-
-  clean_up()
-  check_for_collisions()
-
-  extmarks.restore_cursor()
-
-  ignore_cursor_movement = false
 
 end
 

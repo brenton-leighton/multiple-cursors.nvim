@@ -61,7 +61,7 @@ local function virtual_cursor_replace_mode_paste(lines, vc)
 end
 
 local function virtual_cursor_visual_mode_paste(lines, vc)
-
+  -- ToDo
 end
 
 -- Paste handler
@@ -74,29 +74,35 @@ local function paste(lines)
     virtual_cursors.reorder_lines_for_split_pasting(lines)
   end
 
+  local func = nil
+  local set_position = true
+
+  -- Set the function to call
   if common.is_mode("n") then
-
-    virtual_cursors.paste(lines, function(lines, vc)
-      virtual_cursor_normal_mode_paste(lines, vc)
-    end, split_paste, true)
-
+    func = virtual_cursor_normal_mode_paste
   elseif common.is_mode("i") then
-
-    virtual_cursors.paste(lines, function(lines, vc)
-      virtual_cursor_insert_mode_paste(lines, vc)
-    end, split_paste, true)
-
+    func = virtual_cursor_insert_mode_paste
   elseif common.is_mode("R") then
-
-    virtual_cursors.paste(lines, function(lines, vc)
-      virtual_cursor_replace_mode_paste(lines, vc)
-    end, split_paste, false)
-
+    func = virtual_cursor_replace_mode_paste
+    set_position = false
   elseif common.is_mode("x") then
-    vim.print("visual")
-  else
-    vim.print("Error: unknown mode")
+    -- ToDo
+    func = virtual_cursor_visual_mode_paste
   end
+
+  virtual_cursors.edit_with_cursor(function(vc, idx)
+
+    if split_paste then
+      func({lines[idx]}, vc)
+    else
+      func(lines, vc)
+    end
+
+    if set_position then
+      common.set_virtual_cursor_from_cursor(vc)
+    end
+
+  end)
 
   if split_paste then
     -- Return the last line for pasting to the real cursor
