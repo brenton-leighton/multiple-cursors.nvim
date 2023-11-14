@@ -248,7 +248,7 @@ end
 local function update_virtual_cursor_visual_extmarks(vc)
 
   -- If there's no visual area
-  if vc.visual_start_lnum == 0 or vc.visual_start_col == 0 or
+  if not common.is_visual_area_valid(vc) or
       (vc.visual_start_lnum == vc.lnum and vc.visual_start_col == vc.col) then
 
     -- Clear any visual marks

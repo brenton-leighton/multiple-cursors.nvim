@@ -70,8 +70,8 @@ end
 function M.sort()
   table.sort(virtual_cursors, function(vc1, vc2)
 
---    -- If not visual mode
---    if vc.visual_start_lnum == 0 then
+    -- If not visual mode
+    if not common.is_visual_area_valid(vc) then
 
       if vc1.lnum == vc2.lnum then
         return vc1.col < vc2.col
