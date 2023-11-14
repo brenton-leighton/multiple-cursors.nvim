@@ -4,7 +4,7 @@ local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
 
 function M.escape()
-  virtual_cursors.move_manually(
+  virtual_cursors.visit_in_buffer(
   function(vc)
     -- Move cursor back if it's at the end of a non empty line
     vc.col = vim.fn.min({vc.col, common.get_max_col(vc.lnum) - 1})

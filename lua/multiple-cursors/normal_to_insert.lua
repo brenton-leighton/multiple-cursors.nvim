@@ -28,7 +28,7 @@ function M.mode_changed()
     insert_mode.virtual_cursors_cr()
   elseif mode_cmd == "O" then
     -- New line before current line
-    virtual_cursors.move_manually(function(vc)
+    virtual_cursors.visit_in_buffer(function(vc)
       if vc.lnum == 1 then -- First line, move to start of line
         vc.col = 1
         vc.curswant = 1

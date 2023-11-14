@@ -187,6 +187,46 @@ function M.cursor_moved()
   end
 end
 
+
+-- Visitors --------------------------------------------------------------------
+
+-- Visit all cursors
+function M.visit_all(func, ...)
+
+  for idx = 1, #virtual_cursors do
+    local vc = virtual_cursors[idx]
+
+    if vc.within_buffer then
+      -- Set virtual cursor position from extmark in case there were any changes
+      extmarks.update_virtual_cursor_position(vc)
+    end
+
+    if not vc.delete then
+      -- Call the function
+      func(vc, unpack(arg))
+
+      -- Update extmarks
+      extmarks.update_virtual_cursor_extmarks(vc)
+    end
+
+  end
+
+  clean_up()
+  check_for_collisions()
+
+end
+
+-- Visit cursors within buffer
+function M.visit_in_buffer(func, ...)
+
+  M.visit_all(function(vc, ...)
+    if vc.within_buffer then
+      func(vc, unpack(arg))
+    end
+  end)
+
+end
+
 -- Visit each virtual cursor with the real cursor and call func(vc)
 -- use_extmark: Use an extmark to save the cursor position
 -- editable_only: only call func on editable cursors
@@ -249,30 +289,6 @@ local function visit(use_extmark, editable_only, set_position, func)
 end
 
 -- Move ------------------------------------------------------------------------
-
-function M.move_manually(func)
-
-  for idx = 1, #virtual_cursors do
-    local vc = virtual_cursors[idx]
-
-    if vc.within_buffer then
-      -- Set virtual cursor position from extmark in case there were any changes
-      extmarks.update_virtual_cursor_position(vc)
-    end
-
-    if not vc.delete then
-      -- Call the function
-      func(vc)
-
-      -- Update the extmark
-      extmarks.update_virtual_cursor_extmarks(vc)
-    end
-  end
-
-  clean_up()
-  check_for_collisions()
-
-end
 
 function M.move_normal(cmd, count)
   visit(false, false, true, function()
@@ -363,8 +379,7 @@ function M.mode_changed_to_visual()
   -- Move cursor if there's a count
   if vim.v.count > 1 then
     local count = vim.v.count - 1
-    M.move_manually(
-    function(vc)
+    M.visit_in_buffer(function(vc)
       local col = vc.col + count
       vc.col = common.get_col(vc.lnum, col)
       vc.curswant = vc.col

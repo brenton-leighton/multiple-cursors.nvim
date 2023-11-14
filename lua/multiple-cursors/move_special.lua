@@ -17,7 +17,7 @@ end
 -- Right command for all virtual cursors
 -- This isn't local because it's used in normal_to_insert
 function M.virtual_cursors_right(count)
-  virtual_cursors.move_manually(function(vc) virtual_cursor_right(vc, count) end)
+  virtual_cursors.visit_in_buffer(function(vc) virtual_cursor_right(vc, count) end)
 end
 
 -- l command in normal/visual modes
@@ -45,7 +45,7 @@ end
 -- End-of-Line command for all virtual cursors
 -- This isn't local because it's used by normal_to_insert
 function M.virtual_cursors_eol()
-  virtual_cursors.move_manually(function(vc) M.virtual_cursor_eol(vc) end)
+  virtual_cursors.visit_in_buffer(function(vc) M.virtual_cursor_eol(vc) end)
 end
 
 -- $ command in normal/visual modes
@@ -87,7 +87,7 @@ end
 -- Up command for all virtual cursors
 local function virtual_cursors_up(count)
   count = get_actual_count_up(count)
-  virtual_cursors.move_manually(function(vc) virtual_cursor_up(vc, count) end)
+  virtual_cursors.visit_all(function(vc) virtual_cursor_up(vc, count) end)
 end
 
 -- Up command
@@ -129,7 +129,7 @@ end
 -- Down command for all virtual cursors
 local function virtual_cursors_down(count)
   count = get_actual_count_down(count)
-  virtual_cursors.move_manually(function(vc) virtual_cursor_down(vc, count) end)
+  virtual_cursors.visit_all(function(vc) virtual_cursor_down(vc, count) end)
 end
 
 function M.normal_j()
@@ -177,7 +177,7 @@ end
 -- Normal mode backspace command for all virtual cursors
 local function virtual_cursors_normal_bs(count)
   count = vim.fn.max({count, 1})
-  virtual_cursors.move_manually(function(vc) virtual_cursor_normal_bs(vc, count) end)
+  virtual_cursors.visit_in_buffer(function(vc) virtual_cursor_normal_bs(vc, count) end)
 end
 
 -- Normal mode backspace command
