@@ -127,14 +127,14 @@ local function create_autocmds()
     vim.api.nvim_create_autocmd({"ModeChanged"}, {
       group = autocmd_group_id,
       pattern = "*:v",
-      callback = virtual_cursors.mode_changed_to_visual,
+      callback = visual_mode.mode_changed_to_visual,
     })
 
     -- Mode changed from visual to any
     vim.api.nvim_create_autocmd({"ModeChanged"}, {
       group = autocmd_group_id,
       pattern = "v:*",
-      callback = virtual_cursors.mode_changed_from_visual,
+      callback = visual_mode.mode_changed_from_visual,
     })
 
     -- If there are custom key maps, reset the custom key maps on the LazyLoad
