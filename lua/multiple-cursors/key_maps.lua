@@ -1,6 +1,7 @@
 local M = {}
 
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
+local common = require("multiple-cursors.common")
 
 -- A table of key maps
 -- mode(s), key(s), function
