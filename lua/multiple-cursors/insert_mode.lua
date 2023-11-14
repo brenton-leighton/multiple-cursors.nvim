@@ -35,7 +35,7 @@ end
 
 function M.escape()
   -- Move the cursor back
-  virtual_cursors.move_normal("h", 0)
+  virtual_cursors.move_with_normal_command("h", 0)
 end
 
 

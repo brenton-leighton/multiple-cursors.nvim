@@ -21,7 +21,7 @@ function M.mode_changed()
     move_special.virtual_cursors_eol()
   elseif mode_cmd == "I" then
     -- Cursor to start of line
-    virtual_cursors.move_normal("^", 0)
+    virtual_cursors.move_with_normal_command("^", 0)
   elseif mode_cmd == "o" then
     -- New line after current line
     move_special.virtual_cursors_eol()

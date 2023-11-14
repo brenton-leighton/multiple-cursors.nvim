@@ -190,7 +190,7 @@ end
 
 -- Visitors --------------------------------------------------------------------
 
--- Visit all cursors
+-- Visit all virtual cursors
 function M.visit_all(func, ...)
 
   for idx = 1, #virtual_cursors do
@@ -216,13 +216,48 @@ function M.visit_all(func, ...)
 
 end
 
--- Visit cursors within buffer
+-- Visit virtual cursors within buffer
 function M.visit_in_buffer(func, ...)
 
   M.visit_all(function(vc, ...)
     if vc.within_buffer then
       func(vc, unpack(arg))
     end
+  end)
+
+end
+
+-- Visit virtual cursors within the buffer with the real cursor
+function M.visit_with_cursor(func, ...)
+
+  -- Save cursor position
+  ignore_cursor_movement = true
+  local cursor_pos = vim.fn.getcursorcharpos()
+
+  M.visit_in_buffer(function(vc, ...)
+    common.set_cursor_to_virtual_cursor(vc)
+    func(vc, unpack(arg))
+  end)
+
+  -- Restore cursor
+  vim.fn.setcursorcharpos({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
+  ignore_cursor_movement = false
+
+end
+
+-- Visit virtual cursors and execute a normal command to move them
+function M.move_with_normal_command(cmd, count)
+
+  M.visit_with_cursor(function(vc)
+
+    if count == 0 then
+      vim.cmd("normal! " .. cmd)
+    else
+      vim.cmd("normal! " .. tostring(count) .. cmd)
+    end
+
+    common.set_virtual_cursor_from_cursor(vc)
+
   end)
 
 end
@@ -288,17 +323,6 @@ local function visit(use_extmark, editable_only, set_position, func)
 
 end
 
--- Move ------------------------------------------------------------------------
-
-function M.move_normal(cmd, count)
-  visit(false, false, true, function()
-    if count == 0 then
-      vim.cmd("normal! " .. cmd)
-    else
-      vim.cmd("normal! " .. tostring(count) .. cmd)
-    end
-  end)
-end
 
 -- Edit ------------------------------------------------------------------------
 
