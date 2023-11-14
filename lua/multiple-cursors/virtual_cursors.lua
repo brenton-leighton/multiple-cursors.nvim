@@ -311,87 +311,34 @@ function M.edit_with_normal_command(cmd, count)
 
 end
 
--- Visit each virtual cursor with the real cursor and call func(vc)
--- use_extmark: Use an extmark to save the cursor position
--- editable_only: only call func on editable cursors
--- set_position: set the virtual cursor position from the cursor after calling
--- func: Function to call with the virtual cursor
-local function visit(use_extmark, editable_only, set_position, func)
+-- Execute a normal command to perform a delete or yank at each virtual cursor,
+-- then save the unnamed register
+-- The virtual cursor position is set after calling func
+function M.edit_normal_delete_yank(cmd, count)
 
-  -- Disable cursor_moved
-  ignore_cursor_movement = true
+  M.edit_with_cursor(function(vc)
 
-  -- Save cursor position
-  local cursor_pos = nil
-
-  if not use_extmark then
-    cursor_pos = vim.fn.getcursorcharpos() -- [0, lnum, col, off, curswant]
-  else
-    extmarks.save_cursor()
-  end
-
-  -- For each virtual cursor
-  for idx = 1, #virtual_cursors do
-
-    local vc = virtual_cursors[idx]
-
-    if vc.within_buffer and (not editable_only or vc.editable) then
-
-      -- Set virtual cursor position from extmark in case there were any changes
-      extmarks.update_virtual_cursor_position(vc)
-
-      if not vc.delete then
-        -- Set real cursor to virtual cursor position
-        common.set_cursor_to_virtual_cursor(vc)
-
-        -- Call the function
-        func(vc)
-
-        if set_position then
-          -- Set virtual cursor position from real cursor
-          common.set_virtual_cursor_from_cursor(vc)
-        end
-
-        -- Update the extmark
-        extmarks.update_virtual_cursor_extmarks(vc)
-      end
-    end
-  end
-
-  clean_up()
-  check_for_collisions()
-
-  -- Restore cursor position
-  if not use_extmark then
-    vim.fn.setcursorcharpos({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
-  else
-    extmarks.restore_cursor()
-  end
-
-  ignore_cursor_movement = false
-
-end
-
-
--- Edit ------------------------------------------------------------------------
-
--- Perform a delete or yank command at the virtual cursors
-function M.normal_delete_yank(cmd, count)
-  visit(true, true, true, function(vc)
     if count == 0 then
       vim.cmd("normal! " .. cmd)
     else
       vim.cmd("normal! " .. tostring(count) .. cmd)
     end
 
-    -- Save register info to the virtual cursor
     vc.register_info = vim.fn.getreginfo('"')
+    common.set_virtual_cursor_from_cursor(vc)
+
   end)
+
 end
 
--- Perform a put command at the virtual cursors
-function M.put(cmd, count)
-  visit(true, true, true, function(vc)
+-- Execute a normal command to perform a put at each virtual cursor
+-- The unnamed register is first saved, the replaced by the virtual cursor
+-- register
+-- After executing the command the unnamed register is restored
+function M.edit_normal_put(cmd, count)
+
+  M.edit_with_cursor(function(vc)
+
     local tmp_register_info = nil
 
     -- If the virtual cursor has register info
@@ -413,8 +360,13 @@ function M.put(cmd, count)
       -- Restore the unnamed register
       vim.fn.setreg('"', tmp_register_info)
     end
+
+    common.set_virtual_cursor_from_cursor(vc)
+
   end)
+
 end
+
 
 -- Visual mode -----------------------------------------------------------------
 
