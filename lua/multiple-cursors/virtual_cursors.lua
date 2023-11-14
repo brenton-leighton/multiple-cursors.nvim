@@ -262,6 +262,55 @@ function M.move_with_normal_command(cmd, count)
 
 end
 
+-- Call func to perform an edit at each virtual cursor
+-- The virtual cursor position is not set after calling func
+function M.edit(func, ...)
+
+  -- Save cursor position with extmark
+  ignore_cursor_movement = true
+  extmarks.save_cursor()
+
+  M.visit_in_buffer(function(vc, ...)
+    if vc.editable then
+      func(vc, unpack(arg))
+    end
+  end)
+
+  -- Restore cursor from extmark
+  extmarks.restore_cursor()
+  ignore_cursor_movement = false
+
+end
+
+-- Call func to perform an edit at each virtual cursor using the real cursor
+-- The virtual cursor position is not set after calling func
+function M.edit_with_cursor(func, ...)
+
+  M.edit(function(vc, ...)
+    common.set_cursor_to_virtual_cursor(vc)
+    func(vc, unpack(arg))
+  end)
+
+end
+
+-- Execute a normal command to perform an edit at each virtual cursor
+-- The virtual cursor position is set after calling func
+function M.edit_with_normal_command(cmd, count)
+
+  M.edit_with_cursor(function(vc)
+
+    if count == 0 then
+      vim.cmd("normal! " .. cmd)
+    else
+      vim.cmd("normal! " .. tostring(count) .. cmd)
+    end
+
+    common.set_virtual_cursor_from_cursor(vc)
+
+  end)
+
+end
+
 -- Visit each virtual cursor with the real cursor and call func(vc)
 -- use_extmark: Use an extmark to save the cursor position
 -- editable_only: only call func on editable cursors
@@ -325,27 +374,6 @@ end
 
 
 -- Edit ------------------------------------------------------------------------
-
--- Perform an edit at the virtual cursors using a function
--- if set_position is true the virtual cursor position will be set from the
--- cursor after the function is called
--- The virtual cursor postion must be updated by the function
-function M.edit(func, set_position)
-  visit(true, true, set_position, function(vc)
-    func(vc)
-  end)
-end
-
--- Perform an edit at the virtual cursors using a normal command
-function M.normal_edit(cmd, count)
-  visit(true, true, true, function(vc)
-    if count == 0 then
-      vim.cmd("normal! " .. cmd)
-    else
-      vim.cmd("normal! " .. tostring(count) .. cmd)
-    end
-  end)
-end
 
 -- Perform a delete or yank command at the virtual cursors
 function M.normal_delete_yank(cmd, count)

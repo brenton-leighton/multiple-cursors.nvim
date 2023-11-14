@@ -6,12 +6,12 @@ local virtual_cursors = require("multiple-cursors.virtual_cursors")
 -- Indentation
 function M.indent()
   common.feedkeys(">>", vim.v.count)
-  virtual_cursors.normal_edit(">>", vim.v.count)
+  virtual_cursors.edit_with_normal_command(">>", vim.v.count)
 end
 
 function M.deindent()
   common.feedkeys("<<", vim.v.count)
-  virtual_cursors.normal_edit("<<", vim.v.count)
+  virtual_cursors.edit_with_normal_command("<<", vim.v.count)
 end
 
 -- Delete in normal mode

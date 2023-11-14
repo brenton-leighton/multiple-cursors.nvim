@@ -39,7 +39,7 @@ function M.mode_changed()
     end)
 
     -- Carriage return
-    virtual_cursors.edit(function(vc)
+    virtual_cursors.edit_with_cursor(function(vc)
       -- If first line and first character
       if vc.lnum == 1 and vc.col == 1 then
         insert_mode.virtual_cursor_cr(vc)
@@ -47,7 +47,7 @@ function M.mode_changed()
       else
         insert_mode.virtual_cursor_cr(vc)
       end
-    end, false)
+    end)
   end
 
   mode_cmd = nil

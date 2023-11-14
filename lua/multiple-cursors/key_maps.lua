@@ -129,7 +129,10 @@ local function custom_function(func)
   func()
 
   -- Call func for each virtual cursor and set the virtual cursor position
-  virtual_cursors.edit(func, true)
+  virtual_cursors.edit_with_cursor(function(vc)
+    func()
+    common.set_virtual_cursor_from_cursor(vc)
+  end)
 end
 
 -- Set any custom key maps

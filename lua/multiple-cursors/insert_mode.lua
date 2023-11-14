@@ -53,11 +53,11 @@ function M.text_changed_i(event)
   -- If there's a saved character
   if char then
     -- Put it to virtual cursors
-    virtual_cursors.edit(function(vc)
+    virtual_cursors.edit_with_cursor(function(vc)
       delete_if_replace_mode(vc)
       vim.api.nvim_put({char}, "c", false, true)
       common.set_virtual_cursor_from_cursor(vc)
-    end, false)
+    end)
     char = nil
   end
 
@@ -165,9 +165,13 @@ end
 local function virtual_cursors_bs()
   -- Replace mode
   if common.is_mode("R") then
-    virtual_cursors.edit(function(vc) replace_mode_virtual_cursor_bs(vc) end, false)
+    virtual_cursors.edit_with_cursor(function(vc)
+      replace_mode_virtual_cursor_bs(vc)
+    end)
   else
-    virtual_cursors.edit(function(vc) insert_mode_virtual_cursor_bs(vc) end, false)
+    virtual_cursors.edit_with_cursor(function(vc)
+      insert_mode_virtual_cursor_bs(vc)
+    end)
   end
 end
 
@@ -195,7 +199,9 @@ end
 
 -- Delete command for all virtual cursors
 local function virtual_cursors_del()
-  virtual_cursors.edit(function(vc) virtual_cursor_del(vc) end, false)
+  virtual_cursors.edit_with_cursor(function(vc)
+    virtual_cursor_del(vc)
+  end)
 end
 
 -- Delete command
@@ -227,7 +233,9 @@ end
 -- Carriage return command for all virtual cursors
 -- This isn't local because it's used by normal_to_insert
 function M.virtual_cursors_cr()
-  virtual_cursors.edit(function(vc) M.virtual_cursor_cr(vc) end, false)
+  virtual_cursors.edit_with_cursor(function(vc)
+    M.virtual_cursor_cr(vc)
+  end)
 end
 
 -- Carriage return command
@@ -283,10 +291,10 @@ end
 
 -- Tab command for all virtual cursors
 local function virtual_cursors_tab()
-  virtual_cursors.edit(function(vc)
+  virtual_cursors.edit_with_cursor(function(vc)
     delete_if_replace_mode(vc)
     virtual_cursor_tab(vc)
-  end, false)
+  end)
 end
 
 -- Tab command
