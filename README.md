@@ -139,6 +139,7 @@ These options are to provide functions that are called a the start of initialisa
 - `d` and `y` in normal mode are not implemented, visual mode can be used instead
 -  Using named registers is not implemented
 - This plugin hasn't been tested with completion and it will probably not behave correctly
+- In insert or replace mode, if a line has been auto-indented after a carriage return and nothing has been added to the line, the indentation will not be removed when exiting back to normal mode
 - In insert or replace mode, anything to do with tabs may not behave correctly, in particular if you are using less common options
 - Please use the [Issues](https://github.com/brenton-leighton/multiple-cursors.nvim/issues) page to report issues, and please include any relevant Neovim options
 

@@ -120,8 +120,20 @@ local function insert_mode_virtual_cursor_bs(vc)
 
   if vc.col == 1 then -- Start of the line
     if vc.lnum ~= 1 then -- But not the first line
-      vim.cmd("normal! k$gJ") -- Join with previous line
-      common.set_virtual_cursor_from_cursor(vc)
+      -- If the line is empty
+      if common.get_length_of_line(vc.lnum) == 0 then
+        -- Delete line
+        vim.cmd("normal! dd")
+
+        -- Move up and to end
+        vc.lnum = vc.lnum - 1
+        vc.col = common.get_max_col(vc.lnum)
+        vc.curswant = vim.v.maxcol
+      else
+        vim.cmd("normal! k$gJ") -- Join with previous line
+        common.set_virtual_cursor_from_cursor(vc)
+      end
+
     end
   else
 
