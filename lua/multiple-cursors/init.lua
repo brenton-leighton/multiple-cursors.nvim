@@ -99,6 +99,9 @@ default_key_maps = {
   {"x", "y", visual_mode.y},
   {"x", "d", visual_mode.d},
 
+  -- Undo in normal mode
+  {"n", "u", function() M.undo() end},
+
   -- Escape in all modes
   {{"n", "i", "x"}, "<Esc>", function() M.escape() end},
 }
@@ -180,6 +183,12 @@ local function deinit()
 
     initialised = false
   end
+end
+
+-- Normal mode undo will exit because cursor positions can't be restored
+function M.undo()
+  deinit()
+  common.feedkeys("u", vim.v.count)
 end
 
 -- Escape key
