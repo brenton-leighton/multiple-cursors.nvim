@@ -61,13 +61,16 @@ After adding a new cursor the following functions are available:
 | Normal | Yank | `yy` | |
 | Normal | Put | `p` `P` | |
 | Normal | Indentation | `>>` `<<` | |
+| Normal | Join | `J` `gJ` | |
 | Insert/repalce | Character insertion | | |
 | Insert/replace | Other edits | `<BS>` `<Del>` `<CR>` `<Tab>` | These commands are implemented manually, and may not behave correctly <br/> In replace mode `<BS>` will only move any virtual cursors back, and not undo edits |
 | Insert/replace | Paste | | By default if the number of lines in the paste text matches the number of cursors, each line of the text will be inserted at each cursor |
 | Insert | Change to replace mode | `<Insert>` | |
 | Visual | Swap cursor to other end of visual area | `o` | |
 | Visual | Yank/delete | `y` `d` | |
+| Visual | Join | `J` `gJ` | |
 | Insert/replace/visual | Exit to normal mode | `<Esc>` | |
+| Normal | Undo | `u` | Also exits multiple cursors, because cursor positions can't be restored by undo |
 | Normal | Exit multiple cursors | `<Esc>` | Clears virtual cursors, virtual cursor registers will be lost |
 
 ## Options
