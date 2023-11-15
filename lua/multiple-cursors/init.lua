@@ -84,6 +84,10 @@ default_key_maps = {
   {"n", ">>", normal_edit.indent},
   {"n", "<<", normal_edit.deindent},
 
+  -- Join lines in normal mode
+  {"n", "J", normal_edit.J},
+  {"n", "gJ", normal_edit.gJ},
+
   -- Insert mode
   {"i", "<BS>", insert_mode.bs},
   {"i", "<Del>", insert_mode.del},

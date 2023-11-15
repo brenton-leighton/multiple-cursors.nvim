@@ -14,6 +14,17 @@ function M.deindent()
   virtual_cursors.edit_with_normal_command("<<", vim.v.count)
 end
 
+-- Join lines
+function M.J()
+  common.feedkeys("J", vim.v.count)
+  virtual_cursors.edit_with_normal_command("J", vim.v.count)
+end
+
+function M.gJ()
+  common.feedkeys("gJ", vim.v.count)
+  virtual_cursors.edit_with_normal_command("gJ", vim.v.count)
+end
+
 -- Delete in normal mode
 function M.x() -- Also <Del>
   common.feedkeys("x", vim.v.count)
