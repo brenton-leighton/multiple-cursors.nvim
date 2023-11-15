@@ -80,4 +80,22 @@ function M.is_visual_area_forward(vc)
   end
 end
 
+-- Get the positions of the visual area in a forward direction
+function M.get_normalised_visual_area(vc)
+  -- Get start and end positions for the extmarks representing the visual area
+  local lnum1 = vc.visual_start_lnum
+  local col1 = vc.visual_start_col
+  local lnum2 = vc.lnum
+  local col2 = vc.col
+
+  if not M.is_visual_area_forward(vc) then
+    lnum1 = vc.lnum
+    col1 = vc.col
+    lnum2 = vc.visual_start_lnum
+    col2 = vc.visual_start_col
+  end
+
+  return lnum1, col1, lnum2, col2
+end
+
 return M

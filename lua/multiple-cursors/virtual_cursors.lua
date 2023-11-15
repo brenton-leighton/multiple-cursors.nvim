@@ -48,24 +48,6 @@ function M.get_num_virtual_cursors()
   return #virtual_cursors
 end
 
--- Get the positions of the visual area in a forward direction
-local function get_normalised_visual_area(vc)
-  -- Get start and end positions for the extmarks representing the visual area
-  local lnum1 = vc.visual_start_lnum
-  local col1 = vc.visual_start_col
-  local lnum2 = vc.lnum
-  local col2 = vc.col
-
-  if not common.is_visual_area_forward(vc) then
-    lnum1 = vc.lnum
-    col1 = vc.col
-    lnum2 = vc.visual_start_lnum
-    col2 = vc.visual_start_col
-  end
-
-  return lnum1, col1, lnum2, col2
-end
-
 -- Sort virtual cursors by position
 function M.sort()
   table.sort(virtual_cursors, function(vc1, vc2)
@@ -79,19 +61,19 @@ function M.sort()
         return vc1.lnum < vc2.lnum
       end
 
---    else -- Visual mode
+    else -- Visual mode
 
---      -- Normalise first
---      local vc1_lnum, vc1_col = get_normalised_visual_area(vc1)
---      local vc2_lnum, vc2_col = get_normalised_visual_area(vc2)
+      -- Normalise first
+      local vc1_lnum, vc1_col = common.get_normalised_visual_area(vc1)
+      local vc2_lnum, vc2_col = common.get_normalised_visual_area(vc2)
 
---      if vc1_lnum == vc2_lnum then
---        return vc1_col < vc2_col
---      else
---        return vc1_lnum < vc2_lnum
---      end
+      if vc1_lnum == vc2_lnum then
+        return vc1_col < vc2_col
+      else
+        return vc1_lnum < vc2_lnum
+      end
 
---    end
+    end
   end)
 end
 
@@ -356,166 +338,18 @@ function M.edit_normal_put(cmd, count)
       vim.cmd("normal! " .. tostring(count) .. cmd)
     end
 
+    common.set_virtual_cursor_from_cursor(vc)
+
+    -- If the virtual cursor has register info
     if vc.register_info then
       -- Restore the unnamed register
       vim.fn.setreg('"', tmp_register_info)
     end
 
-    common.set_virtual_cursor_from_cursor(vc)
-
   end)
 
 end
 
-
--- Visual mode -----------------------------------------------------------------
-
--- Get visual area text to put into regcontents
-local function visual_area_to_register_info(lnum1, col1, lnum2, col2, cmd)
-
-  local lines = {}
-
-  -- Single line
-  if lnum1 == lnum2 then
-    lines = vim.fn.getbufline("", lnum1)
-  else
-    lines = vim.fn.getbufline("", lnum1, lnum2)
-  end
-
-  -- Trim back of last line
-  if col2 < string.len(lines[#lines]) then
-    lines[#lines] = string.sub(lines[1], 1, col2)
-  end
-
-  -- Trim front of first line
-  if col1 > 1 then
-    lines[1] = string.sub(lines[1], col1)
-  end
-
-  local points_to = "0" -- yank
-
-  if cmd == "d" then -- delete
-    if lnum1 == lnum2 then -- Single line
-      points_to = "-"
-    else
-      points_to = "1"
-    end
-  end
-
-  return {
-    points_to = points_to,
-    regcontents = lines,
-    regtype = "v",
-  }
-
-end
-
-function M.visual_yank()
-
-  for idx = 1, #virtual_cursors do
-    local vc = virtual_cursors[idx]
-
-    if vc.within_buffer then
-      -- Yank the area
-      local lnum1, col1, lnum2, col2 = get_normalised_visual_area(vc)
-      vc.register_info = visual_area_to_register_info(lnum1, col1, lnum2, col2, "y")
-
-      -- Move cursor to start
-      if common.is_visual_area_forward(vc) then
-        vc.lnum = vc.visual_start_lnum
-        vc.col = vc.visual_start_col
-        vc.curswant = vc.col
-        extmarks.update_virtual_cursor_extmarks(vc)
-      end
-    end
-  end
-
-end
-
-local function get_text_adjacent_to_visual_area(lnum1, col1, lnum2, col2)
-
-  -- Get the text before col1
-  local text1 = ""
-
-  if col1 > 1 then
-    text1 = vim.fn.getbufoneline("", lnum1)
-    text1 = string.sub(text1, 1, col1 - 1)
-  end
-
-  -- Get the text after col2
-  local text2 = ""
-
-  if col2 < common.get_length_of_line(lnum2) then
-    text2 = vim.fn.getbufoneline("", lnum2)
-    text2 = string.sub(text2, col2 + 1)
-  end
-
-  return text1 .. text2
-
-end
-
-function M.visual_delete()
-
-  -- Disable cursor_moved
-  ignore_cursor_movement = true
-
-  -- Save cursor position
-  extmarks.save_cursor()
-
-  -- For each virtual cursor
-  for idx = 1, #virtual_cursors do
-    local vc = virtual_cursors[idx]
-
-    if vc.within_buffer then
-
-      -- Set virtual cursor position from extmark in case there were any changes
-      extmarks.update_virtual_cursor_position(vc)
-
-      -- Yank the area
-      local lnum1, col1, lnum2, col2 = get_normalised_visual_area(vc)
-      vc.register_info = visual_area_to_register_info(lnum1, col1, lnum2, col2, "d")
-
-      -- Handle the end of the visual area being past the end of the line
-      if col2 >= common.get_max_col(lnum2) then
-        lnum2 = lnum2 + 1
-        col2 = 0
-      end
-
-      -- Get the text before and after the visual area
-      local remaining_text = get_text_adjacent_to_visual_area(lnum1, col1, lnum2, col2)
-
-      -- Delete all lines of the area
-      vim.fn.deletebufline("", lnum1, lnum2)
-
-      -- Put the remaining text
-      vim.fn.append(lnum1 - 1, remaining_text)
-
-      -- Move cursor to start
-      vc.lnum = lnum1
-      vc.col = vim.fn.min({col1, common.get_max_col(lnum1) - 1})
-      -- col is limited to what it can be in normal mode, because visual mode will exit afterwards
-      vc.curswant = col1
-
-      -- Clear the visual area
-      vc.visual_start_lnum = 0
-      vc.visual_start_col = 0
-
-      -- Update the extmark
-      extmarks.update_virtual_cursor_extmarks(vc)
-
-    end -- If within buffer
-
-  end -- For each virtual cursor
-
-  clean_up()
-  check_for_collisions()
-
-  -- Restore cursor position
-  extmarks.restore_cursor()
-
-  ignore_cursor_movement = false
-
-end
 
 -- Split pasting ---------------------------------------------------------------------
 
@@ -536,7 +370,7 @@ function M.can_split_paste(num_lines)
 end
 
 -- Move the line for the real cursor to the end of lines
--- Modifies lines
+-- Modifies the lines variable
 function M.reorder_lines_for_split_pasting(lines)
 
   -- Ensure virtual_cursors is sorted
