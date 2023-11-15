@@ -98,6 +98,8 @@ default_key_maps = {
   {"x", "o", visual_mode.o},
   {"x", "y", visual_mode.y},
   {"x", "d", visual_mode.d},
+  {"x", "J", visual_mode.J},
+  {"x", "gJ", visual_mode.gJ},
 
   -- Undo in normal mode
   {"n", "u", function() M.undo() end},

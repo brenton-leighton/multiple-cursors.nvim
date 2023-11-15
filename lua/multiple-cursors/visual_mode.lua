@@ -8,6 +8,8 @@ local delete_on_exit = false
 local split_paste = false
 local paste_lines = nil
 
+local join_on_exit = nil
+
 -- Visual mode entered while multiple cursors is active
 function M.mode_changed_to_visual()
 
@@ -111,7 +113,6 @@ end
 -- Paste for a virtual cursor
 local function paste(vc, lines)
   -- Put lines before the cursor
-  vim.fn.setcursorcharpos({vc.lnum, vc.col, 0, vc.col})
   vim.api.nvim_put(lines, "c", false, true)
 
   -- Set virtual cursor position from the real cursor and then move it back
@@ -127,7 +128,7 @@ local function paste_all()
   delete_all_visual_areas()
 
   -- Perform the paste
-  virtual_cursors.edit(function(vc, idx)
+  virtual_cursors.edit_with_cursor(function(vc, idx)
     if split_paste then
       paste(vc, {paste_lines[idx]})
     else
@@ -137,16 +138,50 @@ local function paste_all()
 
 end
 
+local function join_visual_area(vc, command)
+
+  local lnum1, col1, lnum2, col2 = common.get_normalised_visual_area(vc)
+
+  -- Set cursor to start of area
+  vim.fn.setcursorcharpos({lnum1, col1, 0, col1})
+
+  local count = lnum2 - lnum1
+
+  if count == 0 then
+    vim.cmd("normal! " .. command)
+  else
+    vim.cmd("normal! " .. tostring(count + 1) .. command)
+  end
+
+  common.set_virtual_cursor_from_cursor(vc)
+
+  -- Clear visual area
+  vc.visual_start_lnum = 0
+  vc.visual_start_col = 0
+
+end
+
+local function join_all_visual_areas(command)
+
+  virtual_cursors.edit(function(vc)
+    join_visual_area(vc, command)
+  end)
+
+end
+
 -- Visual mode exited while multiple cursors is active
 function M.mode_changed_from_visual()
 
-  if paste_lines then -- Paste
+  if delete_on_exit then  -- Delete
+    delete_all_visual_areas()
+    delete_on_exit = false
+  elseif paste_lines then  -- Paste
     paste_all()
     split_paste = false
     paste_lines = nil
-  elseif delete_on_exit then -- Delete
-    delete_all_visual_areas()
-    delete_on_exit = false
+  elseif join_on_exit then  -- Join
+    join_all_visual_areas(join_on_exit)
+    join_on_exit = nil
   else -- Just clear visual areas
     virtual_cursors.visit_all(function(vc)
       vc.visual_start_lnum = 0
@@ -261,6 +296,17 @@ function M.d()
   common.feedkeys("d", 0)
   yank_visual_areas("d")
   delete_on_exit = true
+end
+
+-- Join commands
+function M.J()
+  common.feedkeys("J", 0)
+  join_on_exit = "J"
+end
+
+function M.gJ()
+  common.feedkeys("gJ", 0)
+  join_on_exit = "gJ"
 end
 
 -- Escape command
