@@ -3,8 +3,10 @@ local M = {}
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
 
--- This is not local so that the paste module can set it
-M.delete_on_exit = false
+local delete_on_exit = false
+
+local split_paste = false
+local paste_lines = nil
 
 -- Visual mode entered while multiple cursors is active
 function M.mode_changed_to_visual()
@@ -27,7 +29,7 @@ function M.mode_changed_to_visual()
 
 end
 
--- Delete line lnumfrom col1 to col2
+-- Delete line lnum from col1 to col2
 local function delete_line(lnum, col1, col2)
 
   -- Move cursor to start
@@ -45,6 +47,7 @@ local function delete_line(lnum, col1, col2)
 
 end
 
+-- Delete lines lnum1 to lnum2 inclusive
 local function delete_lines(lnum1, lnum2)
 
   if lnum1 > lnum2 then
@@ -65,48 +68,91 @@ local function delete_lines(lnum1, lnum2)
 
 end
 
-local function delete_visual_areas()
+-- Delete the visual area for a virtual cursor
+local function delete_visual_area(vc)
+
+  local lnum1, col1, lnum2, col2 = common.get_normalised_visual_area(vc)
+
+  -- If the visual area is a single line
+  if lnum1 == lnum2 then
+    delete_line(lnum1, col1, col2)
+
+  else -- Multiple lines
+
+    -- Delete the last line
+    delete_line(lnum2, 1, col2)
+
+    -- Delete any in-between lines
+    delete_lines(lnum1 + 1, lnum2 - 1)
+
+    -- Delete the first line
+    delete_line(lnum1, col1, vim.v.maxcol)
+
+  end
+end
+
+-- Delete visual areas for all virtual cursors
+local function delete_all_visual_areas()
+
   virtual_cursors.edit(function(vc)
     if common.is_visual_area_valid(vc) then
 
-      local lnum1, col1, lnum2, col2 = common.get_normalised_visual_area(vc)
-
-      -- If the visual area is a single line
-      if lnum1 == lnum2 then
-        delete_line(lnum1, col1, col2)
-
-      else -- Multiple lines
-
-        -- Delete the last line
-        delete_line(lnum2, 1, col2)
-
-        -- Delete any in-between lines
-        delete_lines(lnum1 + 1, lnum2 - 1)
-
-        -- Delete the first line
-        delete_line(lnum1, col1, vim.v.maxcol)
-
-      end
+      delete_visual_area(vc)
 
       common.set_virtual_cursor_from_cursor(vc)
 
+      vc.visual_start_lnum = 0
+      vc.visual_start_col = 0
     end
   end)
+
+end
+
+-- Paste for a virtual cursor
+local function paste(vc, lines)
+  -- Put lines before the cursor
+  vim.fn.setcursorcharpos({vc.lnum, vc.col, 0, vc.col})
+  vim.api.nvim_put(lines, "c", false, true)
+
+  -- Set virtual cursor position from the real cursor and then move it back
+  common.set_virtual_cursor_from_cursor(vc)
+  vc.col = vc.col - 1
+  vc.curswant = vc.col
+end
+
+-- Paste for all virtual cursors
+local function paste_all()
+
+  -- First delete the visual areas
+  delete_all_visual_areas()
+
+  -- Perform the paste
+  virtual_cursors.edit(function(vc, idx)
+    if split_paste then
+      paste(vc, {paste_lines[idx]})
+    else
+      paste(vc, paste_lines)
+    end
+  end)
+
 end
 
 -- Visual mode exited while multiple cursors is active
 function M.mode_changed_from_visual()
 
-  if M.delete_on_exit then
-    delete_visual_areas()
-    M.delete_on_exit = false
+  if paste_lines then -- Paste
+    paste_all()
+    split_paste = false
+    paste_lines = nil
+  elseif delete_on_exit then -- Delete
+    delete_all_visual_areas()
+    delete_on_exit = false
+  else -- Just clear visual areas
+    virtual_cursors.visit_all(function(vc)
+      vc.visual_start_lnum = 0
+      vc.visual_start_col = 0
+    end)
   end
-
-  -- Clear visual areas
-  virtual_cursors.visit_all(function(vc)
-    vc.visual_start_lnum = 0
-    vc.visual_start_col = 0
-  end)
 
 end
 
@@ -180,6 +226,7 @@ local function visual_area_to_register_info(cmd, lnum1, col1, lnum2, col2)
 
 end
 
+-- Perform yank for all virtual cursors
 local function yank_visual_areas(cmd)
   virtual_cursors.visit_in_buffer(function(vc)
 
@@ -203,23 +250,32 @@ local function yank_visual_areas(cmd)
   end)
 end
 
+ -- y command
 function M.y()
   common.feedkeys("y", 0)
   yank_visual_areas("y")
 end
 
+-- d command
 function M.d()
   common.feedkeys("d", 0)
   yank_visual_areas("d")
-  M.delete_on_exit = true
+  delete_on_exit = true
 end
 
+-- Escape command
 function M.escape()
   virtual_cursors.visit_in_buffer(function(vc)
     -- Move cursor back if it's at the end of a non empty line
     vc.col = vim.fn.min({vc.col, common.get_max_col(vc.lnum) - 1})
     vc.col = vim.fn.max({vc.col, 1})
   end)
+end
+
+-- Trigger paste when visual mode is exited
+function M.paste_on_exit(_split_paste, lines)
+  split_paste = _split_paste
+  paste_lines = lines
 end
 
 return M

@@ -2,6 +2,7 @@ local M = {}
 
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
+local visual_mode = require("multiple-cursors.visual_mode")
 
 local enable_split_paste = nil
 local original_paste_function = nil
@@ -60,10 +61,6 @@ local function virtual_cursor_replace_mode_paste(lines, vc)
 
 end
 
-local function virtual_cursor_visual_mode_paste(lines, vc)
-  -- ToDo
-end
-
 -- Paste handler
 local function paste(lines)
 
@@ -85,24 +82,27 @@ local function paste(lines)
   elseif common.is_mode("R") then
     func = virtual_cursor_replace_mode_paste
     set_position = false
-  elseif common.is_mode("x") then
-    -- ToDo
-    func = virtual_cursor_visual_mode_paste
+  elseif common.is_mode("v") then
+    -- Paste is handled by the visual_mode module so it can be performed after
+    -- exiting visual mode
+    visual_mode.paste_on_exit(split_paste, lines)
   end
 
-  virtual_cursors.edit_with_cursor(function(vc, idx)
+  if func then
+    virtual_cursors.edit_with_cursor(function(vc, idx)
 
-    if split_paste then
-      func({lines[idx]}, vc)
-    else
-      func(lines, vc)
-    end
+      if split_paste then
+        func({lines[idx]}, vc)
+      else
+        func(lines, vc)
+      end
 
-    if set_position then
-      common.set_virtual_cursor_from_cursor(vc)
-    end
+      if set_position then
+        common.set_virtual_cursor_from_cursor(vc)
+      end
 
-  end)
+    end)
+  end
 
   if split_paste then
     -- Return the last line for pasting to the real cursor
