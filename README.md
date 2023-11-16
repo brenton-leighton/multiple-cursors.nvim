@@ -63,7 +63,7 @@ After adding a new cursor the following functions are available:
 | Mode | Description | Commands | Notes |
 | --- | --- | --- | --- |
 | All | Left/right motion | `<Left>` `<Right>` `<Home>` `<End>` | |
-| Normal/visual | Left/right motion | `h` `<BS>` `l` `<Space>` `0` `^` `$` `|` | |
+| Normal/visual | Left/right motion | `h` `<BS>` `l` `<Space>` `0` `^` `$` `\|` | |
 | All | Up/down motion | `<Up>` `<Down>` | |
 | Normal/visual | Up/down motion | `j` `k` `-` `+` `<CR>` `kEnter` `_` | |
 | All | Text object motion | `<C-Left>` `<C-Right>` | |
