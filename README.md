@@ -21,15 +21,15 @@ to bind the `MultipleCursorsAddDown` command to `Ctrl+Down` in normal and insert
 
 ### Inserting text
 
-https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/3747f5ac-5dd4-4503-b940-9506860bc611
+![Video demonstrating inserting text using multiple cursors](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/02e3987c-746b-43df-928e-855e3f01b075)
 
 ### Adding cursors with a mouse click
 
-https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/7fca393f-57a0-4d73-b322-de46400307bc
+![Video demonstrating adding cursors with a mouse click](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/6ae50e5c-9d1f-48da-baf7-ed951b17e462)
 
 ### Deleting in visual mode and split pasting
 
-https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/241c5760-9f6f-464c-8611-174527ad0604
+![Video demonstrating deletion in visual mode and then split pasting in insert mode](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/5abfed1c-1119-4343-834d-796ed091fc5c)
 
 ## Installation
 
