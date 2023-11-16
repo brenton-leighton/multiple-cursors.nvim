@@ -57,6 +57,20 @@ function M.set_virtual_cursor_from_cursor(vc)
   vc.curswant = pos[5]
 end
 
+function M.is_visual_area_valid(vc)
+
+  if vc.visual_start_lnum == 0 or vc.visual_start_col == 0 then
+    return false
+  end
+
+  if vc.visual_start_lnum > vim.fn.line("$") then
+    return false
+  end
+
+  return true
+
+end
+
 -- Is the visual area defined in a forward direction?
 function M.is_visual_area_forward(vc)
   if vc.visual_start_lnum == vc.lnum then
@@ -64,6 +78,24 @@ function M.is_visual_area_forward(vc)
   else
     return vc.visual_start_lnum < vc.lnum
   end
+end
+
+-- Get the positions of the visual area in a forward direction
+function M.get_normalised_visual_area(vc)
+  -- Get start and end positions for the extmarks representing the visual area
+  local lnum1 = vc.visual_start_lnum
+  local col1 = vc.visual_start_col
+  local lnum2 = vc.lnum
+  local col2 = vc.col
+
+  if not M.is_visual_area_forward(vc) then
+    lnum1 = vc.lnum
+    col1 = vc.col
+    lnum2 = vc.visual_start_lnum
+    col2 = vc.visual_start_col
+  end
+
+  return lnum1, col1, lnum2, col2
 end
 
 return M

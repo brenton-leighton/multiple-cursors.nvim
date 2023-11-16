@@ -15,39 +15,39 @@ function M.mode_changed()
     return
   elseif mode_cmd == "a" then
     -- Shift cursors right
-    move_special.virtual_cursors_right(0)
+    move_special.all_virtual_cursors_right(0)
   elseif mode_cmd == "A" then
     -- Cursors to end of line
-    move_special.virtual_cursors_eol()
+    move_special.all_virtual_cursors_end()
   elseif mode_cmd == "I" then
     -- Cursor to start of line
-    virtual_cursors.move_normal("^", 0)
+    virtual_cursors.move_with_normal_command("^", 0)
   elseif mode_cmd == "o" then
     -- New line after current line
-    move_special.virtual_cursors_eol()
-    insert_mode.virtual_cursors_cr()
+    move_special.all_virtual_cursors_end()
+    insert_mode.all_virtual_cursors_carriage_return()
   elseif mode_cmd == "O" then
     -- New line before current line
-    virtual_cursors.move_manually(function(vc)
+    virtual_cursors.visit_in_buffer(function(vc)
       if vc.lnum == 1 then -- First line, move to start of line
         vc.col = 1
         vc.curswant = 1
       else -- Move to end of previous line
         vc.lnum = vc.lnum - 1
-        move_special.virtual_cursor_eol(vc)
+        move_special.virtual_cursor_end(vc)
       end
     end)
 
     -- Carriage return
-    virtual_cursors.edit(function(vc)
+    virtual_cursors.edit_with_cursor(function(vc)
       -- If first line and first character
       if vc.lnum == 1 and vc.col == 1 then
-        insert_mode.virtual_cursor_cr(vc)
+        insert_mode.virtual_cursor_carriage_return(vc)
         vc.lnum = 1 -- Move the cursor back
       else
-        insert_mode.virtual_cursor_cr(vc)
+        insert_mode.virtual_cursor_carriage_return(vc)
       end
-    end, false)
+    end)
   end
 
   mode_cmd = nil

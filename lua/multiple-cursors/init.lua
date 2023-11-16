@@ -10,12 +10,13 @@ local normal_edit = require("multiple-cursors.normal_edit")
 local normal_to_insert = require("multiple-cursors.normal_to_insert")
 local insert_mode = require("multiple-cursors.insert_mode")
 local visual_mode = require("multiple-cursors.visual_mode")
+local paste = require("multiple-cursors.paste")
 
 local initialised = false
 local autocmd_group_id = nil
-local original_paste_function = nil
 
-local enable_split_paste = true
+local pre_hook = nil
+local post_hook = nil
 
 default_key_maps = {
   -- Left/right motion in normal/visual modes
@@ -83,6 +84,10 @@ default_key_maps = {
   {"n", ">>", normal_edit.indent},
   {"n", "<<", normal_edit.deindent},
 
+  -- Join lines in normal mode
+  {"n", "J", normal_edit.J},
+  {"n", "gJ", normal_edit.gJ},
+
   -- Insert mode
   {"i", "<BS>", insert_mode.bs},
   {"i", "<Del>", insert_mode.del},
@@ -92,7 +97,12 @@ default_key_maps = {
   -- Visual mode
   {"x", "o", visual_mode.o},
   {"x", "y", visual_mode.y},
-  {"x", "d", visual_mode.d},
+  {"x", {"d", "<Del>"}, visual_mode.d},
+  {"x", "J", visual_mode.J},
+  {"x", "gJ", visual_mode.gJ},
+
+  -- Undo in normal mode
+  {"n", "u", function() M.undo() end},
 
   -- Escape in all modes
   {{"n", "i", "x"}, "<Esc>", function() M.escape() end},
@@ -126,14 +136,14 @@ local function create_autocmds()
     vim.api.nvim_create_autocmd({"ModeChanged"}, {
       group = autocmd_group_id,
       pattern = "*:v",
-      callback = virtual_cursors.mode_changed_to_visual,
+      callback = visual_mode.mode_changed_to_visual,
     })
 
     -- Mode changed from visual to any
     vim.api.nvim_create_autocmd({"ModeChanged"}, {
       group = autocmd_group_id,
       pattern = "v:*",
-      callback = virtual_cursors.mode_changed_from_visual,
+      callback = visual_mode.mode_changed_from_visual,
     })
 
     -- If there are custom key maps, reset the custom key maps on the LazyLoad
@@ -150,31 +160,14 @@ local function create_autocmds()
 
 end
 
--- Override the paste handler
-local function override_paste_handler()
-  original_paste_function = vim.paste
-
-  vim.paste = (function(overridden)
-      return function(lines, phase)
-        if enable_split_paste and
-            #lines == virtual_cursors.get_num_editable_cursors() + 1 then
-          local line = insert_mode.split_paste(lines)
-          return overridden({line}, phase)
-        else
-          insert_mode.paste(lines)
-          return overridden(lines, phase)
-        end
-      end
-  end)(vim.paste)
-end
-
 -- Initialise
 local function init()
   if not initialised then
+    if pre_hook then pre_hook() end
     key_maps.save_existing()
     key_maps.set()
     create_autocmds()
-    override_paste_handler()
+    paste.override_handler()
 
     initialised = true
   end
@@ -187,10 +180,17 @@ local function deinit()
     key_maps.delete()
     key_maps.restore_existing()
     vim.api.nvim_clear_autocmds({group = autocmd_group_id}) -- Clear autocmds
-    vim.paste = original_paste_function -- Revert the paste handler
+    paste.revert_handler()
+    if post_hook then post_hook() end
 
     initialised = false
   end
+end
+
+-- Normal mode undo will exit because cursor positions can't be restored
+function M.undo()
+  deinit()
+  common.feedkeys("u", vim.v.count)
 end
 
 -- Escape key
@@ -246,15 +246,21 @@ function M.setup(opts)
   -- Options
   opts = opts or {}
 
-  enable_split_paste = opts.enable_split_paste or true
   local disabled_default_key_maps = opts.disabled_default_key_maps or {}
   local custom_key_maps = opts.custom_key_maps or {}
+  local enable_split_paste = opts.enable_split_paste or true
+
+  pre_hook = opts.pre_hook or nil
+  post_hook = opts.post_hook or nil
 
   -- Set up extmarks
   extmarks.setup()
 
   -- Set up key maps
   key_maps.setup(default_key_maps, disabled_default_key_maps, custom_key_maps)
+
+  -- Set up paste
+  paste.setup(enable_split_paste)
 
   -- Autocmds
   autocmd_group_id = vim.api.nvim_create_augroup("MultipleCursors", {})

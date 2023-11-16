@@ -17,6 +17,20 @@ vim.keymap.set({"n", "i"}, "<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>")
 ```
 to bind the `MultipleCursorsAddDown` command to `Ctrl+Down` in normal and insert modes.
 
+## Demo videos
+
+### Inserting text
+
+![Video demonstrating inserting text using multiple cursors](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/02e3987c-746b-43df-928e-855e3f01b075)
+
+### Adding cursors with a mouse click
+
+![Video demonstrating adding cursors with a mouse click](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/6ae50e5c-9d1f-48da-baf7-ed951b17e462)
+
+### Deleting in visual mode and split pasting
+
+![Video demonstrating deletion in visual mode and then split pasting in insert mode](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/5abfed1c-1119-4343-834d-796ed091fc5c)
+
 ## Installation
 
 ### Using [lazy.nvim](https://github.com/folke/lazy.nvim)
@@ -49,7 +63,7 @@ After adding a new cursor the following functions are available:
 | Mode | Description | Commands | Notes |
 | --- | --- | --- | --- |
 | All | Left/right motion | `<Left>` `<Right>` `<Home>` `<End>` | |
-| Normal/visual | Left/right motion | `h` `<BS>` `l` `<Space>` `0` `^` `$` `|` | |
+| Normal/visual | Left/right motion | `h` `<BS>` `l` `<Space>` `0` `^` `$` `\|` | |
 | All | Up/down motion | `<Up>` `<Down>` | |
 | Normal/visual | Up/down motion | `j` `k` `-` `+` `<CR>` `kEnter` `_` | |
 | All | Text object motion | `<C-Left>` `<C-Right>` | |
@@ -61,13 +75,16 @@ After adding a new cursor the following functions are available:
 | Normal | Yank | `yy` | |
 | Normal | Put | `p` `P` | |
 | Normal | Indentation | `>>` `<<` | |
+| Normal | Join | `J` `gJ` | |
 | Insert/repalce | Character insertion | | |
 | Insert/replace | Other edits | `<BS>` `<Del>` `<CR>` `<Tab>` | These commands are implemented manually, and may not behave correctly <br/> In replace mode `<BS>` will only move any virtual cursors back, and not undo edits |
 | Insert/replace | Paste | | By default if the number of lines in the paste text matches the number of cursors, each line of the text will be inserted at each cursor |
 | Insert | Change to replace mode | `<Insert>` | |
 | Visual | Swap cursor to other end of visual area | `o` | |
 | Visual | Yank/delete | `y` `d` | |
+| Visual | Join | `J` `gJ` | |
 | Insert/replace/visual | Exit to normal mode | `<Esc>` | |
+| Normal | Undo | `u` | Also exits multiple cursors, because cursor positions can't be restored by undo |
 | Normal | Exit multiple cursors | `<Esc>` | Clears virtual cursors, virtual cursor registers will be lost |
 
 ## Options
@@ -84,6 +101,8 @@ opts = {
   custom_key_maps = {
     {{"n", "i"}, "<C-/>", function() vim.cmd("ExampleCommand") end},
   },
+  pre_hook = function() vim.print("Hello") end,
+  post_hook = function() vim.print("Goodbye") end,
 },
 keys = {
   {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i"}},
@@ -94,13 +113,13 @@ keys = {
 },
 ```
 
-### enable_split_paste
+### `enable_split_paste`
 
 Default value: `true`
 
 This option allows for disabling the "split pasting" function, where if the number of lines in the paste text matches the number of cursors, each line of the text will be inserted at each cursor.
 
-### disabled_default_key_maps
+### `disabled_default_key_maps`
 
 Default value: `{}`
 
@@ -109,7 +128,7 @@ This option can be used to disabled any of the default key maps. Each element in
 - Mode (string|table): Mode short-name string (`"n"`, `"i"`, or `"v"`), or a table of mode short-name strings
 - Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
 
-### custom_key_maps
+### `custom_key_maps`
 
 Default value: `{}`
 
@@ -121,12 +140,20 @@ This option allows for mapping keys to custom functions for use with multiple cu
 
 When a mapping is executed the given function will be called at each cursor.
 
+### `pre_hook` and `post_hook`
+
+Default values: `nil`
+
+These options are to provide functions that are called a the start of initialisation and at the end of de-initialisation respectively.
+
 ## Notes and known issues
 
 - Anything other than the functionality listed above probably won't work correctly
 - This plugin has been developed and tested with Neovim 0.9.1 and there may be issues with other versions
 - `d` and `y` in normal mode are not implemented, visual mode can be used instead
+-  Using named registers is not implemented
 - This plugin hasn't been tested with completion and it will probably not behave correctly
+- In insert or replace mode, if a line has been auto-indented after a carriage return and nothing has been added to the line, the indentation will not be removed when exiting back to normal mode
 - In insert or replace mode, anything to do with tabs may not behave correctly, in particular if you are using less common options
 - Please use the [Issues](https://github.com/brenton-leighton/multiple-cursors.nvim/issues) page to report issues, and please include any relevant Neovim options
 

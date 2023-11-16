@@ -35,7 +35,7 @@ end
 
 function M.escape()
   -- Move the cursor back
-  virtual_cursors.move_normal("h", 0)
+  virtual_cursors.move_with_normal_command("h", 0)
 end
 
 
@@ -53,11 +53,11 @@ function M.text_changed_i(event)
   -- If there's a saved character
   if char then
     -- Put it to virtual cursors
-    virtual_cursors.edit(function(vc)
+    virtual_cursors.edit_with_cursor(function(vc)
       delete_if_replace_mode(vc)
       vim.api.nvim_put({char}, "c", false, true)
       common.set_virtual_cursor_from_cursor(vc)
-    end, false)
+    end)
     char = nil
   end
 
@@ -116,12 +116,24 @@ local function count_spaces_back(lnum, col)
 end
 
 -- Insert mode backspace command for a virtual cursor
-local function insert_mode_virtual_cursor_bs(vc)
+local function virtual_cursor_insert_mode_backspace(vc)
 
   if vc.col == 1 then -- Start of the line
     if vc.lnum ~= 1 then -- But not the first line
-      vim.cmd("normal! k$gJ") -- Join with previous line
-      common.set_virtual_cursor_from_cursor(vc)
+      -- If the line is empty
+      if common.get_length_of_line(vc.lnum) == 0 then
+        -- Delete line
+        vim.cmd("normal! dd")
+
+        -- Move up and to end
+        vc.lnum = vc.lnum - 1
+        vc.col = common.get_max_col(vc.lnum)
+        vc.curswant = vim.v.maxcol
+      else
+        vim.cmd("normal! k$gJ") -- Join with previous line
+        common.set_virtual_cursor_from_cursor(vc)
+      end
+
     end
   else
 
@@ -141,7 +153,7 @@ end
 
 -- Replace mode backspace command for a virtual cursor
 -- This only moves back a character, it doesn't undo
-local function replace_mode_virtual_cursor_bs(vc)
+local function virtual_cursor_replace_mode_backspace(vc)
 
   -- First column but not first line
   if vc.col == 1 and vc.lnum ~= 1 then
@@ -162,26 +174,30 @@ local function replace_mode_virtual_cursor_bs(vc)
 end
 
 -- Backspace command for all virtual cursors
-local function virtual_cursors_bs()
+local function all_virtual_cursors_backspace()
   -- Replace mode
   if common.is_mode("R") then
-    virtual_cursors.edit(function(vc) replace_mode_virtual_cursor_bs(vc) end, false)
+    virtual_cursors.edit_with_cursor(function(vc)
+      virtual_cursor_replace_mode_backspace(vc)
+    end)
   else
-    virtual_cursors.edit(function(vc) insert_mode_virtual_cursor_bs(vc) end, false)
+    virtual_cursors.edit_with_cursor(function(vc)
+      virtual_cursor_insert_mode_backspace(vc)
+    end)
   end
 end
 
 -- Backspace command
 function M.bs()
   common.feedkeys("<BS>", 0)
-  virtual_cursors_bs()
+  all_virtual_cursors_backspace()
 end
 
 
 -- Delete ----------------------------------------------------------------------
 
 -- Delete command for a virtual cursor
-local function virtual_cursor_del(vc)
+local function virtual_cursor_delete(vc)
 
   if vc.col == common.get_max_col(vc.lnum) then -- End of the line
     -- Join next line
@@ -194,14 +210,16 @@ local function virtual_cursor_del(vc)
 end
 
 -- Delete command for all virtual cursors
-local function virtual_cursors_del()
-  virtual_cursors.edit(function(vc) virtual_cursor_del(vc) end, false)
+local function all_virtual_cursors_delete()
+  virtual_cursors.edit_with_cursor(function(vc)
+    virtual_cursor_delete(vc)
+  end)
 end
 
 -- Delete command
 function M.del()
   common.feedkeys("<Del>", 0)
-  virtual_cursors_del()
+  all_virtual_cursors_delete()
 end
 
 
@@ -209,7 +227,7 @@ end
 
 -- Carriage return command for a virtual cursor
 -- This isn't local because it's used by normal_to_insert
-function M.virtual_cursor_cr(vc)
+function M.virtual_cursor_carriage_return(vc)
   if vc.col <= common.get_length_of_line(vc.lnum) then
     vim.api.nvim_put({"", ""}, "c", false, true)
     vim.cmd("normal! ==^")
@@ -226,15 +244,17 @@ end
 
 -- Carriage return command for all virtual cursors
 -- This isn't local because it's used by normal_to_insert
-function M.virtual_cursors_cr()
-  virtual_cursors.edit(function(vc) M.virtual_cursor_cr(vc) end, false)
+function M.all_virtual_cursors_carriage_return()
+  virtual_cursors.edit_with_cursor(function(vc)
+    M.virtual_cursor_carriage_return(vc)
+  end)
 end
 
 -- Carriage return command
 -- Also for <kEnter>
 function M.cr()
   common.feedkeys("<CR>", 0)
-  M.virtual_cursors_cr()
+  M.all_virtual_cursors_carriage_return()
 end
 
 
@@ -282,80 +302,17 @@ local function virtual_cursor_tab(vc)
 end
 
 -- Tab command for all virtual cursors
-local function virtual_cursors_tab()
-  virtual_cursors.edit(function(vc)
+local function all_virtual_cursors_tab()
+  virtual_cursors.edit_with_cursor(function(vc)
     delete_if_replace_mode(vc)
     virtual_cursor_tab(vc)
-  end, false)
+  end)
 end
 
 -- Tab command
 function M.tab()
   common.feedkeys("<Tab>", 0)
-  virtual_cursors_tab()
-end
-
-
--- Paste -----------------------------------------------------------------------
-
--- Paste line(s) at a virtual cursor in insert mode
-local function virtual_cursor_insert_paste(lines, vc)
-  -- Put the line(s) before the cursor
-  vim.api.nvim_put(lines, "c", false, true)
-end
-
--- Paste line(s) at a virtual cursor in replace mode
-local function virtual_cursor_replace_paste(lines, vc)
-
-  -- If the cursor is at the end of the line
-  if vc.col == common.get_max_col(vc.lnum) then
-    -- Put paste lines before the cursor
-    vim.api.nvim_put(lines, "c", false, false)
-  else -- Cursor not at the end of the line
-    -- If there are multiple paste lines
-    if #lines ~= 1 then
-      -- Delete to the end of the line and put paste lines after the cursor
-      vim.cmd("normal! \"_D")
-      vim.api.nvim_put(lines, "c", true, false)
-    else -- Single paste line
-      local paste_line_length = #lines[1]
-      local overwrite_length = common.get_length_of_line(vc.lnum) - vc.col + 1
-
-      -- The length of the paste line is less than being overwritten
-      if paste_line_length < overwrite_length then
-        -- Delete the paste line length and put the paste line before the cursor
-        vim.cmd("normal! \"_" .. tostring(paste_line_length) .. "dl")
-        vim.api.nvim_put(lines, "c", false, false)
-      else
-        -- Delete to the end of the line and put paste line after the cursor
-        vim.cmd("normal! \"_D")
-        vim.api.nvim_put(lines, "c", true, false)
-      end
-    end
-  end
-
-end
-
--- Paste
-function M.paste(lines)
-  if common.is_mode("R") then
-    virtual_cursors.edit(function(vc)
-      virtual_cursor_replace_paste(lines, vc)
-    end, false)
-  else
-    virtual_cursors.edit(function(vc)
-      virtual_cursor_insert_paste(lines, vc)
-    end, true)
-  end
-end
-
--- Split the paste lines so that one is put to each cursor
--- The final line for the real cursor is returned
-function M.split_paste(lines)
-  if common.is_mode("R") then
-    return virtual_cursors.split_paste(lines, virtual_cursor_replace_paste, false)
-  end
-    return virtual_cursors.split_paste(lines, virtual_cursor_insert_paste, true)
+  all_virtual_cursors_tab()
 end
 
 return M

@@ -48,18 +48,33 @@ function M.get_num_virtual_cursors()
   return #virtual_cursors
 end
 
--- Get the number of editable virtual cursors
-function M.get_num_editable_cursors()
-  local count = 0
+-- Sort virtual cursors by position
+function M.sort()
+  table.sort(virtual_cursors, function(vc1, vc2)
 
-  for idx = 1, #virtual_cursors do
-    local vc = virtual_cursors[idx]
-    if vc.within_buffer and vc.editable then
-      count = count + 1
+    -- If not visual mode
+    if not common.is_visual_area_valid(vc1) or not common.is_visual_area_valid(vc2) then
+
+      if vc1.lnum == vc2.lnum then
+        return vc1.col < vc2.col
+      else
+        return vc1.lnum < vc2.lnum
+      end
+
+    else -- Visual mode
+
+      -- Normalise first
+      local vc1_lnum, vc1_col = common.get_normalised_visual_area(vc1)
+      local vc2_lnum, vc2_col = common.get_normalised_visual_area(vc2)
+
+      if vc1_lnum == vc2_lnum then
+        return vc1_col < vc2_col
+      else
+        return vc1_lnum < vc2_lnum
+      end
+
     end
-  end
-
-  return count
+  end)
 end
 
 -- Add a new virtual cursor
@@ -154,70 +169,11 @@ function M.cursor_moved()
   end
 end
 
--- Visit each virtual cursor with the real cursor and call func(vc)
--- use_extmark: Use an extmark to save the cursor position
--- editable_only: only call func on editable cursors
--- set_position: set the virtual cursor position from the cursor after calling
--- func: Function to call with the virtual cursor
-local function visit(use_extmark, editable_only, set_position, func)
 
-  -- Disable cursor_moved
-  ignore_cursor_movement = true
+-- Visitors --------------------------------------------------------------------
 
-  -- Save cursor position
-  local cursor_pos = nil
-
-  if not use_extmark then
-    cursor_pos = vim.fn.getcursorcharpos() -- [0, lnum, col, off, curswant]
-  else
-    extmarks.save_cursor()
-  end
-
-  -- For each virtual cursor
-  for idx = 1, #virtual_cursors do
-
-    local vc = virtual_cursors[idx]
-
-    if vc.within_buffer and (not editable_only or vc.editable) then
-
-      -- Set virtual cursor position from extmark in case there were any changes
-      extmarks.update_virtual_cursor_position(vc)
-
-      if not vc.delete then
-        -- Set real cursor to virtual cursor position
-        common.set_cursor_to_virtual_cursor(vc)
-
-        -- Call the function
-        func(vc)
-
-        if set_position then
-          -- Set virtual cursor position from real cursor
-          common.set_virtual_cursor_from_cursor(vc)
-        end
-
-        -- Update the extmark
-        extmarks.update_virtual_cursor_extmarks(vc)
-      end
-    end
-  end
-
-  clean_up()
-  check_for_collisions()
-
-  -- Restore cursor position
-  if not use_extmark then
-    vim.fn.setcursorcharpos({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
-  else
-    extmarks.restore_cursor()
-  end
-
-  ignore_cursor_movement = false
-
-end
-
--- Move ------------------------------------------------------------------------
-
-function M.move_manually(func)
+-- Visit all virtual cursors
+function M.visit_all(func)
 
   for idx = 1, #virtual_cursors do
     local vc = virtual_cursors[idx]
@@ -229,11 +185,12 @@ function M.move_manually(func)
 
     if not vc.delete then
       -- Call the function
-      func(vc)
+      func(vc, idx)
 
-      -- Update the extmark
+      -- Update extmarks
       extmarks.update_virtual_cursor_extmarks(vc)
     end
+
   end
 
   clean_up()
@@ -241,56 +198,129 @@ function M.move_manually(func)
 
 end
 
-function M.move_normal(cmd, count)
-  visit(false, false, true, function()
+-- Visit virtual cursors within buffer
+function M.visit_in_buffer(func)
+
+  M.visit_all(function(vc, idx)
+    if vc.within_buffer then
+      func(vc, idx)
+    end
+  end)
+
+end
+
+-- Visit virtual cursors within the buffer with the real cursor
+function M.visit_with_cursor(func)
+
+  -- Save cursor position
+  ignore_cursor_movement = true
+  local cursor_pos = vim.fn.getcursorcharpos()
+
+  M.visit_in_buffer(function(vc, idx)
+    common.set_cursor_to_virtual_cursor(vc)
+    func(vc, idx)
+  end)
+
+  -- Restore cursor
+  vim.fn.setcursorcharpos({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
+  ignore_cursor_movement = false
+
+end
+
+-- Visit virtual cursors and execute a normal command to move them
+function M.move_with_normal_command(cmd, count)
+
+  M.visit_with_cursor(function(vc)
+
     if count == 0 then
       vim.cmd("normal! " .. cmd)
     else
       vim.cmd("normal! " .. tostring(count) .. cmd)
     end
+
+    common.set_virtual_cursor_from_cursor(vc)
+
   end)
+
 end
 
--- Edit ------------------------------------------------------------------------
+-- Call func to perform an edit at each virtual cursor
+-- The virtual cursor position is not set after calling func
+function M.edit(func)
 
--- Perform an edit at the virtual cursors using a function
--- if set_position is true the virtual cursor position will be set from the
--- cursor after the function is called
--- The virtual cursor postion must be updated by the function
-function M.edit(func, set_position)
-  visit(true, true, set_position, function(vc)
-    func(vc)
+  -- Save cursor position with extmark
+  ignore_cursor_movement = true
+  extmarks.save_cursor()
+
+  M.visit_in_buffer(function(vc, idx)
+    if vc.editable then
+      func(vc, idx)
+    end
   end)
+
+  -- Restore cursor from extmark
+  extmarks.restore_cursor()
+  ignore_cursor_movement = false
+
 end
 
--- Perform an edit at the virtual cursors using a normal command
-function M.normal_edit(cmd, count)
-  visit(true, true, true, function(vc)
+-- Call func to perform an edit at each virtual cursor using the real cursor
+-- The virtual cursor position is not set after calling func
+function M.edit_with_cursor(func)
+
+  M.edit(function(vc, idx)
+    common.set_cursor_to_virtual_cursor(vc)
+    func(vc, idx)
+  end)
+
+end
+
+-- Execute a normal command to perform an edit at each virtual cursor
+-- The virtual cursor position is set after calling func
+function M.edit_with_normal_command(cmd, count)
+
+  M.edit_with_cursor(function(vc)
+
     if count == 0 then
       vim.cmd("normal! " .. cmd)
     else
       vim.cmd("normal! " .. tostring(count) .. cmd)
     end
+
+    common.set_virtual_cursor_from_cursor(vc)
+
   end)
+
 end
 
--- Perform a delete or yank command at the virtual cursors
-function M.normal_delete_yank(cmd, count)
-  visit(true, true, true, function(vc)
+-- Execute a normal command to perform a delete or yank at each virtual cursor,
+-- then save the unnamed register
+-- The virtual cursor position is set after calling func
+function M.edit_normal_delete_yank(cmd, count)
+
+  M.edit_with_cursor(function(vc)
+
     if count == 0 then
       vim.cmd("normal! " .. cmd)
     else
       vim.cmd("normal! " .. tostring(count) .. cmd)
     end
 
-    -- Save register info to the virtual cursor
     vc.register_info = vim.fn.getreginfo('"')
+    common.set_virtual_cursor_from_cursor(vc)
+
   end)
+
 end
 
--- Perform a put command at the virtual cursors
-function M.put(cmd, count)
-  visit(true, true, true, function(vc)
+-- Execute a normal command to perform a put at each virtual cursor
+-- The unnamed register is first saved, the replaced by the virtual cursor
+-- register
+-- After executing the command the unnamed register is restored
+function M.edit_normal_put(cmd, count)
+
+  M.edit_with_cursor(function(vc)
+
     local tmp_register_info = nil
 
     -- If the virtual cursor has register info
@@ -308,330 +338,71 @@ function M.put(cmd, count)
       vim.cmd("normal! " .. tostring(count) .. cmd)
     end
 
+    common.set_virtual_cursor_from_cursor(vc)
+
+    -- If the virtual cursor has register info
     if vc.register_info then
       -- Restore the unnamed register
       vim.fn.setreg('"', tmp_register_info)
     end
+
   end)
-end
-
--- Visual mode -----------------------------------------------------------------
-
--- Visual mode entered while multiple cursors is active
-function M.mode_changed_to_visual()
-
-  -- Save cursor position as visual area start
-  for idx = 1, #virtual_cursors do
-    local vc = virtual_cursors[idx]
-    vc.visual_start_lnum = vc.lnum
-    vc.visual_start_col = vc.col
-  end
-
-  -- Move cursor if there's a count
-  if vim.v.count > 1 then
-    local count = vim.v.count - 1
-    M.move_manually(
-    function(vc)
-      local col = vc.col + count
-      vc.col = common.get_col(vc.lnum, col)
-      vc.curswant = vc.col
-    end)
-  end
 
 end
 
--- Visual mode exited while multiple cursors is active
-function M.mode_changed_from_visual()
-  for idx = 1, #virtual_cursors do
-    local vc = virtual_cursors[idx]
-    extmarks.update_virtual_cursor_position(vc)
 
-    vc.visual_start_lnum = 0
-    vc.visual_start_col = 0
+-- Split pasting ---------------------------------------------------------------------
 
-    extmarks.update_virtual_cursor_extmarks(vc)
-  end
-end
-
--- Move cursor to other end of visual area
-function M.visual_other()
-  for idx = 1, #virtual_cursors do
-    local vc = virtual_cursors[idx]
-
-    local lnum = vc.lnum
-    local col = vc.col
-
-    vc.lnum = vc.visual_start_lnum
-    vc.col = vc.visual_start_col
-    vc.curswant = vc.col
-
-    vc.visual_start_lnum = lnum
-    vc.visual_start_col = col
-
-    extmarks.update_virtual_cursor_extmarks(vc)
-  end
-end
-
--- Get the positions of the visual area in a forward direction
-local function get_normalised_visual_area(vc)
-  -- Get start and end positions for the extmarks representing the visual area
-  local lnum1 = vc.visual_start_lnum
-  local col1 = vc.visual_start_col
-  local lnum2 = vc.lnum
-  local col2 = vc.col
-
-  if not common.is_visual_area_forward(vc) then
-    lnum1 = vc.lnum
-    col1 = vc.col
-    lnum2 = vc.visual_start_lnum
-    col2 = vc.visual_start_col
-  end
-
-  return lnum1, col1, lnum2, col2
-end
-
--- Get visual area text to put into regcontents
-local function visual_area_to_register_info(lnum1, col1, lnum2, col2, cmd)
-
-  local lines = {}
-
-  -- Single line
-  if lnum1 == lnum2 then
-    lines = vim.fn.getbufline("", lnum1)
-  else
-    lines = vim.fn.getbufline("", lnum1, lnum2)
-  end
-
-  -- Trim back of last line
-  if col2 < string.len(lines[#lines]) then
-    lines[#lines] = string.sub(lines[1], 1, col2)
-  end
-
-  -- Trim front of first line
-  if col1 > 1 then
-    lines[1] = string.sub(lines[1], col1)
-  end
-
-  local points_to = "0" -- yank
-
-  if cmd == "d" then -- delete
-    if lnum1 == lnum2 then -- Single line
-      points_to = "-"
-    else
-      points_to = "1"
-    end
-  end
-
-  return {
-    points_to = points_to,
-    regcontents = lines,
-    regtype = "v",
-  }
-
-end
-
-function M.visual_yank()
-
-  for idx = 1, #virtual_cursors do
-    local vc = virtual_cursors[idx]
-
-    if vc.within_buffer then
-      -- Yank the area
-      local lnum1, col1, lnum2, col2 = get_normalised_visual_area(vc)
-      vc.register_info = visual_area_to_register_info(lnum1, col1, lnum2, col2, "y")
-
-      -- Move cursor to start
-      if common.is_visual_area_forward(vc) then
-        vc.lnum = vc.visual_start_lnum
-        vc.col = vc.visual_start_col
-        vc.curswant = vc.col
-        extmarks.update_virtual_cursor_extmarks(vc)
-      end
-    end
-  end
-
-end
-
-local function get_text_adjacent_to_visual_area(lnum1, col1, lnum2, col2)
-
-  -- Get the text before col1
-  local text1 = ""
-
-  if col1 > 1 then
-    text1 = vim.fn.getbufoneline("", lnum1)
-    text1 = string.sub(text1, 1, col1 - 1)
-  end
-
-  -- Get the text after col2
-  local text2 = ""
-
-  if col2 < common.get_length_of_line(lnum2) then
-    text2 = vim.fn.getbufoneline("", lnum2)
-    text2 = string.sub(text2, col2 + 1)
-  end
-
-  return text1 .. text2
-
-end
-
-function M.visual_delete()
-
-  -- Disable cursor_moved
-  ignore_cursor_movement = true
-
-  -- Save cursor position
-  extmarks.save_cursor()
-
-  -- For each virtual cursor
-  for idx = 1, #virtual_cursors do
-    local vc = virtual_cursors[idx]
-
-    if vc.within_buffer then
-
-      -- Set virtual cursor position from extmark in case there were any changes
-      extmarks.update_virtual_cursor_position(vc)
-
-      -- Yank the area
-      local lnum1, col1, lnum2, col2 = get_normalised_visual_area(vc)
-      vc.register_info = visual_area_to_register_info(lnum1, col1, lnum2, col2, "d")
-
-      -- Handle the end of the visual area being past the end of the line
-      if col2 >= common.get_max_col(lnum2) then
-        lnum2 = lnum2 + 1
-        col2 = 0
-      end
-
-      -- Get the text before and after the visual area
-      local remaining_text = get_text_adjacent_to_visual_area(lnum1, col1, lnum2, col2)
-
-      -- Delete all lines of the area
-      vim.fn.deletebufline("", lnum1, lnum2)
-
-      -- Put the remaining text
-      vim.fn.append(lnum1 - 1, remaining_text)
-
-      -- Move cursor to start
-      vc.lnum = lnum1
-      vc.col = vim.fn.min({col1, common.get_max_col(lnum1) - 1})
-      -- col is limited to what it can be in normal mode, because visual mode will exit afterwards
-      vc.curswant = col1
-
-      -- Clear the visual area
-      vc.visual_start_lnum = 0
-      vc.visual_start_col = 0
-
-      -- Update the extmark
-      extmarks.update_virtual_cursor_extmarks(vc)
-
-    end -- If within buffer
-
-  end -- For each virtual cursor
-
-  clean_up()
-  check_for_collisions()
-
-  -- Restore cursor position
-  extmarks.restore_cursor()
-
-  ignore_cursor_movement = false
-
-end
-
--- Paste line per cursor -------------------------------------------------------
-
--- Get indices of virtual cursors and the real cursor (represented by 0) ordered
--- by position
-local function get_cursor_order()
-  local tmp = {}
-
-  -- Real cursor
-  local cursor_pos = vim.fn.getcursorcharpos()
-  table.insert(tmp, {0, cursor_pos[2], cursor_pos[3]})
+-- Does the number of lines match the number of editable cursors + 1 (for the
+-- real cursor)
+function M.can_split_paste(num_lines)
+  -- Get the number of editable virtual cursors
+  local count = 0
 
   for idx = 1, #virtual_cursors do
     local vc = virtual_cursors[idx]
     if vc.within_buffer and vc.editable then
-      table.insert(tmp, {idx, vc.lnum, vc.col})
+      count = count + 1
     end
   end
 
-  table.sort(tmp, function(a, b)
-    if a[2] == b[2] then
-      return a[3] < b[3]
-    else
-      return a[2] < b[2]
-    end
-  end)
-
-  local indices = {}
-
-  for idx = 1, #tmp do
-    table.insert(indices, tmp[idx][1])
-  end
-
-  return indices
-
+  return count + 1 == num_lines
 end
 
--- Call func on each line from lines on each virtual cursor, and return the line
--- for the real cursor
--- #lines must match #virtual_cursors + 1 (for the real cursor)
-function M.split_paste(lines, func, set_position)
+-- Move the line for the real cursor to the end of lines
+-- Modifies the lines variable
+function M.reorder_lines_for_split_pasting(lines)
 
-  ignore_cursor_movement = true
+  -- Ensure virtual_cursors is sorted
+  M.sort()
 
-  extmarks.save_cursor()
+  -- Move real cursor line to the end
+  local real_cursor_pos = vim.fn.getcursorcharpos() -- [0, lnum, col, off, curswant]
 
-  local indices = get_cursor_order()
+  local cursor_line_idx = 0
 
-  if #lines ~= #indices then
-    print("Error: #lines ~= #indices")
-    return
-  end
+  for idx = 1, #virtual_cursors do
+    local vc = virtual_cursors[idx]
 
-  local real_cursor_line = nil
-
-  for _idx = 1, #indices do
-    local line = lines[_idx]
-    local idx = indices[_idx]
-
-    if idx == 0 then -- Real cursor
-      real_cursor_line = line
+    if vc.lnum == real_cursor_pos[2] then
+      if vc.col > real_cursor_pos[3] then
+        cursor_line_idx = idx
+        break
+      end
     else
-      local vc = virtual_cursors[idx]
-
-      if vc.within_buffer and vc.editable then
-        -- Set virtual cursor position from extmark in case there were any changes
-        extmarks.update_virtual_cursor_position(vc)
-
-        if not vc.delete then
-          -- Set real cursor to virtual cursor position
-          common.set_cursor_to_virtual_cursor(vc)
-
-          -- Call func with the line
-          func({line}, vc)
-
-          if set_position then
-            -- Set virtual cursor position from real cursor
-            common.set_virtual_cursor_from_cursor(vc)
-          end
-
-          -- Update extmark
-          extmarks.update_virtual_cursor_extmarks(vc)
-        end
+      if vc.lnum > real_cursor_pos[2] then
+        cursor_line_idx = idx
+        break
       end
     end
 
   end
 
-  clean_up()
-  check_for_collisions()
-
-  extmarks.restore_cursor()
-
-  ignore_cursor_movement = false
-
-  return real_cursor_line
+  if cursor_line_idx ~= 0 then
+    -- Move the line for the real cursor to the end
+    local real_cursor_line = table.remove(lines, cursor_line_idx)
+    table.insert(lines, real_cursor_line)
+  end
 
 end
 
