@@ -16,20 +16,20 @@ end
 
 -- Right command for all virtual cursors
 -- This isn't local because it's used in normal_to_insert
-function M.virtual_cursors_right(count)
+function M.all_virtual_cursors_right(count)
   virtual_cursors.visit_in_buffer(function(vc) virtual_cursor_right(vc, count) end)
 end
 
 -- l command in normal/visual modes
 function M.normal_l()
   common.feedkeys("l", vim.v.count)
-  M.virtual_cursors_right(vim.v.count)
+  M.all_virtual_cursors_right(vim.v.count)
 end
 
 -- Right in insert/replace modes
 function M.insert_right()
   common.feedkeys("<Right>", 0)
-  M.virtual_cursors_right(0)
+  M.all_virtual_cursors_right(0)
 end
 
 
@@ -37,27 +37,27 @@ end
 
 -- End-of-Line command for a virtual cursor
 -- This isn't local because it's used by normal_to_insert
-function M.virtual_cursor_eol(vc)
+function M.virtual_cursor_end(vc)
   vc.col = common.get_col(vc.lnum, vim.v.maxcol)
   vc.curswant = vim.v.maxcol
 end
 
 -- End-of-Line command for all virtual cursors
 -- This isn't local because it's used by normal_to_insert
-function M.virtual_cursors_eol()
-  virtual_cursors.visit_in_buffer(function(vc) M.virtual_cursor_eol(vc) end)
+function M.all_virtual_cursors_end()
+  virtual_cursors.visit_in_buffer(function(vc) M.virtual_cursor_end(vc) end)
 end
 
 -- $ command in normal/visual modes
 function M.normal_dollar()
   common.feedkeys("$", 0)
-  M.virtual_cursors_eol()
+  M.all_virtual_cursors_end()
 end
 
 -- EoL command in all modes
 function M.eol()
   common.feedkeys("<End>", 0)
-  M.virtual_cursors_eol()
+  M.all_virtual_cursors_end()
 end
 
 
@@ -85,7 +85,7 @@ local function virtual_cursor_up(vc, count)
 end
 
 -- Up command for all virtual cursors
-local function virtual_cursors_up(count)
+local function all_virtual_cursors_up(count)
   count = get_actual_count_up(count)
   virtual_cursors.visit_all(function(vc) virtual_cursor_up(vc, count) end)
 end
@@ -93,12 +93,12 @@ end
 -- Up command
 function M.normal_k()
   common.feedkeys("k", vim.v.count)
-  virtual_cursors_up(vim.v.count)
+  all_virtual_cursors_up(vim.v.count)
 end
 
 function M.insert_up()
   common.feedkeys("<Up>", 0)
-  virtual_cursors_up(0)
+  all_virtual_cursors_up(0)
 end
 
 
@@ -127,19 +127,19 @@ local function virtual_cursor_down(vc, count)
 end
 
 -- Down command for all virtual cursors
-local function virtual_cursors_down(count)
+local function all_virtual_cursors_down(count)
   count = get_actual_count_down(count)
   virtual_cursors.visit_all(function(vc) virtual_cursor_down(vc, count) end)
 end
 
 function M.normal_j()
   common.feedkeys("j", vim.v.count)
-  virtual_cursors_down(vim.v.count)
+  all_virtual_cursors_down(vim.v.count)
 end
 
 function M.insert_down()
   common.feedkeys("<Down>", 0)
-  virtual_cursors_down(0)
+  all_virtual_cursors_down(0)
 end
 
 
@@ -147,7 +147,7 @@ end
 -- Funtions that can also change lines
 
 -- Normal mode backspace command for a vritual cursor
-local function virtual_cursor_normal_bs(vc, count)
+local function virtual_cursor_normal_backspace(vc, count)
 
   while count > 0 do
 
@@ -175,15 +175,15 @@ local function virtual_cursor_normal_bs(vc, count)
 end
 
 -- Normal mode backspace command for all virtual cursors
-local function virtual_cursors_normal_bs(count)
+local function all_virtual_cursors_normal_backspace(count)
   count = vim.fn.max({count, 1})
-  virtual_cursors.visit_in_buffer(function(vc) virtual_cursor_normal_bs(vc, count) end)
+  virtual_cursors.visit_in_buffer(function(vc) virtual_cursor_normal_backspace(vc, count) end)
 end
 
 -- Normal mode backspace command
 function M.normal_bs()
   common.feedkeys("<BS>", vim.v.count)
-  virtual_cursors_normal_bs(vim.v.count)
+  all_virtual_cursors_normal_backspace(vim.v.count)
 end
 
 -- Normal mode -: up N lines to first non-blank character

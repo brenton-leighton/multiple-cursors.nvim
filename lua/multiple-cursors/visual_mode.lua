@@ -71,7 +71,7 @@ local function delete_lines(lnum1, lnum2)
 end
 
 -- Delete the visual area for a virtual cursor
-local function delete_visual_area(vc)
+local function virtual_cursor_delete(vc)
 
   local lnum1, col1, lnum2, col2 = common.get_normalised_visual_area(vc)
 
@@ -94,12 +94,12 @@ local function delete_visual_area(vc)
 end
 
 -- Delete visual areas for all virtual cursors
-local function delete_all_visual_areas()
+local function all_virtual_cursors_delete()
 
   virtual_cursors.edit(function(vc)
     if common.is_visual_area_valid(vc) then
 
-      delete_visual_area(vc)
+      virtual_cursor_delete(vc)
 
       common.set_virtual_cursor_from_cursor(vc)
 
@@ -111,7 +111,7 @@ local function delete_all_visual_areas()
 end
 
 -- Paste for a virtual cursor
-local function paste(vc, lines)
+local function virtual_cursor_paste(vc, lines)
   -- Put lines before the cursor
   vim.api.nvim_put(lines, "c", false, true)
 
@@ -122,23 +122,23 @@ local function paste(vc, lines)
 end
 
 -- Paste for all virtual cursors
-local function paste_all()
+local function all_virtual_cursors_paste()
 
   -- First delete the visual areas
-  delete_all_visual_areas()
+  all_virtual_cursors_delete()
 
   -- Perform the paste
   virtual_cursors.edit_with_cursor(function(vc, idx)
     if split_paste then
-      paste(vc, {paste_lines[idx]})
+      virtual_cursor_paste(vc, {paste_lines[idx]})
     else
-      paste(vc, paste_lines)
+      virtual_cursor_paste(vc, paste_lines)
     end
   end)
 
 end
 
-local function join_visual_area(vc, command)
+local function virtual_cursor_join(vc, command)
 
   local lnum1, col1, lnum2, col2 = common.get_normalised_visual_area(vc)
 
@@ -161,10 +161,10 @@ local function join_visual_area(vc, command)
 
 end
 
-local function join_all_visual_areas(command)
+local function all_virtual_cursors_join(command)
 
   virtual_cursors.edit(function(vc)
-    join_visual_area(vc, command)
+    virtual_cursor_join(vc, command)
   end)
 
 end
@@ -173,14 +173,14 @@ end
 function M.mode_changed_from_visual()
 
   if delete_on_exit then  -- Delete
-    delete_all_visual_areas()
+    all_virtual_cursors_delete()
     delete_on_exit = false
   elseif paste_lines then  -- Paste
-    paste_all()
+    all_virtual_cursors_paste()
     split_paste = false
     paste_lines = nil
   elseif join_on_exit then  -- Join
-    join_all_visual_areas(join_on_exit)
+    all_virtual_cursors_join(join_on_exit)
     join_on_exit = nil
   else -- Just clear visual areas
     virtual_cursors.visit_all(function(vc)
@@ -262,7 +262,7 @@ local function visual_area_to_register_info(cmd, lnum1, col1, lnum2, col2)
 end
 
 -- Perform yank for all virtual cursors
-local function yank_visual_areas(cmd)
+local function all_virtual_cursors_yank(cmd)
   virtual_cursors.visit_in_buffer(function(vc)
 
     local lnum1, col1, lnum2, col2 = common.get_normalised_visual_area(vc)
@@ -288,13 +288,13 @@ end
  -- y command
 function M.y()
   common.feedkeys("y", 0)
-  yank_visual_areas("y")
+  all_virtual_cursors_yank("y")
 end
 
 -- d command
 function M.d()
   common.feedkeys("d", 0)
-  yank_visual_areas("d")
+  all_virtual_cursors_yank("d")
   delete_on_exit = true
 end
 

@@ -116,7 +116,7 @@ local function count_spaces_back(lnum, col)
 end
 
 -- Insert mode backspace command for a virtual cursor
-local function insert_mode_virtual_cursor_bs(vc)
+local function virtual_cursor_insert_mode_backspace(vc)
 
   if vc.col == 1 then -- Start of the line
     if vc.lnum ~= 1 then -- But not the first line
@@ -153,7 +153,7 @@ end
 
 -- Replace mode backspace command for a virtual cursor
 -- This only moves back a character, it doesn't undo
-local function replace_mode_virtual_cursor_bs(vc)
+local function virtual_cursor_replace_mode_backspace(vc)
 
   -- First column but not first line
   if vc.col == 1 and vc.lnum ~= 1 then
@@ -174,15 +174,15 @@ local function replace_mode_virtual_cursor_bs(vc)
 end
 
 -- Backspace command for all virtual cursors
-local function virtual_cursors_bs()
+local function all_virtual_cursors_backspace()
   -- Replace mode
   if common.is_mode("R") then
     virtual_cursors.edit_with_cursor(function(vc)
-      replace_mode_virtual_cursor_bs(vc)
+      virtual_cursor_replace_mode_backspace(vc)
     end)
   else
     virtual_cursors.edit_with_cursor(function(vc)
-      insert_mode_virtual_cursor_bs(vc)
+      virtual_cursor_insert_mode_backspace(vc)
     end)
   end
 end
@@ -190,14 +190,14 @@ end
 -- Backspace command
 function M.bs()
   common.feedkeys("<BS>", 0)
-  virtual_cursors_bs()
+  all_virtual_cursors_backspace()
 end
 
 
 -- Delete ----------------------------------------------------------------------
 
 -- Delete command for a virtual cursor
-local function virtual_cursor_del(vc)
+local function virtual_cursor_delete(vc)
 
   if vc.col == common.get_max_col(vc.lnum) then -- End of the line
     -- Join next line
@@ -210,16 +210,16 @@ local function virtual_cursor_del(vc)
 end
 
 -- Delete command for all virtual cursors
-local function virtual_cursors_del()
+local function all_virtual_cursors_delete()
   virtual_cursors.edit_with_cursor(function(vc)
-    virtual_cursor_del(vc)
+    virtual_cursor_delete(vc)
   end)
 end
 
 -- Delete command
 function M.del()
   common.feedkeys("<Del>", 0)
-  virtual_cursors_del()
+  all_virtual_cursors_delete()
 end
 
 
@@ -227,7 +227,7 @@ end
 
 -- Carriage return command for a virtual cursor
 -- This isn't local because it's used by normal_to_insert
-function M.virtual_cursor_cr(vc)
+function M.virtual_cursor_carriage_return(vc)
   if vc.col <= common.get_length_of_line(vc.lnum) then
     vim.api.nvim_put({"", ""}, "c", false, true)
     vim.cmd("normal! ==^")
@@ -244,9 +244,9 @@ end
 
 -- Carriage return command for all virtual cursors
 -- This isn't local because it's used by normal_to_insert
-function M.virtual_cursors_cr()
+function M.all_virtual_cursors_carriage_return()
   virtual_cursors.edit_with_cursor(function(vc)
-    M.virtual_cursor_cr(vc)
+    M.virtual_cursor_carriage_return(vc)
   end)
 end
 
@@ -254,7 +254,7 @@ end
 -- Also for <kEnter>
 function M.cr()
   common.feedkeys("<CR>", 0)
-  M.virtual_cursors_cr()
+  M.all_virtual_cursors_carriage_return()
 end
 
 
@@ -302,7 +302,7 @@ local function virtual_cursor_tab(vc)
 end
 
 -- Tab command for all virtual cursors
-local function virtual_cursors_tab()
+local function all_virtual_cursors_tab()
   virtual_cursors.edit_with_cursor(function(vc)
     delete_if_replace_mode(vc)
     virtual_cursor_tab(vc)
@@ -312,7 +312,7 @@ end
 -- Tab command
 function M.tab()
   common.feedkeys("<Tab>", 0)
-  virtual_cursors_tab()
+  all_virtual_cursors_tab()
 end
 
 return M
