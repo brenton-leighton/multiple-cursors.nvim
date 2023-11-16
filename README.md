@@ -17,6 +17,20 @@ vim.keymap.set({"n", "i"}, "<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>")
 ```
 to bind the `MultipleCursorsAddDown` command to `Ctrl+Down` in normal and insert modes.
 
+## Demo videos
+
+### Inserting text
+
+https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/3747f5ac-5dd4-4503-b940-9506860bc611
+
+### Adding cursors with a mouse click
+
+https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/7fca393f-57a0-4d73-b322-de46400307bc
+
+### Deleting in visual mode and split pasting
+
+https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/241c5760-9f6f-464c-8611-174527ad0604
+
 ## Installation
 
 ### Using [lazy.nvim](https://github.com/folke/lazy.nvim)
