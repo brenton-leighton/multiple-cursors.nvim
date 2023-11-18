@@ -98,6 +98,7 @@ default_key_maps = {
   {"x", "o", visual_mode.o},
   {"x", "y", visual_mode.y},
   {"x", {"d", "<Del>"}, visual_mode.d},
+  {"x", "c", visual_mode.c},
   {"x", "J", visual_mode.J},
   {"x", "gJ", visual_mode.gJ},
 
