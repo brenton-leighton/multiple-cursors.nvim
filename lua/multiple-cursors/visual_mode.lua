@@ -245,7 +245,7 @@ local function visual_area_to_register_info(cmd, lnum1, col1, lnum2, col2)
 
   local points_to = "0" -- yank
 
-  if cmd == "d" then -- delete
+  if cmd == "d" or cmd == "c" then -- delete or change
     if lnum1 == lnum2 then -- Single line
       points_to = "-"
     else
@@ -294,6 +294,13 @@ end
 -- d command
 function M.d()
   common.feedkeys("d", 0)
+  all_virtual_cursors_yank("d")
+  delete_on_exit = true
+end
+
+-- c command
+function M.c()
+  common.feedkeys("c", 0)
   all_virtual_cursors_yank("d")
   delete_on_exit = true
 end
