@@ -122,6 +122,8 @@ function M.restore_existing()
     vim.fn.mapset(mode, false, dict)
   end
 
+  existing_key_maps = {}
+
 end
 
 -- Function to execute a custom key map
