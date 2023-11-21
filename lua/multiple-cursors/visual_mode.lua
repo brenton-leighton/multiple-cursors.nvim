@@ -298,13 +298,6 @@ function M.d()
   delete_on_exit = true
 end
 
--- c command
-function M.c()
-  common.feedkeys("c", 0)
-  all_virtual_cursors_yank("d")
-  delete_on_exit = true
-end
-
 -- Join commands
 function M.J()
   common.feedkeys("J", 0)
