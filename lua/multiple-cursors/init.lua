@@ -27,6 +27,10 @@ default_key_maps = {
   {{"n", "x"}, "^", move.normal_caret},
   {{"n", "x"}, "$", move_special.normal_dollar},
   {{"n", "x"}, "|", move.normal_bar},
+  {{"n", "x"}, "f", move.normal_f},
+  {{"n", "x"}, "F", move.normal_F},
+  {{"n", "x"}, "t", move.normal_t},
+  {{"n", "x"}, "T", move.normal_T},
 
   -- Left/right motion in insert/replace modes
   {"i", "<Left>", move.insert_left},

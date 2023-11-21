@@ -46,4 +46,17 @@ function M.get_motion_char()
 
 end
 
+-- Get a standard character
+-- Returns nil for anything else
+function M.get_char()
+
+  local char = vim.fn.getcharstr()
+  if #char == 1 then
+    return char
+  else
+    return nil
+  end
+
+end
+
 return M

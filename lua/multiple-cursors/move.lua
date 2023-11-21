@@ -2,6 +2,7 @@ local M = {}
 
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
+local input = require("multiple-cursors.input")
 
 -- Left/right motion in normal/visual modes
 function M.normal_h()
@@ -22,6 +23,34 @@ end
 function M.normal_bar()
   common.feedkeys("|", vim.v.count)
   virtual_cursors.move_with_normal_command("|", vim.v.count)
+end
+
+-- Handle f, F, t, or T command
+local function normal_fFtT(cmd)
+  local count = vim.v.count
+  local char = input.get_char()
+
+  if char ~= nil then
+    virtual_cursors.move_with_normal_command(cmd .. char, count)
+    common.feedkeys(cmd .. char, count)
+  end
+
+end
+
+function M.normal_f()
+  normal_fFtT("f")
+end
+
+function M.normal_F()
+  normal_fFtT("F")
+end
+
+function M.normal_t()
+  normal_fFtT("t")
+end
+
+function M.normal_T()
+  normal_fFtT("T")
 end
 
 -- Left motion in insert/replace modes
