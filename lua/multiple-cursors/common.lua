@@ -1,5 +1,15 @@
 local M = {}
 
+-- Execute a command with normal!
+function M.normal_bang(cmd, count)
+  if count == 0 then
+    vim.cmd("normal! " .. cmd)
+  else
+    vim.cmd("normal! " .. tostring(count) .. cmd)
+  end
+end
+
+-- Wrapper around nvim_feedkeys
 function M.feedkeys(cmd, count)
 
   if count ~= 0 then

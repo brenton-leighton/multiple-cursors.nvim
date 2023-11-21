@@ -72,6 +72,7 @@ default_key_maps = {
   -- Delete in normal mode
   {"n", {"x", "<Del>"}, normal_edit.x},
   {"n", "X", normal_edit.X},
+  {"n", "d", normal_edit.d},
   {"n", "dd", normal_edit.dd},
   {"n", "D", normal_edit.D},
 
