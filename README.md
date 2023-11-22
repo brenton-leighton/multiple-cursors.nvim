@@ -64,6 +64,7 @@ After adding a new cursor the following functions are available:
 | --- | --- | --- | --- |
 | All | Left/right motion | `<Left>` `<Right>` `<Home>` `<End>` | |
 | Normal/visual | Left/right motion | `h` `<BS>` `l` `<Space>` `0` `^` `$` `\|` | |
+| Normal/visual | Left/right motion | `f` `F` `t` `T` | These don't indicate that they're waiting for a character |
 | All | Up/down motion | `<Up>` `<Down>` | |
 | Normal/visual | Up/down motion | `j` `k` `-` `+` `<CR>` `kEnter` `_` | |
 | All | Text object motion | `<C-Left>` `<C-Right>` | |
@@ -71,8 +72,8 @@ After adding a new cursor the following functions are available:
 | Normal/visual | Percent symbol | `%` | Count is ignored i.e. [jump to match of item under cursor](https://neovim.io/doc/user/motion.html#%25) only |
 | Normal | Change to insert/replace mode | `a` `A` `i` `I` `o` `O` `R` | Count is ignored |
 | Normal | Change to visual mode | `v` | |
-| Normal | Delete | `x` `<Del>` `X` `dd` `D` | |
-| Normal | Yank | `yy` | |
+| Normal | Delete | `x` `<Del>` `X` `d` `dd` `D` | `d` doesn't indicate that it's waiting for a motion |
+| Normal | Yank | `y` `yy` | `y` doesn't indicate that it's waiting for a motion |
 | Normal | Put | `p` `P` | |
 | Normal | Indentation | `>>` `<<` | |
 | Normal | Join | `J` `gJ` | |
@@ -150,7 +151,6 @@ These options are to provide functions that are called a the start of initialisa
 
 - Anything other than the functionality listed above probably won't work correctly
 - This plugin has been developed and tested with Neovim 0.9.1 and there may be issues with other versions
-- `d` and `y` in normal mode are not implemented, visual mode can be used instead
 -  Using named registers is not implemented
 - This plugin hasn't been tested with completion and it will probably not behave correctly
 - In insert or replace mode, if a line has been auto-indented after a carriage return and nothing has been added to the line, the indentation will not be removed when exiting back to normal mode
@@ -159,4 +159,6 @@ These options are to provide functions that are called a the start of initialisa
 
 ## Planned features
 
-- Create virtual cursors from search terms
+- More visual mode commands
+- Create virtual cursors from a search
+- `c` and `.` commands in normal and visual modes

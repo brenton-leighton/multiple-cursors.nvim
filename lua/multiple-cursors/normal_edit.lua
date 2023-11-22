@@ -2,6 +2,7 @@ local M = {}
 
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
+local input = require("multiple-cursors.input")
 
 -- Indentation
 function M.indent()
@@ -36,6 +37,16 @@ function M.X()
   virtual_cursors.edit_normal_delete_yank("X", vim.v.count)
 end
 
+function M.d()
+  local count = vim.v.count
+  local motion_cmd = input.get_motion_char()
+
+  if motion_cmd ~= nil then
+    virtual_cursors.edit_normal_delete_yank("d" .. motion_cmd, count)
+    common.feedkeys("d" .. motion_cmd, count)
+  end
+end
+
 function M.dd()
   common.feedkeys("dd", vim.v.count)
   virtual_cursors.edit_normal_delete_yank("dd", vim.v.count)
@@ -47,6 +58,16 @@ function M.D()
 end
 
 -- Yank in normal mode
+function M.y()
+  local count = vim.v.count
+  local motion_cmd = input.get_motion_char()
+
+  if motion_cmd ~= nil then
+    virtual_cursors.edit_normal_delete_yank("y" .. motion_cmd, count)
+    common.feedkeys("y" .. motion_cmd, count)
+  end
+end
+
 function M.yy()
   common.feedkeys("yy", vim.v.count)
   virtual_cursors.edit_normal_delete_yank("yy", vim.v.count)

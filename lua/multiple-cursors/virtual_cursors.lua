@@ -231,15 +231,8 @@ end
 function M.move_with_normal_command(cmd, count)
 
   M.visit_with_cursor(function(vc)
-
-    if count == 0 then
-      vim.cmd("normal! " .. cmd)
-    else
-      vim.cmd("normal! " .. tostring(count) .. cmd)
-    end
-
+    common.normal_bang(cmd, count)
     common.set_virtual_cursor_from_cursor(vc)
-
   end)
 
 end
@@ -280,15 +273,8 @@ end
 function M.edit_with_normal_command(cmd, count)
 
   M.edit_with_cursor(function(vc)
-
-    if count == 0 then
-      vim.cmd("normal! " .. cmd)
-    else
-      vim.cmd("normal! " .. tostring(count) .. cmd)
-    end
-
+    common.normal_bang(cmd, count)
     common.set_virtual_cursor_from_cursor(vc)
-
   end)
 
 end
@@ -299,16 +285,9 @@ end
 function M.edit_normal_delete_yank(cmd, count)
 
   M.edit_with_cursor(function(vc)
-
-    if count == 0 then
-      vim.cmd("normal! " .. cmd)
-    else
-      vim.cmd("normal! " .. tostring(count) .. cmd)
-    end
-
+    common.normal_bang(cmd, count)
     vc.register_info = vim.fn.getreginfo('"')
     common.set_virtual_cursor_from_cursor(vc)
-
   end)
 
 end
@@ -332,11 +311,7 @@ function M.edit_normal_put(cmd, count)
     end
 
     -- Put the unnamed register
-    if count == 0 then
-      vim.cmd("normal! " .. cmd)
-    else
-      vim.cmd("normal! " .. tostring(count) .. cmd)
-    end
+    common.normal_bang(cmd, count)
 
     common.set_virtual_cursor_from_cursor(vc)
 

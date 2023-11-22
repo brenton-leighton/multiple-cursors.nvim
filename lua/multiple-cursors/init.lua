@@ -27,6 +27,10 @@ default_key_maps = {
   {{"n", "x"}, "^", move.normal_caret},
   {{"n", "x"}, "$", move_special.normal_dollar},
   {{"n", "x"}, "|", move.normal_bar},
+  {{"n", "x"}, "f", move.normal_f},
+  {{"n", "x"}, "F", move.normal_F},
+  {{"n", "x"}, "t", move.normal_t},
+  {{"n", "x"}, "T", move.normal_T},
 
   -- Left/right motion in insert/replace modes
   {"i", "<Left>", move.insert_left},
@@ -72,6 +76,7 @@ default_key_maps = {
   -- Delete in normal mode
   {"n", {"x", "<Del>"}, normal_edit.x},
   {"n", "X", normal_edit.X},
+  {"n", "d", normal_edit.d},
   {"n", "dd", normal_edit.dd},
   {"n", "D", normal_edit.D},
 
@@ -98,7 +103,6 @@ default_key_maps = {
   {"x", "o", visual_mode.o},
   {"x", "y", visual_mode.y},
   {"x", {"d", "<Del>"}, visual_mode.d},
-  {"x", "c", visual_mode.c},
   {"x", "J", visual_mode.J},
   {"x", "gJ", visual_mode.gJ},
 
