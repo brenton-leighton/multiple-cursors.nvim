@@ -282,7 +282,7 @@ end
 -- Execute a normal command to perform a delete or yank at each virtual cursor,
 -- then save the unnamed register
 -- The virtual cursor position is set after calling func
-function M.edit_normal_delete_yank(cmd, count)
+function M.normal_mode_delete_yank(cmd, count)
 
   M.edit_with_cursor(function(vc)
     common.normal_bang(cmd, count)
@@ -296,7 +296,7 @@ end
 -- The unnamed register is first saved, the replaced by the virtual cursor
 -- register
 -- After executing the command the unnamed register is restored
-function M.edit_normal_put(cmd, count)
+function M.normal_mode_put(cmd, count)
 
   M.edit_with_cursor(function(vc)
 
