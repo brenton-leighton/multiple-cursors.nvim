@@ -212,7 +212,7 @@ function M.escape()
 end
 
 -- Add a virtual cursor then move the real cursor up or down
-local function add_cursor(down)
+local function add_virtual_cursor_at_real_cursor(down)
   -- Initialise if this is the first cursor
   init()
 
@@ -229,8 +229,15 @@ local function add_cursor(down)
 
 end
 
-function M.add_cursor_up() return add_cursor(false) end
-function M.add_cursor_down() return add_cursor(true) end
+-- Add a virtual cursor at the real cursor position, then move the real cursor up
+function M.add_cursor_up()
+  return add_virtual_cursor_at_real_cursor(false)
+end
+
+-- Add a virtual cursor at the real cursor position, then move the real cursor down
+function M.add_cursor_down()
+  return add_virtual_cursor_at_real_cursor(true)
+end
 
 -- Add or delete a virtual cursor at the mouse position
 function M.mouse_add_delete_cursor()
@@ -244,6 +251,17 @@ function M.mouse_add_delete_cursor()
   if virtual_cursors.get_num_virtual_cursors() == 0 then
     deinit() -- Deinitialise if there are no more cursors
   end
+end
+
+-- Add a new cursor at given position
+function M.add_cursor(lnum, col, curswant)
+
+  -- Initialise if this is the first cursor
+  init()
+
+  -- Add a virtual cursor
+  virtual_cursors.add(lnum, col, curswant)
+
 end
 
 function M.setup(opts)

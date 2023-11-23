@@ -147,6 +147,17 @@ Default values: `nil`
 
 These options are to provide functions that are called a the start of initialisation and at the end of de-initialisation respectively.
 
+## API
+
+### `add_cursor(lnum, col, curswant)`
+In addition to the provided commands there is a function to add a cursor to a given position, which can be called like so:
+
+```
+require("multiple-cursors").add_cursor(lnum, col, curswant)
+```
+
+where `lnum` is the line number of the new cursor, `col` is the column, and `curswant` is the desired column. Typically `curswant` will be the value same as `col`, although it can be larger if the cursor position is limited by the line length. If the cursor is to be positioned at the end of a line, `curswant` would be equal to `vim.v.maxcol`.
+
 ## Notes and known issues
 
 - Anything other than the functionality listed above probably won't work correctly
