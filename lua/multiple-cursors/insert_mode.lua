@@ -35,7 +35,12 @@ end
 
 function M.escape()
   -- Move the cursor back
-  virtual_cursors.move_with_normal_command("h", 0)
+  virtual_cursors.visit_with_cursor(function(vc)
+    if vc.col ~= 1 then
+      common.normal_bang("h", 0)
+      common.set_virtual_cursor_from_cursor(vc)
+    end
+  end)
 end
 
 
