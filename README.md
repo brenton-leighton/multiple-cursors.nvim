@@ -68,11 +68,12 @@ After adding a new cursor the following functions are available:
 | All | Up/down motion | `<Up>` `<Down>` | |
 | Normal/visual | Up/down motion | `j` `k` `-` `+` `<CR>` `kEnter` `_` | |
 | All | Text object motion | `<C-Left>` `<C-Right>` | |
-| Normal/visual | Text object motion | `w` `W` `e` `E` `b` `B` | |
+| Normal/visual | Text object motion | `w` `W` `e` `E` `b` `B` `ge` `gE` | |
 | Normal/visual | Percent symbol | `%` | Count is ignored i.e. [jump to match of item under cursor](https://neovim.io/doc/user/motion.html#%25) only |
 | Normal | Change to insert/replace mode | `a` `A` `i` `I` `o` `O` `R` | Count is ignored |
 | Normal | Change to visual mode | `v` | |
 | Normal | Delete | `x` `<Del>` `X` `d` `dd` `D` | `d` doesn't indicate that it's waiting for a motion |
+| Normal | Change | `c` `cc` `C` | `c` doesn't indicate that it's waiting for a motion |
 | Normal | Yank | `y` `yy` | `y` doesn't indicate that it's waiting for a motion |
 | Normal | Put | `p` `P` | |
 | Normal | Indentation | `>>` `<<` | |
@@ -172,4 +173,4 @@ where `lnum` is the line number of the new cursor, `col` is the column, and `cur
 
 - More visual mode commands
 - Create virtual cursors from a search
-- `c` and `.` commands in normal and visual modes
+- `.` commands in normal and visual modes

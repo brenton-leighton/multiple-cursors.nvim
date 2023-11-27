@@ -36,13 +36,32 @@ local motions = {
 
 }
 
+local motions_waiting_for_char = {
+  ["f"] = "f",
+  ["F"] = "F",
+  ["t"] = "t",
+  ["T"] = "T",
+}
+
 -- Wait for a motion character
 -- Returns a normal motion command or nil if the character isn't a valid motion
 function M.get_motion_char()
 
   -- Wait for a character
-  local char = vim.fn.getcharstr()
-  return motions[char]
+  local count = ""
+  local motion
+  while true do
+    motion = vim.fn.getcharstr()
+    if not motion or not motion:match('%d') then break end
+    count = count .. motion
+  end
+
+  local char = motions_waiting_for_char[motion]
+  if char then
+    return count .. char .. vim.fn.getcharstr()
+  end
+
+  return count .. motions[motion]
 
 end
 

@@ -58,6 +58,8 @@ default_key_maps = {
   {{"n", "x"}, "E", move.normal_E},
   {{"n", "x"}, {"b", "<S-Left>", "<C-Left>"}, move.normal_b},
   {{"n", "x"}, "B", move.normal_B},
+  {{"n", "x"}, "ge", move.normal_ge},
+  {{"n", "x"}, "gE", move.normal_gE},
 
   -- Text object motion in insert/replace modes
   {"i", "<C-Left>", move.insert_word_left},
@@ -80,10 +82,23 @@ default_key_maps = {
   {"n", "dd", normal_edit.dd},
   {"n", "D", normal_edit.D},
 
+  -- Change in normal mode
+  {"n", "c", normal_edit.c},
+  {"n", "cc", normal_edit.cc},
+  {"n", "C", normal_edit.C},
+
+  -- Change case in normal mode
+  {"n", "gu", normal_edit.gu},
+  {"n", "gU", normal_edit.gU},
+  {"n", "g~", normal_edit.g_tilde},
+
   -- Yank and put in normal mode
   {"n", "yy", normal_edit.yy},
   {"n", "p", normal_edit.p},
   {"n", "P", normal_edit.P},
+
+  -- Replace char in normal mode
+  {"n", "r", normal_edit.r},
 
   -- Indentation in normal mode
   {"n", ">>", normal_edit.indent},

@@ -96,6 +96,16 @@ function M.normal_E()
   virtual_cursors.move_with_normal_command("E", vim.v.count)
 end
 
+function M.normal_ge()
+  common.feedkeys("ge", vim.v.count)
+  virtual_cursors.move_with_normal_command("ge", vim.v.count)
+end
+
+function M.normal_gE()
+  common.feedkeys("gE", vim.v.count)
+  virtual_cursors.move_with_normal_command("gE", vim.v.count)
+end
+
 -- Text object motion in insert/replace modes
 function M.insert_word_left()
   common.feedkeys("<C-Left>", 0)
