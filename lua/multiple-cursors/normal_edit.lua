@@ -26,6 +26,17 @@ function M.gJ()
   virtual_cursors.edit_with_normal_command("gJ", vim.v.count)
 end
 
+-- Replace char
+function M.r()
+  local count = vim.v.count
+  local char = input.get_char()
+
+  if char ~= nil then
+    common.feedkeys("r" .. char, count)
+    virtual_cursors.edit_with_normal_command("r" .. char, vim.v.count)
+  end
+end
+
 -- Delete in normal mode
 function M.x() -- Also <Del>
   common.feedkeys("x", vim.v.count)
@@ -55,6 +66,54 @@ end
 function M.D()
   common.feedkeys("D", vim.v.count)
   virtual_cursors.normal_mode_delete_yank("D", vim.v.count)
+end
+
+-- Change in normal mode
+function M.c()
+  M.d()
+  require("multiple-cursors.normal_to_insert").i()
+end
+
+function M.cc()
+  require("multiple-cursors.move").normal_0()
+  M.D()
+  require("multiple-cursors.normal_to_insert").i()
+end
+
+function M.C()
+  M.D()
+  require("multiple-cursors.normal_to_insert").i()
+end
+
+-- Switch case in normal mode
+function M.gu()
+  local count = vim.v.count
+  local motion_cmd = input.get_motion_char()
+
+  if motion_cmd ~= nil then
+    virtual_cursors.edit_with_normal_command("gu" .. motion_cmd, count)
+    common.feedkeys("gu" .. motion_cmd, count)
+  end
+end
+
+function M.gU()
+  local count = vim.v.count
+  local motion_cmd = input.get_motion_char()
+
+  if motion_cmd ~= nil then
+    virtual_cursors.edit_with_normal_command("gU" .. motion_cmd, count)
+    common.feedkeys("gU" .. motion_cmd, count)
+  end
+end
+
+function M.g_tilde()
+  local count = vim.v.count
+  local motion_cmd = input.get_motion_char()
+
+  if motion_cmd ~= nil then
+    virtual_cursors.edit_with_normal_command("g~" .. motion_cmd, count)
+    common.feedkeys("g~" .. motion_cmd, count)
+  end
 end
 
 -- Yank in normal mode

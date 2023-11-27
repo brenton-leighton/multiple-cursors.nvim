@@ -68,11 +68,12 @@ After adding a new cursor the following functions are available:
 | All | Up/down motion | `<Up>` `<Down>` | |
 | Normal/visual | Up/down motion | `j` `k` `-` `+` `<CR>` `kEnter` `_` | |
 | All | Text object motion | `<C-Left>` `<C-Right>` | |
-| Normal/visual | Text object motion | `w` `W` `e` `E` `b` `B` | |
+| Normal/visual | Text object motion | `w` `W` `e` `E` `b` `B` `ge` `gE` | |
 | Normal/visual | Percent symbol | `%` | Count is ignored i.e. [jump to match of item under cursor](https://neovim.io/doc/user/motion.html#%25) only |
 | Normal | Change to insert/replace mode | `a` `A` `i` `I` `o` `O` `R` | Count is ignored |
 | Normal | Change to visual mode | `v` | |
 | Normal | Delete | `x` `<Del>` `X` `d` `dd` `D` | `d` doesn't indicate that it's waiting for a motion |
+| Normal | Change | `c` `cc` `C` | `c` doesn't indicate that it's waiting for a motion |
 | Normal | Yank | `y` `yy` | `y` doesn't indicate that it's waiting for a motion |
 | Normal | Put | `p` `P` | |
 | Normal | Indentation | `>>` `<<` | |
@@ -147,6 +148,17 @@ Default values: `nil`
 
 These options are to provide functions that are called a the start of initialisation and at the end of de-initialisation respectively.
 
+## API
+
+### `add_cursor(lnum, col, curswant)`
+In addition to the provided commands there is a function to add a cursor to a given position, which can be called like so:
+
+```
+require("multiple-cursors").add_cursor(lnum, col, curswant)
+```
+
+where `lnum` is the line number of the new cursor, `col` is the column, and `curswant` is the desired column. Typically `curswant` will be the value same as `col`, although it can be larger if the cursor position is limited by the line length. If the cursor is to be positioned at the end of a line, `curswant` would be equal to `vim.v.maxcol`.
+
 ## Notes and known issues
 
 - Anything other than the functionality listed above probably won't work correctly
@@ -161,4 +173,4 @@ These options are to provide functions that are called a the start of initialisa
 
 - More visual mode commands
 - Create virtual cursors from a search
-- `c` and `.` commands in normal and visual modes
+- `.` commands in normal and visual modes

@@ -58,6 +58,8 @@ default_key_maps = {
   {{"n", "x"}, "E", move.normal_E},
   {{"n", "x"}, {"b", "<S-Left>", "<C-Left>"}, move.normal_b},
   {{"n", "x"}, "B", move.normal_B},
+  {{"n", "x"}, "ge", move.normal_ge},
+  {{"n", "x"}, "gE", move.normal_gE},
 
   -- Text object motion in insert/replace modes
   {"i", "<C-Left>", move.insert_word_left},
@@ -80,10 +82,23 @@ default_key_maps = {
   {"n", "dd", normal_edit.dd},
   {"n", "D", normal_edit.D},
 
+  -- Change in normal mode
+  {"n", "c", normal_edit.c},
+  {"n", "cc", normal_edit.cc},
+  {"n", "C", normal_edit.C},
+
+  -- Change case in normal mode
+  {"n", "gu", normal_edit.gu},
+  {"n", "gU", normal_edit.gU},
+  {"n", "g~", normal_edit.g_tilde},
+
   -- Yank and put in normal mode
   {"n", "yy", normal_edit.yy},
   {"n", "p", normal_edit.p},
   {"n", "P", normal_edit.P},
+
+  -- Replace char in normal mode
+  {"n", "r", normal_edit.r},
 
   -- Indentation in normal mode
   {"n", ">>", normal_edit.indent},
@@ -212,7 +227,7 @@ function M.escape()
 end
 
 -- Add a virtual cursor then move the real cursor up or down
-local function add_cursor(down)
+local function add_virtual_cursor_at_real_cursor(down)
   -- Initialise if this is the first cursor
   init()
 
@@ -229,8 +244,15 @@ local function add_cursor(down)
 
 end
 
-function M.add_cursor_up() return add_cursor(false) end
-function M.add_cursor_down() return add_cursor(true) end
+-- Add a virtual cursor at the real cursor position, then move the real cursor up
+function M.add_cursor_up()
+  return add_virtual_cursor_at_real_cursor(false)
+end
+
+-- Add a virtual cursor at the real cursor position, then move the real cursor down
+function M.add_cursor_down()
+  return add_virtual_cursor_at_real_cursor(true)
+end
 
 -- Add or delete a virtual cursor at the mouse position
 function M.mouse_add_delete_cursor()
@@ -244,6 +266,17 @@ function M.mouse_add_delete_cursor()
   if virtual_cursors.get_num_virtual_cursors() == 0 then
     deinit() -- Deinitialise if there are no more cursors
   end
+end
+
+-- Add a new cursor at given position
+function M.add_cursor(lnum, col, curswant)
+
+  -- Initialise if this is the first cursor
+  init()
+
+  -- Add a virtual cursor
+  virtual_cursors.add(lnum, col, curswant)
+
 end
 
 function M.setup(opts)
