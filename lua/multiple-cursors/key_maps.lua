@@ -2,6 +2,7 @@ local M = {}
 
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
 local common = require("multiple-cursors.common")
+local input = require("multiple-cursors.input")
 
 -- A table of key maps
 -- mode(s), key(s), function
@@ -138,6 +139,46 @@ local function custom_function(func)
   end)
 end
 
+local function custom_function_with_motion(func)
+
+  -- Get a printable character
+  local motion = input.get_motion_char()
+
+  if motion == nil then
+    return
+  end
+
+  -- Call func for the real cursor
+  func(motion)
+
+  -- Call func for each virtual cursor and set the virtual cursor position
+  virtual_cursors.edit_with_cursor(function(vc)
+    func(motion)
+    common.set_virtual_cursor_from_cursor(vc)
+  end)
+
+end
+
+local function custom_function_with_char(func)
+
+  -- Get a printable character
+  local char = input.get_char()
+
+  if char == nil then
+    return
+  end
+
+  -- Call func for the real cursor
+  func(char)
+
+  -- Call func for each virtual cursor and set the virtual cursor position
+  virtual_cursors.edit_with_cursor(function(vc)
+    func(char)
+    common.set_virtual_cursor_from_cursor(vc)
+  end)
+
+end
+
 -- Set any custom key maps
 -- This is a separate function because it's also used by the LazyLoad autocmd
 function M.set_custom()
@@ -146,9 +187,21 @@ function M.set_custom()
     local custom_keys = wrap_in_table(custom_key_maps[i][2])
     local func = custom_key_maps[i][3]
 
+    local opt = nil
+
+    if #custom_key_maps[i] == 4 then
+      opt = custom_key_maps[i][4]
+    end
+
     for j=1, #custom_modes do
       for k=1, #custom_keys do
-        vim.keymap.set(custom_modes[j], custom_keys[k], function() custom_function(func) end)
+        if opt == "m" then
+          vim.keymap.set(custom_modes[j], custom_keys[k], function() custom_function_with_motion(func) end)
+        elseif opt == "c" then
+          vim.keymap.set(custom_modes[j], custom_keys[k], function() custom_function_with_char(func) end)
+        else
+          vim.keymap.set(custom_modes[j], custom_keys[k], function() custom_function(func) end)
+        end
       end
     end
   end
