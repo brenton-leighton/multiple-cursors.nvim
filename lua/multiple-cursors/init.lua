@@ -7,7 +7,7 @@ local virtual_cursors = require("multiple-cursors.virtual_cursors")
 local move = require("multiple-cursors.move")
 local move_special = require("multiple-cursors.move_special")
 local normal_edit = require("multiple-cursors.normal_edit")
-local normal_to_insert = require("multiple-cursors.normal_to_insert")
+local normal_mode_change = require("multiple-cursors.normal_mode_change")
 local insert_mode = require("multiple-cursors.insert_mode")
 local visual_mode = require("multiple-cursors.visual_mode")
 local paste = require("multiple-cursors.paste")
@@ -69,11 +69,11 @@ default_key_maps = {
   {{"n", "x"}, "%", move.normal_percent},
 
   -- Inserting text (from normal mode)
-  {"n", "a", normal_to_insert.a},
-  {"n", "A", normal_to_insert.A},
-  {"n", "I", normal_to_insert.I},
-  {"n", "o", normal_to_insert.o},
-  {"n", "O", normal_to_insert.O},
+  {"n", "a", normal_mode_change.a},
+  {"n", "A", normal_mode_change.A},
+  {"n", "I", normal_mode_change.I},
+  {"n", "o", normal_mode_change.o},
+  {"n", "O", normal_mode_change.O},
 
   -- Delete in normal mode
   {"n", {"x", "<Del>"}, normal_edit.x},
@@ -115,6 +115,7 @@ default_key_maps = {
   {"i", "<Tab>", insert_mode.tab},
 
   -- Visual mode
+  {"n", "v", normal_mode_change.v},
   {"x", "o", visual_mode.o},
   {"x", "y", visual_mode.y},
   {"x", {"d", "<Del>"}, visual_mode.d},
@@ -145,25 +146,11 @@ local function create_autocmds()
       { group = autocmd_group_id, callback = insert_mode.text_changed_i }
     )
 
-    -- Mode changed from normal to insert
+    -- Mode changed from normal to insert or visual
     vim.api.nvim_create_autocmd({"ModeChanged"}, {
       group = autocmd_group_id,
-      pattern = "n:i",
-      callback = normal_to_insert.mode_changed,
-    })
-
-    -- Mode changed from any to visual
-    vim.api.nvim_create_autocmd({"ModeChanged"}, {
-      group = autocmd_group_id,
-      pattern = "*:v",
-      callback = visual_mode.mode_changed_to_visual,
-    })
-
-    -- Mode changed from visual to any
-    vim.api.nvim_create_autocmd({"ModeChanged"}, {
-      group = autocmd_group_id,
-      pattern = "v:*",
-      callback = visual_mode.mode_changed_from_visual,
+      pattern = "n:{i,v}",
+      callback = normal_mode_change.mode_changed,
     })
 
     -- If there are custom key maps, reset the custom key maps on the LazyLoad

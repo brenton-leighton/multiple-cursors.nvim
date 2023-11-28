@@ -15,7 +15,7 @@ local function virtual_cursor_right(vc, count)
 end
 
 -- Right command for all virtual cursors
--- This isn't local because it's used in normal_to_insert
+-- This isn't local because it's used in normal_mode_change
 function M.all_virtual_cursors_right(count)
   virtual_cursors.visit_in_buffer(function(vc) virtual_cursor_right(vc, count) end)
 end
@@ -36,14 +36,14 @@ end
 -- End-of-line -----------------------------------------------------------------
 
 -- End-of-Line command for a virtual cursor
--- This isn't local because it's used by normal_to_insert
+-- This isn't local because it's used by normal_mode_change
 function M.virtual_cursor_end(vc)
   vc.col = common.get_col(vc.lnum, vim.v.maxcol)
   vc.curswant = vim.v.maxcol
 end
 
 -- End-of-Line command for all virtual cursors
--- This isn't local because it's used by normal_to_insert
+-- This isn't local because it's used by normal_mode_change
 function M.all_virtual_cursors_end()
   virtual_cursors.visit_in_buffer(function(vc) M.virtual_cursor_end(vc) end)
 end

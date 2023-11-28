@@ -3,6 +3,8 @@ local M = {}
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
 local input = require("multiple-cursors.input")
+local move = require("multiple-cursors.move")
+local normal_mode_change = require("multiple-cursors.normal_mode_change")
 
 -- Indentation
 function M.indent()
@@ -71,18 +73,18 @@ end
 -- Change in normal mode
 function M.c()
   M.d()
-  require("multiple-cursors.normal_to_insert").i()
+  normal_mode_change.i()
 end
 
 function M.cc()
-  require("multiple-cursors.move").normal_0()
+  move.normal_0()
   M.D()
-  require("multiple-cursors.normal_to_insert").i()
+  normal_mode_change.i()
 end
 
 function M.C()
   M.D()
-  require("multiple-cursors.normal_to_insert").i()
+  normal_mode_change.i()
 end
 
 -- Switch case in normal mode
