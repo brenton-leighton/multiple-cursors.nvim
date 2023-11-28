@@ -84,9 +84,9 @@ end
 -- Is the visual area defined in a forward direction?
 function M.is_visual_area_forward(vc)
   if vc.visual_start_lnum == vc.lnum then
-    return vc.visual_start_col < vc.col
+    return vc.visual_start_col <= vc.col
   else
-    return vc.visual_start_lnum < vc.lnum
+    return vc.visual_start_lnum <= vc.lnum
   end
 end
 
@@ -106,6 +106,41 @@ function M.get_normalised_visual_area(vc)
   end
 
   return lnum1, col1, lnum2, col2
+end
+
+-- Set the previous visual area from a virtual cursor
+function M.set_visual_area_from_virtual_cursor(vc)
+  -- Set start mark
+  vim.api.nvim_buf_set_mark(0, "<", vc.visual_start_lnum, vc.visual_start_col - 1, {})
+
+  -- Set end mark
+  vim.api.nvim_buf_set_mark(0, ">", vc.lnum, vc.col - 1, {})
+end
+
+-- Set a virtual cursor's visual area from the previous visual area
+function M.set_virtual_cursor_from_visual_area(vc)
+
+  -- The previous visual area marks are always forwards, so the direction of the
+  -- virtual cursor's existing visual area is used to maintain direction
+  local forward = M.is_visual_area_forward(vc)
+
+  local start_pos = vim.api.nvim_buf_get_mark(0, "<")
+  local end_pos = vim.api.nvim_buf_get_mark(0, ">")
+
+  if forward then
+    vc.lnum = end_pos[1]
+    vc.col = end_pos[2] + 1
+    vc.visual_start_lnum = start_pos[1]
+    vc.visual_start_col = start_pos[2] + 1
+  else
+    vc.lnum = start_pos[1]
+    vc.col = start_pos[2] + 1
+    vc.visual_start_lnum = end_pos[1]
+    vc.visual_start_col = end_pos[2] + 1
+  end
+
+  vc.curswant = vc.col
+
 end
 
 return M
