@@ -360,14 +360,15 @@ function M.visual_mode_modify_area(func)
   end
 
   -- Restore the visual area
-  if cursor_pos[2] == end_pos[1] and cursor_pos[3] == end_pos[2] - 1 then
-    -- Forward
-    vim.api.nvim_buf_set_mark(0, ">", start_pos[1], start_pos[2], {})
-    vim.api.nvim_buf_set_mark(0, "<", end_pos[1], end_pos[2], {})
+  -- If the cursor is at the end position mark
+  if cursor_pos[2] == end_pos[1] and cursor_pos[3] == end_pos[2] + 1 then
+    -- The visual area is forwards
+    vim.api.nvim_buf_set_mark(0, "<", start_pos[1], start_pos[2], {})
+    vim.api.nvim_buf_set_mark(0, ">", end_pos[1], end_pos[2], {})
   else
     -- Backwards
-    vim.api.nvim_buf_set_mark(0, ">", end_pos[1], end_pos[2], {})
-    vim.api.nvim_buf_set_mark(0, "<", start_pos[1], start_pos[2], {})
+    vim.api.nvim_buf_set_mark(0, "<", end_pos[1], end_pos[2], {})
+    vim.api.nvim_buf_set_mark(0, ">", start_pos[1], start_pos[2], {})
   end
 
   -- Return to visual mode
