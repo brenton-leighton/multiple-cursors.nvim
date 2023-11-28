@@ -325,19 +325,19 @@ function M.normal_mode_put(cmd, count)
 
 end
 
+-- Restore a saved visual area
+local function restore_visual_area(prev_visual_area)
+    vim.api.nvim_buf_set_mark(0, "<", prev_visual_area[1], prev_visual_area[2] - 1, {})
+    vim.api.nvim_buf_set_mark(0, ">", prev_visual_area[3], prev_visual_area[4] - 1, {})
+end
+
 -- Modify visual areas without changing the buffer
 function M.visual_mode_modify_area(func)
 
-  -- Get cursor position
   ignore_cursor_movement = true
-  local cursor_pos = vim.fn.getcursorcharpos()
 
-  -- Exit visual mode
-  vim.cmd("normal!:")
-
-  -- Save visual area
-  local start_pos = vim.api.nvim_buf_get_mark(0, "<")
-  local end_pos = vim.api.nvim_buf_get_mark(0, ">")
+  -- Save the previous visual area (this also exits visual mode)
+  local prev_visual_area = common.get_previous_visual_area()
 
   -- For each cursor
   for idx = 1, #virtual_cursors do
@@ -349,10 +349,7 @@ function M.visual_mode_modify_area(func)
     -- Call func
     func()
 
-    -- Exit visual mode
-    vim.cmd("normal!:")
-
-    -- Save visual area to virtual cursor
+    -- Save visual area to virtual cursor (this also exits visual mode)
     common.set_virtual_cursor_from_visual_area(vc)
 
     extmarks.update_virtual_cursor_extmarks(vc)
@@ -360,16 +357,7 @@ function M.visual_mode_modify_area(func)
   end
 
   -- Restore the visual area
-  -- If the cursor is at the end position mark
-  if cursor_pos[2] == end_pos[1] and cursor_pos[3] == end_pos[2] + 1 then
-    -- The visual area is forwards
-    vim.api.nvim_buf_set_mark(0, "<", start_pos[1], start_pos[2], {})
-    vim.api.nvim_buf_set_mark(0, ">", end_pos[1], end_pos[2], {})
-  else
-    -- Backwards
-    vim.api.nvim_buf_set_mark(0, "<", end_pos[1], end_pos[2], {})
-    vim.api.nvim_buf_set_mark(0, ">", start_pos[1], start_pos[2], {})
-  end
+  restore_visual_area(prev_visual_area)
 
   -- Return to visual mode
   vim.cmd("normal! gv")
@@ -378,6 +366,13 @@ function M.visual_mode_modify_area(func)
 
 end
 
+function M.visual_mode_modify_area_with_command(cmd, count)
+
+  M.visual_mode_modify_area(function()
+    common.visual_normal_bang(cmd, count)
+  end)
+
+end
 
 -- Split pasting ---------------------------------------------------------------------
 

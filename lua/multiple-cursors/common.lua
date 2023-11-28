@@ -9,6 +9,15 @@ function M.normal_bang(cmd, count)
   end
 end
 
+-- Execute a command with normal! after entering visual mode
+function M.visual_normal_bang(cmd, count)
+  if count == 0 then
+    vim.cmd("normal! gv" .. cmd)
+  else
+    vim.cmd("normal! gv" .. tostring(count) .. cmd)
+  end
+end
+
 -- Wrapper around nvim_feedkeys
 function M.feedkeys(cmd, count)
 
@@ -117,28 +126,40 @@ function M.set_visual_area_from_virtual_cursor(vc)
   vim.api.nvim_buf_set_mark(0, ">", vc.lnum, vc.col - 1, {})
 end
 
--- Set a virtual cursor's visual area from the previous visual area
-function M.set_virtual_cursor_from_visual_area(vc)
+-- Get previous visual area in the correct direction
+-- This also exits visual mode
+-- Returns {lnum1, col1, lnum2, col2}
+function M.get_previous_visual_area()
 
-  -- The previous visual area marks are always forwards, so the direction of the
-  -- virtual cursor's existing visual area is used to maintain direction
-  local forward = M.is_visual_area_forward(vc)
+  local cursor_pos = vim.fn.getcursorcharpos()
+
+  -- Exit visual mode
+  vim.cmd("normal!:")
 
   local start_pos = vim.api.nvim_buf_get_mark(0, "<")
   local end_pos = vim.api.nvim_buf_get_mark(0, ">")
 
-  if forward then
-    vc.lnum = end_pos[1]
-    vc.col = end_pos[2] + 1
-    vc.visual_start_lnum = start_pos[1]
-    vc.visual_start_col = start_pos[2] + 1
+  -- If the cursor is at the start position
+  if cursor_pos[2] == start_pos[1] and cursor_pos[3] == start_pos[2] + 1 then
+    -- The visual area is backwards
+    return {end_pos[1], end_pos[2] + 1, start_pos[1], start_pos[2] + 1}
   else
-    vc.lnum = start_pos[1]
-    vc.col = start_pos[2] + 1
-    vc.visual_start_lnum = end_pos[1]
-    vc.visual_start_col = end_pos[2] + 1
+    -- The visual area is forwards
+    return {start_pos[1], start_pos[2] + 1, end_pos[1], end_pos[2] + 1}
   end
 
+end
+
+-- Set a virtual cursor's visual area from the previous visual area
+function M.set_virtual_cursor_from_visual_area(vc)
+
+  local visual_area = M.get_previous_visual_area()
+
+  vc.visual_start_lnum = visual_area[1]
+  vc.visual_start_col = visual_area[2]
+
+  vc.lnum = visual_area[3]
+  vc.col = visual_area[4]
   vc.curswant = vc.col
 
 end
