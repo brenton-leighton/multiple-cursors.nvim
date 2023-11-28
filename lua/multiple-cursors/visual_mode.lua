@@ -2,6 +2,7 @@ local M = {}
 
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
+local normal_to_insert = require("multiple-cursors.normal_to_insert")
 
 local delete_on_exit = false
 
@@ -9,6 +10,7 @@ local split_paste = false
 local paste_lines = nil
 
 local join_on_exit = nil
+local change_case_on_exit = nil
 
 -- Visual mode entered while multiple cursors is active
 function M.mode_changed_to_visual()
@@ -169,6 +171,33 @@ local function all_virtual_cursors_join(command)
 
 end
 
+local function all_virtual_cursors_change_case(command)
+
+  virtual_cursors.edit(function(vc)
+    if common.is_visual_area_valid(vc) then
+
+			local lnum1, col1, lnum2, col2 = common.get_normalised_visual_area(vc)
+			vim.fn.setcursorcharpos({ lnum1, col1, 0, col1 })
+
+			local text = vim.api.nvim_buf_get_text(0, lnum1 - 1, col1 - 1, lnum2 - 1, col2, {})
+			local dist = -1
+			for _, line in ipairs(text) do
+				dist = dist + vim.fn.strchars(line) + 1
+			end
+      if dist > 0 then
+        vim.cmd('normal! g' .. command .. tostring(dist) .. 'l')
+      end
+
+      common.set_virtual_cursor_from_cursor(vc)
+
+      vc.visual_start_lnum = 0
+      vc.visual_start_col = 0
+
+    end
+  end)
+
+end
+
 -- Visual mode exited while multiple cursors is active
 function M.mode_changed_from_visual()
 
@@ -182,6 +211,9 @@ function M.mode_changed_from_visual()
   elseif join_on_exit then  -- Join
     all_virtual_cursors_join(join_on_exit)
     join_on_exit = nil
+  elseif change_case_on_exit then -- Change case
+    all_virtual_cursors_change_case(change_case_on_exit)
+    change_case_on_exit = nil
   else -- Just clear visual areas
     virtual_cursors.visit_all(function(vc)
       vc.visual_start_lnum = 0
@@ -296,6 +328,40 @@ function M.d()
   common.feedkeys("d", 0)
   all_virtual_cursors_yank("d")
   delete_on_exit = true
+end
+
+-- c command
+function M.c()
+  local orig_ve = vim.wo.ve
+  vim.wo.ve = "onemore"
+
+  M.d()
+  normal_to_insert.i()
+
+  vim.api.nvim_create_autocmd("InsertEnter",{
+    once = true,
+    callback = function ()
+      vim.wo.ve = orig_ve
+    end
+  })
+end
+
+-- Lowercase command
+function M.u()
+  common.feedkeys("u", 0)
+  change_case_on_exit = "u"
+end
+
+-- Lowercase command
+function M.U()
+  common.feedkeys("U", 0)
+  change_case_on_exit = "U"
+end
+
+-- Lowercase command
+function M.tilde()
+  common.feedkeys("~", 0)
+  change_case_on_exit = "~"
 end
 
 -- Join commands

@@ -83,6 +83,7 @@ default_key_maps = {
   {"n", "D", normal_edit.D},
 
   -- Change in normal mode
+  {"n", "s", normal_edit.s},
   {"n", "c", normal_edit.c},
   {"n", "cc", normal_edit.cc},
   {"n", "C", normal_edit.C},
@@ -118,6 +119,13 @@ default_key_maps = {
   {"x", "o", visual_mode.o},
   {"x", "y", visual_mode.y},
   {"x", {"d", "<Del>"}, visual_mode.d},
+  {"x", "c", visual_mode.c},
+  {"x", "u", visual_mode.u},
+  {"x", "U", visual_mode.U},
+  {"x", "~", visual_mode.tilde},
+  {"x", "gu", visual_mode.u},
+  {"x", "gU", visual_mode.U},
+  {"x", "g~", visual_mode.tilde},
   {"x", "J", visual_mode.J},
   {"x", "gJ", visual_mode.gJ},
 

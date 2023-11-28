@@ -3,6 +3,8 @@ local M = {}
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
 local input = require("multiple-cursors.input")
+local normal_to_insert = require("multiple-cursors.normal_to_insert")
+local move = require("multiple-cursors.move")
 
 -- Indentation
 function M.indent()
@@ -69,20 +71,61 @@ function M.D()
 end
 
 -- Change in normal mode
+function M.s()
+  -- When set virtualedit to onemore,
+  -- the cursor will be placed one character after the end of the line
+  -- if it delete all content right 
+  local orig_ve = vim.wo.ve
+  vim.wo.ve = "onemore"
+
+	M.x()
+  normal_to_insert.i()
+
+  -- feedkeys are consumed asynchronously,
+  -- with option x will case exit insert mode
+  vim.api.nvim_create_autocmd("InsertEnter",{
+    once = true,
+    callback = function ()
+      vim.wo.ve = orig_ve
+    end
+  })
+end
+
 function M.c()
+  local orig_ve = vim.wo.ve
+  vim.wo.ve = "onemore"
+
   M.d()
-  require("multiple-cursors.normal_to_insert").i()
+  normal_to_insert.i()
+
+  vim.api.nvim_create_autocmd("InsertEnter",{
+    once = true,
+    callback = function ()
+      vim.wo.ve = orig_ve
+    end
+  })
 end
 
 function M.cc()
-  require("multiple-cursors.move").normal_0()
+  move.normal_0()
   M.D()
-  require("multiple-cursors.normal_to_insert").i()
+  normal_to_insert.i()
 end
 
 function M.C()
+  -- use to solve cursor blinking
+  local orig_ve = vim.wo.ve
+  vim.wo.ve = "onemore"
+
   M.D()
-  require("multiple-cursors.normal_to_insert").i()
+  normal_to_insert.a()
+
+  vim.api.nvim_create_autocmd("InsertEnter",{
+    once = true,
+    callback = function ()
+      vim.wo.ve = orig_ve
+    end
+  })
 end
 
 -- Switch case in normal mode
