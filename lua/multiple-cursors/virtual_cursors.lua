@@ -325,6 +325,58 @@ function M.normal_mode_put(cmd, count)
 
 end
 
+-- Modify visual areas without changing the buffer
+function M.visual_mode_modify_area(func)
+
+  -- Get cursor position
+  ignore_cursor_movement = true
+  local cursor_pos = vim.fn.getcursorcharpos()
+
+  -- Exit visual mode
+  vim.cmd("normal!:")
+
+  -- Save visual area
+  local start_pos = vim.api.nvim_buf_get_mark(0, "<")
+  local end_pos = vim.api.nvim_buf_get_mark(0, ">")
+
+  -- For each cursor
+  for idx = 1, #virtual_cursors do
+    local vc = virtual_cursors[idx]
+
+    -- Set visual area
+    common.set_visual_area_from_virtual_cursor(vc)
+
+    -- Call func
+    func()
+
+    -- Exit visual mode
+    vim.cmd("normal!:")
+
+    -- Save visual area to virtual cursor
+    common.set_virtual_cursor_from_visual_area(vc)
+
+    extmarks.update_virtual_cursor_extmarks(vc)
+
+  end
+
+  -- Restore the visual area
+  if cursor_pos[2] == end_pos[1] and cursor_pos[3] == end_pos[2] - 1 then
+    -- Forward
+    vim.api.nvim_buf_set_mark(0, ">", start_pos[1], start_pos[2], {})
+    vim.api.nvim_buf_set_mark(0, "<", end_pos[1], end_pos[2], {})
+  else
+    -- Backwards
+    vim.api.nvim_buf_set_mark(0, ">", end_pos[1], end_pos[2], {})
+    vim.api.nvim_buf_set_mark(0, "<", start_pos[1], start_pos[2], {})
+  end
+
+  -- Return to visual mode
+  vim.cmd("normal! gv")
+
+  ignore_cursor_movement = false
+
+end
+
 
 -- Split pasting ---------------------------------------------------------------------
 
