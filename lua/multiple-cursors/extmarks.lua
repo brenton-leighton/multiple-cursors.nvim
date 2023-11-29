@@ -28,17 +28,16 @@ local function set_extmark(lnum, col, mark_id, hl_group, priority)
     opts.id = mark_id
   end
 
-  local line_length = common.get_length_of_line(lnum)
+  local start_col, end_col = common.char_col_to_byte_col(lnum, col)
 
   -- If the line is empty or col is past the end of the line
-  if line_length == 0 or col > line_length then
+  if start_col == end_col then
     -- Use virtual text to add and highlight a space
-    col = line_length + 1
     opts.virt_text = {{" ", hl_group}}
     opts.virt_text_pos = "overlay"
   else
     -- Otherwise highlight the character
-    opts.end_col = col
+    opts.end_col = end_col
     opts.hl_group = hl_group
   end
 
@@ -46,7 +45,7 @@ local function set_extmark(lnum, col, mark_id, hl_group, priority)
     opts.priority = priority
   end
 
-  return vim.api.nvim_buf_set_extmark(0, highlight_namespace_id, lnum - 1, col - 1, opts)
+  return vim.api.nvim_buf_set_extmark(0, highlight_namespace_id, lnum - 1, start_col, opts)
 
 end
 
@@ -80,8 +79,9 @@ function M.restore_cursor()
 
     -- If the extmark position is valid
     if next(extmark_pos) ~= nil then
-        -- TODO curswant?
-      vim.fn.setcursorcharpos({extmark_pos[1] + 1, extmark_pos[2] + 1, 0, extmark_pos[2] + 1})
+      -- TODO curswant?
+      local col = common.byte_col_to_char_col(extmark_pos[1], extmark_pos[2])
+      vim.fn.setcursorcharpos({extmark_pos[1] + 1, col, 0, extmark_pos[2] + 1})
     else
       -- extmark gone, restore from lnum
       vim.fn.setcursorcharpos({cursor_lnum, 1, 0, 1})
@@ -131,11 +131,13 @@ local function update_visual_multi_line_extmark(mark_id, lnum1, col1, lnum2, col
       opts.end_row = lnum2 - 1
     end
 
-    opts.end_col = col2 - 1
+    local _, end_col = common.char_col_to_byte_col(lnum2, col2)
+    opts.end_col = end_col
     opts.hl_group = visual_hl_group
     opts.priority = 9998
 
-    return vim.api.nvim_buf_set_extmark(0, highlight_namespace_id, lnum1 - 1, col1 - 1, opts)
+    local start_col = common.char_col_to_byte_col(lnum1, col1)
+    return vim.api.nvim_buf_set_extmark(0, highlight_namespace_id, lnum1 - 1, start_col, opts)
 
   end
 
@@ -311,7 +313,7 @@ function M.update_virtual_cursor_position(vc)
     if next(extmark_pos) ~= nil then
       -- Update the virtual cursor position
       vc.lnum = extmark_pos[1] + 1
-      vc.col = extmark_pos[2] + 1
+      vc.col = common.byte_col_to_char_col(extmark_pos[1], extmark_pos[2])
 
       -- Maintain curswant = vim.v.maxcol if the cursor is still at the end of the line
       if vc.curswant < vim.v.maxcol and vc.col < common.get_max_col(vc.lnum) then

@@ -32,6 +32,19 @@ function M.is_mode_insert_replace()
   return mode == "i" or mode == "R"
 end
 
+-- Convert 1-based character index to 0-based byte index
+-- Return start byte and end byte, end-exclusive
+function M.char_col_to_byte_col(lnum, col)
+  local line = vim.api.nvim_buf_get_lines(0, lnum - 1, lnum, true)[1]
+  return #vim.fn.strcharpart(line, 0, col - 1), #vim.fn.strcharpart(line, 0, col)
+end
+
+-- Convert 0-based byte index to 1-based character index
+function M.byte_col_to_char_col(lnum, col)
+  local text = vim.api.nvim_buf_get_text(0, lnum, 0, lnum, col, {})[1]
+  return vim.fn.strchars(text) + 1
+end
+
 -- Number of characters in a line
 function M.get_length_of_line(lnum)
   return vim.fn.charcol({lnum, "$"}) - 1
@@ -50,7 +63,12 @@ end
 
 -- Get a column position for a given curswant
 function M.get_col(lnum, curswant)
-  return vim.fn.min({M.get_max_col(lnum), curswant})
+  -- curswant is virtual column
+	local byte_col = vim.fn.virtcol2col(0, lnum, curswant)
+  if byte_col then
+    local char_col = vim.fn.strchars(vim.api.nvim_buf_get_text(0, lnum - 1, 0, lnum - 1, byte_col, {})[1])
+    return vim.fn.min({M.get_max_col(lnum), char_col})
+  end
 end
 
 -- Set the real cursor position to the virtual cursor
