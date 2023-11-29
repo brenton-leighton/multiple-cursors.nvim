@@ -9,15 +9,6 @@ function M.normal_bang(cmd, count)
   end
 end
 
--- Execute a command with normal! after entering visual mode
-function M.visual_normal_bang(cmd, count)
-  if count == 0 then
-    vim.cmd("normal! gv" .. cmd)
-  else
-    vim.cmd("normal! gv" .. tostring(count) .. cmd)
-  end
-end
-
 -- Wrapper around nvim_feedkeys
 function M.feedkeys(cmd, count)
 
@@ -119,15 +110,20 @@ end
 
 -- Set the previous visual area from a virtual cursor
 function M.set_visual_area_from_virtual_cursor(vc)
+  -- Exit visual mode
+  vim.cmd("normal!:")
+
   -- Set start mark
   vim.api.nvim_buf_set_mark(0, "<", vc.visual_start_lnum, vc.visual_start_col - 1, {})
 
   -- Set end mark
   vim.api.nvim_buf_set_mark(0, ">", vc.lnum, vc.col - 1, {})
+
+  -- Return to visual mode
+  vim.cmd("normal! gv")
 end
 
 -- Get previous visual area in the correct direction
--- This also exits visual mode
 -- Returns {lnum1, col1, lnum2, col2}
 function M.get_previous_visual_area()
 
@@ -147,6 +143,9 @@ function M.get_previous_visual_area()
     -- The visual area is forwards
     return {start_pos[1], start_pos[2] + 1, end_pos[1], end_pos[2] + 1}
   end
+
+  -- Return to visual mode
+  vim.cmd("normal! gv")
 
 end
 

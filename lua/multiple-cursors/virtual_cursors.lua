@@ -325,42 +325,38 @@ function M.normal_mode_put(cmd, count)
 
 end
 
+
+-- Visual mode -----------------------------------------------------------------
+
 -- Restore a saved visual area
 local function restore_visual_area(prev_visual_area)
-    vim.api.nvim_buf_set_mark(0, "<", prev_visual_area[1], prev_visual_area[2] - 1, {})
-    vim.api.nvim_buf_set_mark(0, ">", prev_visual_area[3], prev_visual_area[4] - 1, {})
+  vim.cmd("normal!:") -- Exit to normal mode
+  vim.api.nvim_buf_set_mark(0, "<", prev_visual_area[1], prev_visual_area[2] - 1, {})
+  vim.api.nvim_buf_set_mark(0, ">", prev_visual_area[3], prev_visual_area[4] - 1, {})
+  vim.cmd("normal! gv") -- Return to visual mode
 end
 
 -- Modify visual areas without changing the buffer
-function M.visual_mode_modify_area(func)
+function M.visual_mode_modify_area(cmd, count)
 
   ignore_cursor_movement = true
 
-  -- Save the previous visual area (this also exits visual mode)
+  -- Save the previous visual area
   local prev_visual_area = common.get_previous_visual_area()
 
-  -- For each cursor
-  for idx = 1, #virtual_cursors do
-    local vc = virtual_cursors[idx]
-
+  M.visit_in_buffer(function(vc, idx)
     -- Set visual area
     common.set_visual_area_from_virtual_cursor(vc)
 
-    -- Call func
-    func()
+    -- Execute command
+    common.normal_bang(cmd, count)
 
-    -- Save visual area to virtual cursor (this also exits visual mode)
+    -- Save visual area to virtual cursor
     common.set_virtual_cursor_from_visual_area(vc)
-
-    extmarks.update_virtual_cursor_extmarks(vc)
-
-  end
+  end)
 
   -- Restore the visual area
   restore_visual_area(prev_visual_area)
-
-  -- Return to visual mode
-  vim.cmd("normal! gv")
 
   ignore_cursor_movement = false
 
