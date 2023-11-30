@@ -19,7 +19,9 @@ to bind the `MultipleCursorsAddDown` command to `Ctrl+Down` in normal and insert
 
 ## Demo videos
 
-### Inserting text
+### Basic usage
+
+### Pasting
 
 ![Video demonstrating inserting text using multiple cursors](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/02e3987c-746b-43df-928e-855e3f01b075)
 
