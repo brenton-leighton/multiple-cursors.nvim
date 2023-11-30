@@ -85,6 +85,7 @@ After adding a new cursor the following functions are available:
 | Visual | Swap cursor to other end of visual area | `o` | |
 | Visual | Modify visual area | `aw` `iw` `aW` `iW` `ab` `ib` `aB` `iB` `a>` `i>` `at` `it` `a'` `i'` `a"` `i"` `` a` `` `` i` `` | |
 | Visual | Join lines | `J` `gJ` | |
+| Visual | Indentation | `<` `>` | |
 | Visual | Change case | `~` `u` `U` `g~` `gu` `gU` | |
 | Visual | Yank/delete | `y` `d` `<Del>` | |
 | Insert/replace/visual | Exit to normal mode | `<Esc>` | |

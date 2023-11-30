@@ -142,6 +142,10 @@ default_key_maps = {
   {"x", "J", visual_mode.J},
   {"x", "gJ", visual_mode.gJ},
 
+  -- Indentation in visual mode
+  {"x", "<", visual_mode.less_than},
+  {"x", ">", visual_mode.greater_than},
+
   -- Change case in visual mode
   {"x", "~", visual_mode.tilde},
   {"x", "u", visual_mode.u},

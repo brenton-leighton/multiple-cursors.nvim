@@ -65,6 +65,9 @@ end
 function M.J() edit("J") end
 function M.gJ() edit("gJ") end
 
+function M.less_than() edit("<") end
+function M.greater_than() edit(">") end
+
 function M.tilde() edit("~") end
 function M.u() edit("u") end
 function M.U() edit("U") end
