@@ -62,13 +62,15 @@ local function edit(cmd)
   common.feedkeys(cmd, count)
 end
 
-function M.J()
-  edit("J")
-end
+function M.J() edit("J") end
+function M.gJ() edit("gJ") end
 
-function M.gJ()
-  edit("gJ")
-end
+function M.tilde() edit("~") end
+function M.u() edit("u") end
+function M.U() edit("U") end
+function M.g_tilde() edit("g~") end
+function M.gu() edit("gu") end
+function M.gU() edit("gU") end
 
 
 -- Yank/delete -----------------------------------------------------------------

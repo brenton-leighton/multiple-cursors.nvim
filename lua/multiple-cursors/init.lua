@@ -116,8 +116,9 @@ default_key_maps = {
 
   -- Visual mode
   {"n", "v", normal_mode_change.v},
-
   {"x", "o", visual_mode.o},
+
+  -- Modify visual area
   {"x", "aw", visual_mode.aw},
   {"x", "iw", visual_mode.iw},
   {"x", "aW", visual_mode.aW},
@@ -137,9 +138,19 @@ default_key_maps = {
   {"x", "a`", visual_mode.a_backtick},
   {"x", "i`", visual_mode.i_backtick},
 
+  -- Join lines in visual mode
   {"x", "J", visual_mode.J},
   {"x", "gJ", visual_mode.gJ},
 
+  -- Change case in visual mode
+  {"x", "~", visual_mode.tilde},
+  {"x", "u", visual_mode.u},
+  {"x", "U", visual_mode.U},
+  {"x", "g~", visual_mode.g_tilde},
+  {"x", "gu", visual_mode.gu},
+  {"x", "gU", visual_mode.gU},
+
+  -- Yank and delete in visual mode
   {"x", "y", visual_mode.y},
   {"x", {"d", "<Del>"}, visual_mode.d},
 
