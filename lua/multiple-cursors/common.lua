@@ -125,7 +125,7 @@ end
 
 -- Get previous visual area in the correct direction
 -- Returns {lnum1, col1, lnum2, col2}
-function M.get_previous_visual_area()
+function M.get_visual_area()
 
   local cursor_pos = vim.fn.getcursorcharpos()
 
@@ -152,7 +152,7 @@ end
 -- Set a virtual cursor's visual area from the previous visual area
 function M.set_virtual_cursor_from_visual_area(vc)
 
-  local visual_area = M.get_previous_visual_area()
+  local visual_area = M.get_visual_area()
 
   vc.visual_start_lnum = visual_area[1]
   vc.visual_start_col = visual_area[2]

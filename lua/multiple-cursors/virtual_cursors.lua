@@ -337,19 +337,19 @@ local function restore_visual_area(prev_visual_area)
 end
 
 -- Modify visual areas without changing the buffer
-function M.visual_mode_modify_area(cmd, count)
+function M.visual_mode_modify_area(func)
 
   ignore_cursor_movement = true
 
   -- Save the previous visual area
-  local prev_visual_area = common.get_previous_visual_area()
+  local prev_visual_area = common.get_visual_area()
 
   M.visit_in_buffer(function(vc, idx)
     -- Set visual area
     common.set_visual_area_from_virtual_cursor(vc)
 
-    -- Execute command
-    common.normal_bang(cmd, count)
+    -- Call func
+    func(vc, idx)
 
     -- Save visual area to virtual cursor
     common.set_virtual_cursor_from_visual_area(vc)
@@ -362,11 +362,33 @@ function M.visual_mode_modify_area(cmd, count)
 
 end
 
-function M.visual_mode_modify_area_with_command(cmd, count)
+-- Perform edit on each visual area
+function M.visual_mode_edit(func)
 
-  M.visual_mode_modify_area(function()
-    common.visual_normal_bang(cmd, count)
+  ignore_cursor_movement = true
+
+  -- Save the visual area to extmarks
+  extmarks.save_visual_area()
+
+  M.visit_in_buffer(function(vc, idx)
+    -- Set visual area
+    common.set_visual_area_from_virtual_cursor(vc)
+
+    -- Call func
+    func(vc, idx)
+    -- Edit commands will exit
+
+    common.set_virtual_cursor_from_cursor(vc)
+
+    -- Clear the visual area
+    vc.visual_start_lnum = 0
+    vc.visual_start_col = 0
   end)
+
+  -- Restore the visual area from extmarks
+  extmarks.restore_visual_area()
+
+  ignore_cursor_movement = false
 
 end
 

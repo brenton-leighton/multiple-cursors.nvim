@@ -11,6 +11,9 @@ local highlight_namespace_id = nil
 local cursor_mark_id = 0
 local cursor_lnum = nil
 
+local visual_area_start_mark_id = nil
+local visual_area_end_mark_id = nil
+
 function M.setup()
   highlight_namespace_id = vim.api.nvim_create_namespace("multiple-cursors")
 end
@@ -341,6 +344,42 @@ function M.update_virtual_cursor_position(vc)
       -- The extmark is gone, mark the virtual cursor for removal
       vc.delete = true
     end
+  end
+
+end
+
+function M.save_visual_area()
+
+  local visual_area = common.get_visual_area()
+
+  visual_area_start_mark_id = set_extmark(visual_area[1], visual_area[2], visual_area_start_mark_id, "", 0)
+  visual_area_end_mark_id = set_extmark(visual_area[1], visual_area[2], visual_area_end_mark_id, "", 0)
+
+end
+
+function M.restore_visual_area()
+
+  if visual_area_start_mark_id ~= nil and visual_area_end_mark_id ~= nil then
+
+    -- Get the extmark positions
+    local start_pos = vim.api.nvim_buf_get_extmark_by_id(0, highlight_namespace_id, visual_area_start_mark_id, {})
+    local end_pos = vim.api.nvim_buf_get_extmark_by_id(0, highlight_namespace_id, visual_area_end_mark_id, {})
+
+    -- Delete the extmarks
+    vim.api.nvim_buf_del_extmark(0, highlight_namespace_id, visual_area_start_mark_id)
+    vim.api.nvim_buf_del_extmark(0, highlight_namespace_id, visual_area_end_mark_id)
+
+    visual_area_start_mark_id = nil
+    visual_area_end_mark_id = nil
+
+    -- If the extmark positions are valid
+    if next(start_pos) ~= nil and next(end_pos) ~= nil then
+        vim.cmd("normal!:") -- Exit to normal mode
+        vim.api.nvim_buf_set_mark(0, "<", start_pos[1] + 1, start_pos[2], {})
+        vim.api.nvim_buf_set_mark(0, ">", end_pos[1] + 1, end_pos[2], {})
+        vim.cmd("normal! gv") -- Return to visual mode
+    end
+
   end
 
 end
