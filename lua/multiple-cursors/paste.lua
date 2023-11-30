@@ -61,6 +61,31 @@ local function virtual_cursor_replace_mode_paste(lines, vc)
 
 end
 
+-- Paste in visual mode for a virtual cursor
+local function virtual_cursor_visual_mode_paste(lines, vc)
+
+  lnum1, col1, lnum2, col2 = common.get_normalised_visual_area(vc)
+
+  local eol_before = col2 >= (common.get_max_col(lnum2) - 1)
+
+  -- Delete visual area
+  common.normal_bang("\"_d", 0)
+
+  -- Get cursor position
+  local cursor_pos = vim.fn.getcursorcharpos()
+  local eol_after = cursor_pos[3] >= common.get_max_col(cursor_pos[2])
+
+  if eol_before and eol_after then
+    -- Put the line(s) after the cursor
+    vim.api.nvim_put(lines, "c", true, true)
+  else
+    -- Put the line(s) before the cursor and then move it back
+    vim.api.nvim_put(lines, "c", false, true)
+    vim.cmd("normal! h")
+  end
+
+end
+
 -- Paste handler
 local function paste(lines)
 
@@ -71,38 +96,49 @@ local function paste(lines)
     virtual_cursors.reorder_lines_for_split_pasting(lines)
   end
 
-  local func = nil
-  local set_position = true
+  -- Visual mode
+  if common.is_mode("v") then
 
-  -- Set the function to call
-  if common.is_mode("n") then
-    func = virtual_cursor_normal_mode_paste
-  elseif common.is_mode("i") then
-    func = virtual_cursor_insert_mode_paste
-  elseif common.is_mode("R") then
-    func = virtual_cursor_replace_mode_paste
-    set_position = false
-  elseif common.is_mode("v") then
-    -- Paste is handled by the visual_mode module so it can be performed after
-    -- exiting visual mode
-    visual_mode.paste_on_exit(split_paste, lines)
-  end
-
-  if func then
-    virtual_cursors.edit_with_cursor(function(vc, idx)
-
+    virtual_cursors.visual_mode_edit(function(vc, idx)
       if split_paste then
-        func({lines[idx]}, vc)
+        virtual_cursor_visual_mode_paste({lines[idx]}, vc)
       else
-        func(lines, vc)
+        virtual_cursor_visual_mode_paste(lines, vc)
       end
-
-      if set_position then
-        common.set_virtual_cursor_from_cursor(vc)
-      end
-
     end)
-  end
+
+  else -- Not visual mode
+
+    local func = nil
+    local set_position = true
+
+    -- Set the function to call
+    if common.is_mode("n") then -- Normal mode
+      func = virtual_cursor_normal_mode_paste
+    elseif common.is_mode("i") then -- Insert mode
+      func = virtual_cursor_insert_mode_paste
+    elseif common.is_mode("R") then -- Replace mode
+      func = virtual_cursor_replace_mode_paste
+      set_position = false
+    end
+
+    if func then
+      virtual_cursors.edit_with_cursor(function(vc, idx)
+
+        if split_paste then
+          func({lines[idx]}, vc)
+        else
+          func(lines, vc)
+        end
+
+        if set_position then
+          common.set_virtual_cursor_from_cursor(vc)
+        end
+
+      end)
+    end -- if func
+
+  end -- if visual mode
 
   if split_paste then
     -- Return the last line for pasting to the real cursor

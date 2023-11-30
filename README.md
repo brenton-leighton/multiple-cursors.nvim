@@ -19,17 +19,13 @@ to bind the `MultipleCursorsAddDown` command to `Ctrl+Down` in normal and insert
 
 ## Demo videos
 
-### Inserting text
+### Basic usage
 
-![Video demonstrating inserting text using multiple cursors](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/02e3987c-746b-43df-928e-855e3f01b075)
+https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/4d8ee172-3c32-4ad7-ac0f-f180c6890e64
 
-### Adding cursors with a mouse click
+### Pasting
 
-![Video demonstrating adding cursors with a mouse click](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/6ae50e5c-9d1f-48da-baf7-ed951b17e462)
-
-### Deleting in visual mode and split pasting
-
-![Video demonstrating deletion in visual mode and then split pasting in insert mode](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/5abfed1c-1119-4343-834d-796ed091fc5c)
+https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/3af9bfcd-78c0-4f03-8e84-665e10749398
 
 ## Installation
 
@@ -70,24 +66,32 @@ After adding a new cursor the following functions are available:
 | All | Text object motion | `<C-Left>` `<C-Right>` | |
 | Normal/visual | Text object motion | `w` `W` `e` `E` `b` `B` `ge` `gE` | |
 | Normal/visual | Percent symbol | `%` | Count is ignored i.e. [jump to match of item under cursor](https://neovim.io/doc/user/motion.html#%25) only |
-| Normal | Change to insert/replace mode | `a` `A` `i` `I` `o` `O` `R` | Count is ignored |
-| Normal | Change to visual mode | `v` | |
 | Normal | Delete | `x` `<Del>` `X` `d` `dd` `D` | `d` doesn't indicate that it's waiting for a motion |
 | Normal | Change | `c` `cc` `C` | `c` doesn't indicate that it's waiting for a motion |
 | Normal | Yank | `y` `yy` | `y` doesn't indicate that it's waiting for a motion |
 | Normal | Put | `p` `P` | |
 | Normal | Indentation | `>>` `<<` | |
 | Normal | Join | `J` `gJ` | |
+| Normal | Change to insert/replace mode | `a` `A` `i` `I` `o` `O` `R` | Count is ignored |
 | Insert/repalce | Character insertion | | |
 | Insert/replace | Other edits | `<BS>` `<Del>` `<CR>` `<Tab>` | These commands are implemented manually, and may not behave correctly <br/> In replace mode `<BS>` will only move any virtual cursors back, and not undo edits |
 | Insert/replace | Paste | | By default if the number of lines in the paste text matches the number of cursors, each line of the text will be inserted at each cursor |
 | Insert | Change to replace mode | `<Insert>` | |
+| Normal | Change to visual mode | `v` | |
 | Visual | Swap cursor to other end of visual area | `o` | |
-| Visual | Yank/delete | `y` `d` | |
-| Visual | Join | `J` `gJ` | |
+| Visual | Modify visual area | `aw` `iw` `aW` `iW` `ab` `ib` `aB` `iB` `a>` `i>` `at` `it` `a'` `i'` `a"` `i"` `` a` `` `` i` `` | |
+| Visual | Join lines | `J` `gJ` | |
+| Visual | Indentation | `<` `>` | |
+| Visual | Change case | `~` `u` `U` `g~` `gu` `gU` | |
+| Visual | Yank/delete | `y` `d` `<Del>` | |
 | Insert/replace/visual | Exit to normal mode | `<Esc>` | |
 | Normal | Undo | `u` | Also exits multiple cursors, because cursor positions can't be restored by undo |
 | Normal | Exit multiple cursors | `<Esc>` | Clears virtual cursors, virtual cursor registers will be lost |
+
+Notable missing functionality:
+
+- Named registers
+- `.` (repeat) command
 
 ## Options
 
@@ -163,7 +167,6 @@ where `lnum` is the line number of the new cursor, `col` is the column, and `cur
 
 - Anything other than the functionality listed above probably won't work correctly
 - This plugin has been developed and tested with Neovim 0.9.1 and there may be issues with other versions
--  Using named registers is not implemented
 - This plugin hasn't been tested with completion and it will probably not behave correctly
 - In insert or replace mode, if a line has been auto-indented after a carriage return and nothing has been added to the line, the indentation will not be removed when exiting back to normal mode
 - In insert or replace mode, anything to do with tabs may not behave correctly, in particular if you are using less common options
@@ -171,6 +174,5 @@ where `lnum` is the line number of the new cursor, `col` is the column, and `cur
 
 ## Planned features
 
-- More visual mode commands
 - Create virtual cursors from a search
-- `.` commands in normal and visual modes
+- `.` (repeat) command

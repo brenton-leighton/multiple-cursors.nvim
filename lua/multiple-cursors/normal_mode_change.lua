@@ -48,6 +48,24 @@ function M.mode_changed()
         insert_mode.virtual_cursor_carriage_return(vc)
       end
     end)
+  elseif mode_cmd == "v" then
+
+    local count = vim.v.count - 1
+
+    virtual_cursors.visit_in_buffer(function(vc)
+
+      -- Save cursor position as visual area start
+      vc.visual_start_lnum = vc.lnum
+      vc.visual_start_col = vc.col
+
+      -- Move cursor forward if there's a count
+      if count > 0 then
+        vc.col = common.get_col(vc.lnum, vc.col + count)
+        vc.curswant = vc.col
+      end
+
+    end)
+
   end
 
   mode_cmd = nil
@@ -82,6 +100,11 @@ end
 function M.O()
   common.feedkeys("O", 0)
   mode_cmd = "O"
+end
+
+function M.v()
+  common.feedkeys("v", vim.v.count)
+  mode_cmd = "v"
 end
 
 return M

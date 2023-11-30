@@ -282,7 +282,7 @@ end
 -- Execute a normal command to perform a delete or yank at each virtual cursor,
 -- then save the unnamed register
 -- The virtual cursor position is set after calling func
-function M.edit_normal_delete_yank(cmd, count)
+function M.normal_mode_delete_yank(cmd, count)
 
   M.edit_with_cursor(function(vc)
     common.normal_bang(cmd, count)
@@ -296,7 +296,7 @@ end
 -- The unnamed register is first saved, the replaced by the virtual cursor
 -- register
 -- After executing the command the unnamed register is restored
-function M.edit_normal_put(cmd, count)
+function M.normal_mode_put(cmd, count)
 
   M.edit_with_cursor(function(vc)
 
@@ -321,6 +321,82 @@ function M.edit_normal_put(cmd, count)
       vim.fn.setreg('"', tmp_register_info)
     end
 
+  end)
+
+end
+
+
+-- Visual mode -----------------------------------------------------------------
+
+-- Restore a saved visual area
+local function restore_visual_area(prev_visual_area)
+  vim.cmd("normal!:") -- Exit to normal mode
+  vim.api.nvim_buf_set_mark(0, "<", prev_visual_area[1], prev_visual_area[2] - 1, {})
+  vim.api.nvim_buf_set_mark(0, ">", prev_visual_area[3], prev_visual_area[4] - 1, {})
+  vim.cmd("normal! gv") -- Return to visual mode
+end
+
+-- Modify visual areas without changing the buffer
+function M.visual_mode_modify_area(func)
+
+  ignore_cursor_movement = true
+
+  -- Save the previous visual area
+  local prev_visual_area = common.get_visual_area()
+
+  M.visit_in_buffer(function(vc, idx)
+    -- Set visual area
+    common.set_visual_area_from_virtual_cursor(vc)
+
+    -- Call func
+    func(vc, idx)
+
+    -- Save visual area to virtual cursor
+    common.set_virtual_cursor_from_visual_area(vc)
+  end)
+
+  -- Restore the visual area
+  restore_visual_area(prev_visual_area)
+
+  ignore_cursor_movement = false
+
+end
+
+-- Perform edit on each visual area
+function M.visual_mode_edit(func)
+
+  ignore_cursor_movement = true
+
+  -- Save the visual area to extmarks
+  extmarks.save_visual_area()
+
+  M.visit_in_buffer(function(vc, idx)
+    -- Set visual area
+    common.set_visual_area_from_virtual_cursor(vc)
+
+    -- Call func
+    func(vc, idx)
+    -- Edit commands will exit
+
+    common.set_virtual_cursor_from_cursor(vc)
+
+    -- Clear the visual area
+    vc.visual_start_lnum = 0
+    vc.visual_start_col = 0
+  end)
+
+  -- Restore the visual area from extmarks
+  extmarks.restore_visual_area()
+
+  ignore_cursor_movement = false
+
+end
+
+function M.visual_mode_delete_yank(cmd)
+
+  M.visual_mode_edit(function(vc)
+    common.normal_bang(cmd, 0)
+    vc.register_info = vim.fn.getreginfo('"')
   end)
 
 end
