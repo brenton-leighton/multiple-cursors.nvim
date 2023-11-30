@@ -318,10 +318,5 @@ function M.escape()
   end)
 end
 
--- Trigger paste when visual mode is exited
-function M.paste_on_exit(_split_paste, lines)
-  split_paste = _split_paste
-  paste_lines = lines
-end
 
 return M
