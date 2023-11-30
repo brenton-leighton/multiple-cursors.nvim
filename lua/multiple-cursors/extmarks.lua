@@ -353,7 +353,7 @@ function M.save_visual_area()
   local visual_area = common.get_visual_area()
 
   visual_area_start_mark_id = set_extmark(visual_area[1], visual_area[2], visual_area_start_mark_id, "", 0)
-  visual_area_end_mark_id = set_extmark(visual_area[1], visual_area[2], visual_area_end_mark_id, "", 0)
+  visual_area_end_mark_id = set_extmark(visual_area[3], visual_area[4], visual_area_end_mark_id, "", 0)
 
 end
 

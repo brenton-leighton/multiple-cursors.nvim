@@ -392,6 +392,16 @@ function M.visual_mode_edit(func)
 
 end
 
+function M.visual_mode_delete_yank(cmd)
+
+  M.visual_mode_edit(function(vc)
+    common.normal_bang(cmd, 0)
+    vc.register_info = vim.fn.getreginfo('"')
+  end)
+
+end
+
+
 -- Split pasting ---------------------------------------------------------------------
 
 -- Does the number of lines match the number of editable cursors + 1 (for the
