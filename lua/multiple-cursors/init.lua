@@ -116,11 +116,32 @@ default_key_maps = {
 
   -- Visual mode
   {"n", "v", normal_mode_change.v},
+
   {"x", "o", visual_mode.o},
-  {"x", "y", visual_mode.y},
-  {"x", {"d", "<Del>"}, visual_mode.d},
+  {"x", "aw", visual_mode.aw},
+  {"x", "iw", visual_mode.iw},
+  {"x", "aW", visual_mode.aW},
+  {"x", "iW", visual_mode.iW},
+  {"x", "ab", visual_mode.ab},
+  {"x", "ib", visual_mode.ib},
+  {"x", "aB", visual_mode.aB},
+  {"x", "iB", visual_mode.iB},
+  {"x", "a>", visual_mode.a_greater_than},
+  {"x", "i>", visual_mode.i_greater_than},
+  {"x", "at", visual_mode.at},
+  {"x", "it", visual_mode.it},
+  {"x", [[a']], visual_mode.a_quote},
+  {"x", [[i']], visual_mode.i_quote},
+  {"x", [[a"]], visual_mode.a_double_quote},
+  {"x", [[i"]], visual_mode.i_double_quote},
+  {"x", "a`", visual_mode.a_backtick},
+  {"x", "i`", visual_mode.i_backtick},
+
   {"x", "J", visual_mode.J},
   {"x", "gJ", visual_mode.gJ},
+
+  {"x", "y", visual_mode.y},
+  {"x", {"d", "<Del>"}, visual_mode.d},
 
   -- Undo in normal mode
   {"n", "u", function() M.undo() end},
