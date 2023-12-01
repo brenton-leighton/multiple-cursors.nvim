@@ -179,6 +179,26 @@ local function custom_function_with_char(func)
 
 end
 
+local function custom_function_with_two_chars(func)
+
+  -- Get two printable characters
+  local char1, char2 = input.get_two_chars()
+
+  if char1 == nil or char2 == nil then
+    return
+  end
+
+  -- Call func for the real cursor
+  func(char1, char2)
+
+  -- Call func for each virtual cursor and set the virtual cursor position
+  virtual_cursors.edit_with_cursor(function(vc)
+    func(char1, char2)
+    common.set_virtual_cursor_from_cursor(vc)
+  end)
+
+end
+
 -- Set any custom key maps
 -- This is a separate function because it's also used by the LazyLoad autocmd
 function M.set_custom()
@@ -199,6 +219,8 @@ function M.set_custom()
           vim.keymap.set(custom_modes[j], custom_keys[k], function() custom_function_with_motion(func) end)
         elseif opt == "c" then
           vim.keymap.set(custom_modes[j], custom_keys[k], function() custom_function_with_char(func) end)
+        elseif opt == "cc" then
+          vim.keymap.set(custom_modes[j], custom_keys[k], function() custom_function_with_two_chars(func) end)
         else
           vim.keymap.set(custom_modes[j], custom_keys[k], function() custom_function(func) end)
         end

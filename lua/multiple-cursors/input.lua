@@ -74,6 +74,25 @@ function M.get_char()
 
 end
 
+-- Get two standard characters
+function M.get_two_chars()
+
+  local char1 = M.get_char()
+
+  if char1 == nil then
+    return nil, nil
+  end
+
+  local char2 = M.get_char()
+
+  if char2 == nil then
+    return nil, nil
+  end
+
+  return char1, char2
+
+end
+
 -- Wait for a motion command
 -- Returns a normal motion command (which may inclue a count) or nil if no valid
 -- motion was given
