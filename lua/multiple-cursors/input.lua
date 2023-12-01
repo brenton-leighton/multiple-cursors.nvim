@@ -60,17 +60,23 @@ local search_motions = {
   ["T"] = true,
 }
 
--- Get a standard character
--- Returns nil for anything else
--- ToDo check for escape, tab and enter?
+-- Get a standard character and returns nil for anything else
 function M.get_char()
 
-  local char = vim.fn.getcharstr()
-  if #char == 1 then
-    return char
-  else
+  local dec = vim.fn.getchar()
+
+  -- Check for non ASCII special characters
+  if type(dec) ~= "number" then
     return nil
   end
+
+  -- Check for ASCII special characters
+  if dec < 32 or dec == 127 then
+    return nil
+  end
+
+  -- Convert decimal to char and return
+  return vim.fn.nr2char(dec)
 
 end
 
