@@ -58,7 +58,7 @@ end
 -- Save the cursor to a hidden extmark to track movement due to changes
 function M.save_cursor()
 
-  local pos = vim.fn.getcursorcharpos()
+  local pos = vim.fn.getcurpos()
 
   -- Save lnum in case the cursor is lost
   cursor_lnum = pos[2]
@@ -84,10 +84,10 @@ function M.restore_cursor()
     -- If the extmark position is valid
     if next(extmark_pos) ~= nil then
         -- TODO curswant?
-      vim.fn.setcursorcharpos({extmark_pos[1] + 1, extmark_pos[2] + 1, 0, extmark_pos[2] + 1})
+      vim.fn.cursor({extmark_pos[1] + 1, extmark_pos[2] + 1, 0, extmark_pos[2] + 1})
     else
       -- extmark gone, restore from lnum
-      vim.fn.setcursorcharpos({cursor_lnum, 1, 0, 1})
+      vim.fn.cursor({cursor_lnum, 1, 0, 1})
     end
 
     cursor_mark_id = nil
