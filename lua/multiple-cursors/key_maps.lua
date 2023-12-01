@@ -202,31 +202,38 @@ end
 -- Set any custom key maps
 -- This is a separate function because it's also used by the LazyLoad autocmd
 function M.set_custom()
+
   for i=1, #custom_key_maps do
-    local custom_modes = wrap_in_table(custom_key_maps[i][1])
-    local custom_keys = wrap_in_table(custom_key_maps[i][2])
-    local func = custom_key_maps[i][3]
 
-    local opt = nil
+    custom_key_map = custom_key_maps[i]
 
-    if #custom_key_maps[i] == 4 then
-      opt = custom_key_maps[i][4]
+    local custom_modes = wrap_in_table(custom_key_map[1])
+    local custom_keys = wrap_in_table(custom_key_map[2])
+    local func = custom_key_map[3]
+
+    local wrapped_func = function() custom_function(func) end
+
+    -- Change wrapped_func if there's a valid option
+    if #custom_key_map >= 4 then
+      local opt = custom_key_map[4]
+
+      if opt == "m" then -- Motion character
+        wrapped_func = function() custom_function_with_motion(func) end
+      elseif opt == "c" then -- Standard character
+        wrapped_func = function() custom_function_with_char(func) end
+      elseif opt == "cc" then -- Two standard characters
+        wrapped_func = function() custom_function_with_two_chars(func) end
+      end
     end
 
     for j=1, #custom_modes do
       for k=1, #custom_keys do
-        if opt == "m" then
-          vim.keymap.set(custom_modes[j], custom_keys[k], function() custom_function_with_motion(func) end)
-        elseif opt == "c" then
-          vim.keymap.set(custom_modes[j], custom_keys[k], function() custom_function_with_char(func) end)
-        elseif opt == "cc" then
-          vim.keymap.set(custom_modes[j], custom_keys[k], function() custom_function_with_two_chars(func) end)
-        else
-          vim.keymap.set(custom_modes[j], custom_keys[k], function() custom_function(func) end)
-        end
+        vim.keymap.set(custom_modes[j], custom_keys[k], wrapped_func)
       end
     end
-  end
+
+  end -- for each custom key map
+
 end
 
 -- Set key maps used by this plug-in
