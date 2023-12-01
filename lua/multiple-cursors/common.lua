@@ -34,7 +34,7 @@ end
 
 -- Number of characters in a line
 function M.get_length_of_line(lnum)
-  return vim.fn.charcol({lnum, "$"}) - 1
+  return vim.fn.col({lnum, "$"}) - 1
 end
 
 -- Maximum column position for a line
