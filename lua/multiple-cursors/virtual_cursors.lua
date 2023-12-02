@@ -175,6 +175,13 @@ end
 -- Visit all virtual cursors
 function M.visit_all(func)
 
+  local ve = vim.wo.ve
+
+  -- Set virtualedit to onemore in insert or replace modes
+  if common.is_mode_insert_replace() then
+    vim.wo.ve = "onemore"
+  end
+
   for idx = 1, #virtual_cursors do
     local vc = virtual_cursors[idx]
 
@@ -191,6 +198,11 @@ function M.visit_all(func)
       extmarks.update_virtual_cursor_extmarks(vc)
     end
 
+  end
+
+  -- Revert virtualedit in insert or replace modes
+  if common.is_mode_insert_replace() then
+    vim.wo.ve = ve
   end
 
   clean_up()
@@ -233,6 +245,13 @@ function M.move_with_normal_command(cmd, count)
   M.visit_with_cursor(function(vc)
     common.normal_bang(cmd, count)
     common.set_virtual_cursor_from_cursor(vc)
+
+    -- Fix for $ not setting col correctly in insert mode even with onemore
+    if common.is_mode_insert_replace() then
+      if vc.curswant == vim.v.maxcol then
+        vc.col = common.get_max_col(vc.lnum)
+      end
+    end
   end)
 
 end

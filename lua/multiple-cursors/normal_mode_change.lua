@@ -2,7 +2,6 @@ local M = {}
 
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
-local move_special = require("multiple-cursors.move_special")
 local insert_mode = require("multiple-cursors.insert_mode")
 
 local mode_cmd = nil
@@ -15,16 +14,16 @@ function M.mode_changed()
     return
   elseif mode_cmd == "a" then
     -- Shift cursors right
-    move_special.all_virtual_cursors_right(0)
+    virtual_cursors.move_with_normal_command("l", 0)
   elseif mode_cmd == "A" then
     -- Cursors to end of line
-    move_special.all_virtual_cursors_end()
+    virtual_cursors.move_with_normal_command("$", 0)
   elseif mode_cmd == "I" then
     -- Cursor to start of line
     virtual_cursors.move_with_normal_command("^", 0)
   elseif mode_cmd == "o" then
     -- New line after current line
-    move_special.all_virtual_cursors_end()
+    virtual_cursors.move_with_normal_command("$", 0)
     insert_mode.all_virtual_cursors_carriage_return()
   elseif mode_cmd == "O" then
     -- New line before current line
@@ -34,7 +33,8 @@ function M.mode_changed()
         vc.curswant = 1
       else -- Move to end of previous line
         vc.lnum = vc.lnum - 1
-        move_special.virtual_cursor_end(vc)
+        vc.col = common.get_col(vc.lnum, vim.v.maxcol)
+        vc.curswant = vim.v.maxcol
       end
     end)
 
