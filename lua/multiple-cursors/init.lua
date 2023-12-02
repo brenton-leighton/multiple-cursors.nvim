@@ -71,6 +71,7 @@ default_key_maps = {
   -- Inserting text (from normal mode)
   {"n", "a", normal_mode_change.a},
   {"n", "A", normal_mode_change.A},
+  {"n", {"i", "<Insert>"}, normal_mode_change.i},
   {"n", "I", normal_mode_change.I},
   {"n", "o", normal_mode_change.o},
   {"n", "O", normal_mode_change.O},
