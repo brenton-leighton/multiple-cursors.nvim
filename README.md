@@ -162,13 +162,23 @@ This option can be used to disabled any of the default key maps. Each element in
 
 Default value: `{}`
 
-This option allows for mapping keys to custom functions for use with multiple cursors. Each element in the `custom_key_maps` table must have three elements:
+This option allows for mapping keys to custom functions for use with multiple cursors. Each element in the `custom_key_maps` table must have three or four elements:
 
 - Mode (string|table): Mode short-name string (`"n"`, `"i"`, or `"v"`), or a table of mode short-name strings
 - Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
 - Function: Lua function, e.g. `function() vim.cmd("ExampleCommand") end`
+- Option: A string containing "m", "c", or "cc". These options enable getting a character or characters from the user, which is then forwarded to the function. If valid input isn't given by the user the function will not be called. Can be omitted.
+	- "m" indicates that a motion command (and optional count) is requested (i.e. operator pending mode)
+	- "c" indicates that a printable character is requested (e.g. for character search)
+	- "cc" indicates that two printable characters are requested
 
-When a mapping is executed the given function will be called at each cursor.
+When a mapping is executed the given function will be called at each cursor. If an option is used the function will be called with an argument or arguments, e.g.
+
+```
+custom_key_maps = {
+  {"n", "<Leader>x", function(char1, char2) vim.print(char1 .. char2) end, "cc"}
+}
+```
 
 ### `pre_hook` and `post_hook`
 
