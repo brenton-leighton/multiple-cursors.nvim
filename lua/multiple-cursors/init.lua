@@ -255,7 +255,7 @@ local function add_virtual_cursor_at_real_cursor(down)
   init()
 
   -- Add virtual cursor at the real cursor position
-  local pos = vim.fn.getcursorcharpos()
+  local pos = vim.fn.getcurpos()
   virtual_cursors.add(pos[2], pos[3], pos[5])
 
   -- Move the real cursor

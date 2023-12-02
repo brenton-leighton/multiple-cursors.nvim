@@ -66,7 +66,7 @@ end
 -- Determine the amount the real cursor will actually move up
 local function get_actual_count_up(count)
   count = vim.fn.max({count, 1})
-  local cursor_lnum = vim.fn.getcursorcharpos()[2]
+  local cursor_lnum = vim.fn.getcurpos()[2]
   return vim.fn.min({count, cursor_lnum - 1})
 end
 
@@ -107,7 +107,7 @@ end
 -- Determine the amount the real cursor will actually move down
 local function get_actual_count_down(count)
   count = vim.fn.max({count, 1})
-  local cursor_lnum = vim.fn.getcursorcharpos()[2]
+  local cursor_lnum = vim.fn.getcurpos()[2]
   local num_lines = vim.fn.line("$")
   return vim.fn.min({count, num_lines - cursor_lnum})
 end

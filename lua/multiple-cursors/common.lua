@@ -34,7 +34,7 @@ end
 
 -- Number of characters in a line
 function M.get_length_of_line(lnum)
-  return vim.fn.charcol({lnum, "$"}) - 1
+  return vim.fn.col({lnum, "$"}) - 1
 end
 
 -- Maximum column position for a line
@@ -55,12 +55,12 @@ end
 
 -- Set the real cursor position to the virtual cursor
 function M.set_cursor_to_virtual_cursor(vc)
-  vim.fn.setcursorcharpos({vc.lnum, vc.col, 0, vc.curswant})
+  vim.fn.cursor({vc.lnum, vc.col, 0, vc.curswant})
 end
 
 -- Set a virtual cursor position from the real cursor
 function M.set_virtual_cursor_from_cursor(vc)
-  local pos = vim.fn.getcursorcharpos()
+  local pos = vim.fn.getcurpos()
 
   vc.lnum = pos[2]
   vc.col = pos[3]
@@ -127,7 +127,7 @@ end
 -- Returns {lnum1, col1, lnum2, col2}
 function M.get_visual_area()
 
-  local cursor_pos = vim.fn.getcursorcharpos()
+  local cursor_pos = vim.fn.getcurpos()
 
   -- Exit visual mode
   vim.cmd("normal!:")

@@ -150,7 +150,7 @@ function M.cursor_moved()
   end
 
   -- Get real cursor position
-  local pos = vim.fn.getcursorcharpos() -- [0, lnum, col, off, curswant]
+  local pos = vim.fn.getcurpos() -- [0, lnum, col, off, curswant]
 
   for idx = #virtual_cursors, 1, -1 do
     local vc = virtual_cursors[idx]
@@ -214,7 +214,7 @@ function M.visit_with_cursor(func)
 
   -- Save cursor position
   ignore_cursor_movement = true
-  local cursor_pos = vim.fn.getcursorcharpos()
+  local cursor_pos = vim.fn.getcurpos()
 
   M.visit_in_buffer(function(vc, idx)
     common.set_cursor_to_virtual_cursor(vc)
@@ -222,7 +222,7 @@ function M.visit_with_cursor(func)
   end)
 
   -- Restore cursor
-  vim.fn.setcursorcharpos({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
+  vim.fn.cursor({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
   ignore_cursor_movement = false
 
 end
@@ -428,7 +428,7 @@ function M.reorder_lines_for_split_pasting(lines)
   M.sort()
 
   -- Move real cursor line to the end
-  local real_cursor_pos = vim.fn.getcursorcharpos() -- [0, lnum, col, off, curswant]
+  local real_cursor_pos = vim.fn.getcurpos() -- [0, lnum, col, off, curswant]
 
   local cursor_line_idx = 0
 
