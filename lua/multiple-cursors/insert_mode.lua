@@ -2,7 +2,7 @@ local M = {}
 
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
-local move_special = require("multiple-cursors.move_special")
+
 
 -- Character to insert
 local char = nil

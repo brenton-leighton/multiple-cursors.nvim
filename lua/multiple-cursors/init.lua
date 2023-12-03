@@ -22,10 +22,10 @@ default_key_maps = {
   -- Left/right motion in normal/visual modes
   {{"n", "x"}, {"h", "<Left>"}, move.normal_h},
   {{"n", "x"}, "<BS>", move_special.normal_bs},
-  {{"n", "x"}, {"l", "<Right>", "<Space>"}, move_special.normal_l},
+  {{"n", "x"}, {"l", "<Right>", "<Space>"}, move.normal_l},
   {{"n", "x"}, "0", move.normal_0},
   {{"n", "x"}, "^", move.normal_caret},
-  {{"n", "x"}, "$", move_special.normal_dollar},
+  {{"n", "x"}, "$", move.normal_dollar},
   {{"n", "x"}, "|", move.normal_bar},
   {{"n", "x"}, "f", move.normal_f},
   {{"n", "x"}, "F", move.normal_F},
@@ -34,11 +34,11 @@ default_key_maps = {
 
   -- Left/right motion in insert/replace modes
   {"i", "<Left>", move.insert_left},
-  {"i", "<Right>", move_special.insert_right},
+  {"i", "<Right>", move.insert_right},
 
   -- Left/right motion in all modes
   {{"n", "i", "x"}, "<Home>", move.home},
-  {{"n", "i", "x"}, "<End>", move_special.eol},
+  {{"n", "i", "x"}, "<End>", move.eol},
 
   -- Up/down motion in normal/visual modes
   {{"n", "x"}, {"j", "<Down>"}, move_special.normal_j},

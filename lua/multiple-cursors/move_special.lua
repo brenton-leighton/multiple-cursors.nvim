@@ -4,63 +4,6 @@ local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
 
 
--- Right -----------------------------------------------------------------------
-
--- Right command for a virtual cursor
-local function virtual_cursor_right(vc, count)
-  count = vim.fn.max({count, 1})
-  local col = vc.col + count
-  vc.col = common.get_col(vc.lnum, col)
-  vc.curswant = vc.col
-end
-
--- Right command for all virtual cursors
--- This isn't local because it's used in normal_mode_change
-function M.all_virtual_cursors_right(count)
-  virtual_cursors.visit_in_buffer(function(vc) virtual_cursor_right(vc, count) end)
-end
-
--- l command in normal/visual modes
-function M.normal_l()
-  common.feedkeys("l", vim.v.count)
-  M.all_virtual_cursors_right(vim.v.count)
-end
-
--- Right in insert/replace modes
-function M.insert_right()
-  common.feedkeys("<Right>", 0)
-  M.all_virtual_cursors_right(0)
-end
-
-
--- End-of-line -----------------------------------------------------------------
-
--- End-of-Line command for a virtual cursor
--- This isn't local because it's used by normal_mode_change
-function M.virtual_cursor_end(vc)
-  vc.col = common.get_col(vc.lnum, vim.v.maxcol)
-  vc.curswant = vim.v.maxcol
-end
-
--- End-of-Line command for all virtual cursors
--- This isn't local because it's used by normal_mode_change
-function M.all_virtual_cursors_end()
-  virtual_cursors.visit_in_buffer(function(vc) M.virtual_cursor_end(vc) end)
-end
-
--- $ command in normal/visual modes
-function M.normal_dollar()
-  common.feedkeys("$", 0)
-  M.all_virtual_cursors_end()
-end
-
--- EoL command in all modes
-function M.eol()
-  common.feedkeys("<End>", 0)
-  M.all_virtual_cursors_end()
-end
-
-
 -- Up --------------------------------------------------------------------------
 
 -- Determine the amount the real cursor will actually move up
@@ -209,19 +152,6 @@ function M.normal_underscore()
     common.feedkeys("_", vim.v.count)
     all_virtual_cursors_down(vim.v.count - 1)
     virtual_cursors.move_with_normal_command("^", 0)
-  end
-end
-
--- Normal mode $: EoL or down N lines to EoL
-function M.normal_dollar()
-  -- End of current line
-  if vim.v.count <= 1 then
-    common.feedkeys("$", vim.v.count)
-    virtual_cursors.move_with_normal_command("$", vim.v.count)
-  else -- Down N-1 lines
-    common.feedkeys("$", vim.v.count)
-    all_virtual_cursors_down(vim.v.count - 1)
-    virtual_cursors.move_with_normal_command("$", 0)
   end
 end
 

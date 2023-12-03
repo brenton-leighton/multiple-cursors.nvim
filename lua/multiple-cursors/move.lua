@@ -10,9 +10,19 @@ function M.normal_h()
   virtual_cursors.move_with_normal_command("h", vim.v.count)
 end
 
+function M.normal_l()
+  common.feedkeys("l", vim.v.count)
+  virtual_cursors.move_with_normal_command("l", vim.v.count)
+end
+
 function M.normal_0()
   common.feedkeys("0", 0)
   virtual_cursors.move_with_normal_command("0", 0)
+end
+
+function M.normal_dollar()
+  common.feedkeys("$", 0)
+  virtual_cursors.move_with_normal_command("$", 0)
 end
 
 function M.normal_caret()
@@ -53,16 +63,26 @@ function M.normal_T()
   normal_fFtT("T")
 end
 
--- Left motion in insert/replace modes
+-- Left/right motion in insert/replace modes
 function M.insert_left()
   virtual_cursors.move_with_normal_command("h", 0)
   common.feedkeys("<Left>", 0)
 end
 
--- Home motion in all modes
+function M.insert_right()
+  virtual_cursors.move_with_normal_command("l", 0)
+  common.feedkeys("<Right>", 0)
+end
+
+-- Home/End motion in all modes
 function M.home()
   common.feedkeys("<Home>", 0)
   virtual_cursors.move_with_normal_command("0", 0)
+end
+
+function M.eol()
+  common.feedkeys("<End>", 0)
+  virtual_cursors.move_with_normal_command("$", 0)
 end
 
 -- Text object movement in normal/visual mode
