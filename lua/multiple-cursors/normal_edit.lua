@@ -72,8 +72,13 @@ end
 
 -- Change in normal mode
 function M.c()
-  M.d()
-  normal_mode_change.i()
+  local count = vim.v.count
+  local motion_cmd = input.get_motion_char()
+
+  if motion_cmd ~= nil then
+    virtual_cursors.normal_mode_delete_yank("c" .. motion_cmd, count)
+    common.feedkeys("c" .. motion_cmd, count)
+  end
 end
 
 function M.cc()
@@ -84,7 +89,7 @@ end
 
 function M.C()
   M.D()
-  normal_mode_change.i()
+  normal_mode_change.a()
 end
 
 -- Switch case in normal mode

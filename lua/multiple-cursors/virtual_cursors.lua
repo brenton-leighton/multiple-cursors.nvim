@@ -298,16 +298,32 @@ function M.edit_with_normal_command(cmd, count)
 
 end
 
--- Execute a normal command to perform a delete or yank at each virtual cursor,
--- then save the unnamed register
--- The virtual cursor position is set after calling func
+-- Execute a normal command to perform a delete, yank or change at each virtual
+-- cursor, then save the unnamed register
+-- The virtual cursor position is set after calling func, except for the c
+-- command
 function M.normal_mode_delete_yank(cmd, count)
 
-  M.edit_with_cursor(function(vc)
-    common.normal_bang(cmd, count)
-    vc.register_info = vim.fn.getreginfo('"')
-    common.set_virtual_cursor_from_cursor(vc)
-  end)
+  -- If change command
+  if cmd:sub(1, 1) == "c" then
+    -- Replace with a d command
+    local new_cmd = "d" .. cmd:sub(2, #cmd)
+
+    M.edit_with_cursor(function(vc)
+      common.normal_bang(new_cmd, count)
+      vc.register_info = vim.fn.getreginfo('"')
+      -- Don't set the cursor position
+      -- This is to fix the incorrect cursor position when deleting to the end
+      -- of the line
+    end)
+  else
+    -- Delete or yank command
+    M.edit_with_cursor(function(vc)
+      common.normal_bang(cmd, count)
+      vc.register_info = vim.fn.getreginfo('"')
+      common.set_virtual_cursor_from_cursor(vc)
+    end)
+  end
 
 end
 
