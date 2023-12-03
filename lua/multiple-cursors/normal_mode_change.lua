@@ -18,6 +18,11 @@ function M.mode_changed()
   elseif mode_cmd == "A" then
     -- Cursors to end of line
     virtual_cursors.move_with_normal_command("$", 0)
+  elseif mode_cmd == "i" then
+    -- curswant is lost
+    virtual_cursors.visit_in_buffer(function(vc)
+      vc.curswant = vc.col
+    end)
   elseif mode_cmd == "I" then
     -- Cursor to start of line
     virtual_cursors.move_with_normal_command("^", 0)
@@ -84,7 +89,7 @@ end
 
 function M.i() -- Also <Insert>
   common.feedkeys("i", 0)
-  mode_cmd = nil
+  mode_cmd = "i"
 end
 
 function M.I()
