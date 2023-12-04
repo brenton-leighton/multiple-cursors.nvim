@@ -145,11 +145,8 @@ local function virtual_cursor_insert_mode_backspace(vc)
     -- Number of times to execute command, this is to backspace over tab spaces
     local count = vim.fn.max({1, count_spaces_back(vc.lnum, vc.col)})
 
-    if vc.col == common.get_max_col(vc.lnum) then -- End of the line
-      for i = 1, count do vim.cmd("normal! \"_x") end
-    else -- Anywhere else on the line
-      for i = 1, count do vim.cmd("normal! \"_X") end
-    end
+    for i = 1, count do vim.cmd("normal! \"_X") end
+
     vc.col = vc.col - count
     vc.curswant = vc.col
   end
