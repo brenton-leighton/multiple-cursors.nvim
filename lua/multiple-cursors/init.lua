@@ -158,6 +158,7 @@ default_key_maps = {
   -- Yank and delete in visual mode
   {"x", "y", visual_mode.y},
   {"x", {"d", "<Del>"}, visual_mode.d},
+  {"x", "c", visual_mode.c},
 
   -- Undo in normal mode
   {"n", "u", function() M.undo() end},

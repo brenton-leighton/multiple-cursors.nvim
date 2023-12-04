@@ -88,5 +88,10 @@ function M.d()
   common.feedkeys("d", 0)
 end
 
+function M.c()
+  virtual_cursors.visual_mode_delete_yank("d")
+  common.feedkeys("d", 0)
+  common.feedkeys("i", 0)
+end
 
 return M

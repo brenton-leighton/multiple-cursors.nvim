@@ -67,7 +67,7 @@ After adding a new cursor the following functions are available:
 | Normal/visual | Text object motion | `w` `W` `e` `E` `b` `B` `ge` `gE` | |
 | Normal/visual | Percent symbol | `%` | Count is ignored i.e. [jump to match of item under cursor](https://neovim.io/doc/user/motion.html#%25) only |
 | Normal | Delete | `x` `<Del>` `X` `d` `dd` `D` | `d` doesn't indicate that it's waiting for a motion |
-| Normal | Change | `c` `cc` `C` | `c` doesn't indicate that it's waiting for a motion, and using a `w` or `W` motion may not behave exactly correctly <br/> The `cc` command won't auto indent |
+| Normal | Change | `c` `cc` `C` | These commands are implemented as a delete then switch to insert mode <br/> `c` doesn't indicate that it's waiting for a motion, and using a `w` or `W` motion may not behave exactly correctly <br/> The `cc` command won't auto indent |
 | Normal | Yank | `y` `yy` | `y` doesn't indicate that it's waiting for a motion |
 | Normal | Put | `p` `P` | |
 | Normal | Indentation | `>>` `<<` | |
@@ -84,6 +84,7 @@ After adding a new cursor the following functions are available:
 | Visual | Indentation | `<` `>` | |
 | Visual | Change case | `~` `u` `U` `g~` `gu` `gU` | |
 | Visual | Yank/delete | `y` `d` `<Del>` | |
+| Visual | Change | `c` | This command is implemented as a delete then switch to insert mode |
 | Insert/replace/visual | Exit to normal mode | `<Esc>` | |
 | Normal | Undo | `u` | Also exits multiple cursors, because cursor positions can't be restored by undo |
 | Normal | Exit multiple cursors | `<Esc>` | Clears virtual cursors, virtual cursor registers will be lost |
