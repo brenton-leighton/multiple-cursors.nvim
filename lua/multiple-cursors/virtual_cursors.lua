@@ -175,6 +175,9 @@ end
 -- Visit all virtual cursors
 function M.visit_all(func)
 
+
+local cursor_pos = vim.fn.getcurpos()
+
   local ve = vim.wo.ve
 
   -- Set virtualedit to onemore in insert or replace modes
@@ -204,7 +207,7 @@ function M.visit_all(func)
   if common.is_mode_insert_replace() then
     vim.wo.ve = ve
   end
-
+vim.fn.cursor({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
   clean_up()
   check_for_collisions()
 
@@ -298,32 +301,16 @@ function M.edit_with_normal_command(cmd, count)
 
 end
 
--- Execute a normal command to perform a delete, yank or change at each virtual
--- cursor, then save the unnamed register
--- The virtual cursor position is set after calling func, except for the c
--- command
+-- Execute a normal command to perform a delete or yank at each virtual cursor
+-- The virtual cursor position is set after calling func
 function M.normal_mode_delete_yank(cmd, count)
 
-  -- If change command
-  if cmd:sub(1, 1) == "c" then
-    -- Replace with a d command
-    local new_cmd = "d" .. cmd:sub(2, #cmd)
-
-    M.edit_with_cursor(function(vc)
-      common.normal_bang(new_cmd, count)
-      vc.register_info = vim.fn.getreginfo('"')
-      -- Don't set the cursor position
-      -- This is to fix the incorrect cursor position when deleting to the end
-      -- of the line
-    end)
-  else
-    -- Delete or yank command
-    M.edit_with_cursor(function(vc)
-      common.normal_bang(cmd, count)
-      vc.register_info = vim.fn.getreginfo('"')
-      common.set_virtual_cursor_from_cursor(vc)
-    end)
-  end
+  -- Delete or yank command
+  M.edit_with_cursor(function(vc, idx)
+    common.normal_bang(cmd, count)
+    vc.register_info = vim.fn.getreginfo('"')
+    common.set_virtual_cursor_from_cursor(vc)
+  end)
 
 end
 
@@ -333,7 +320,7 @@ end
 -- After executing the command the unnamed register is restored
 function M.normal_mode_put(cmd, count)
 
-  M.edit_with_cursor(function(vc)
+  M.edit_with_cursor(function(vc, idx)
 
     local tmp_register_info = nil
 
@@ -429,7 +416,7 @@ end
 
 function M.visual_mode_delete_yank(cmd)
 
-  M.visual_mode_edit(function(vc)
+  M.visual_mode_edit(function(vc, idx)
     common.normal_bang(cmd, 0)
     vc.register_info = vim.fn.getreginfo('"')
   end)

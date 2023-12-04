@@ -67,7 +67,7 @@ After adding a new cursor the following functions are available:
 | Normal/visual | Text object motion | `w` `W` `e` `E` `b` `B` `ge` `gE` | |
 | Normal/visual | Percent symbol | `%` | Count is ignored i.e. [jump to match of item under cursor](https://neovim.io/doc/user/motion.html#%25) only |
 | Normal | Delete | `x` `<Del>` `X` `d` `dd` `D` | `d` doesn't indicate that it's waiting for a motion |
-| Normal | Change | `c` `cc` `C` | `c` doesn't indicate that it's waiting for a motion |
+| Normal | Change | `c` `cc` `C` | `c` doesn't indicate that it's waiting for a motion, and using a `w` or `W` motion may not behave exactly correctly <br/> The `cc` command won't auto indent |
 | Normal | Yank | `y` `yy` | `y` doesn't indicate that it's waiting for a motion |
 | Normal | Put | `p` `P` | |
 | Normal | Indentation | `>>` `<<` | |

@@ -70,28 +70,6 @@ function M.D()
   virtual_cursors.normal_mode_delete_yank("D", vim.v.count)
 end
 
--- Change in normal mode
-function M.c()
-  local count = vim.v.count
-  local motion_cmd = input.get_motion_char()
-
-  if motion_cmd ~= nil then
-    virtual_cursors.normal_mode_delete_yank("c" .. motion_cmd, count)
-    common.feedkeys("c" .. motion_cmd, count)
-  end
-end
-
-function M.cc()
-  move.normal_0()
-  M.D()
-  normal_mode_change.i()
-end
-
-function M.C()
-  M.D()
-  normal_mode_change.a()
-end
-
 -- Switch case in normal mode
 function M.gu()
   local count = vim.v.count
