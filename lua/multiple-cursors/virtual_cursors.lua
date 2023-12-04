@@ -302,12 +302,12 @@ function M.edit_with_normal_command(cmd, count)
 
 end
 
--- Execute a normal command to perform a delete or yank at each virtual cursor,
--- then save the unnamed register
+-- Execute a normal command to perform a delete or yank at each virtual cursor
 -- The virtual cursor position is set after calling func
 function M.normal_mode_delete_yank(cmd, count)
 
-  M.edit_with_cursor(function(vc)
+  -- Delete or yank command
+  M.edit_with_cursor(function(vc, idx)
     common.normal_bang(cmd, count)
     vc.register_info = vim.fn.getreginfo('"')
     common.set_virtual_cursor_from_cursor(vc)
@@ -321,7 +321,7 @@ end
 -- After executing the command the unnamed register is restored
 function M.normal_mode_put(cmd, count)
 
-  M.edit_with_cursor(function(vc)
+  M.edit_with_cursor(function(vc, idx)
 
     local tmp_register_info = nil
 
@@ -417,7 +417,7 @@ end
 
 function M.visual_mode_delete_yank(cmd)
 
-  M.visual_mode_edit(function(vc)
+  M.visual_mode_edit(function(vc, idx)
     common.normal_bang(cmd, 0)
     vc.register_info = vim.fn.getreginfo('"')
   end)

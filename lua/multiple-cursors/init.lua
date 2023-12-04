@@ -84,9 +84,9 @@ default_key_maps = {
   {"n", "D", normal_edit.D},
 
   -- Change in normal mode
-  {"n", "c", normal_edit.c},
-  {"n", "cc", normal_edit.cc},
-  {"n", "C", normal_edit.C},
+  {"n", "c", normal_mode_change.c},
+  {"n", "cc", normal_mode_change.cc},
+  {"n", "C", normal_mode_change.C},
 
   -- Change case in normal mode
   {"n", "gu", normal_edit.gu},
@@ -158,6 +158,7 @@ default_key_maps = {
   -- Yank and delete in visual mode
   {"x", "y", visual_mode.y},
   {"x", {"d", "<Del>"}, visual_mode.d},
+  {"x", "c", visual_mode.c},
 
   -- Undo in normal mode
   {"n", "u", function() M.undo() end},

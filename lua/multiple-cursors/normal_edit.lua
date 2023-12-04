@@ -70,23 +70,6 @@ function M.D()
   virtual_cursors.normal_mode_delete_yank("D", vim.v.count)
 end
 
--- Change in normal mode
-function M.c()
-  M.d()
-  normal_mode_change.i()
-end
-
-function M.cc()
-  move.normal_0()
-  M.D()
-  normal_mode_change.i()
-end
-
-function M.C()
-  M.D()
-  normal_mode_change.i()
-end
-
 -- Switch case in normal mode
 function M.gu()
   local count = vim.v.count
