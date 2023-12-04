@@ -2,7 +2,7 @@
 
 A multiple cursors plugin for Neovim.
 
-Most of the basic Neovim functions are working. See the [Usage](#usage) section for more information.
+Most Neovim functionality is working. See the [Usage](#usage) section for more information.
 
 The plugin doesn't initially bind any keys, but creates three commands:
 | Command | Description |
@@ -67,7 +67,8 @@ After adding a new cursor the following functions are available:
 | Normal/visual | Text object motion | `w` `W` `e` `E` `b` `B` `ge` `gE` | |
 | Normal/visual | Percent symbol | `%` | Count is ignored i.e. [jump to match of item under cursor](https://neovim.io/doc/user/motion.html#%25) only |
 | Normal | Delete | `x` `<Del>` `X` `d` `dd` `D` | `d` doesn't indicate that it's waiting for a motion |
-| Normal | Change | `c` `cc` `C` | These commands are implemented as a delete then switch to insert mode <br/> `c` doesn't indicate that it's waiting for a motion, and using a `w` or `W` motion may not behave exactly correctly <br/> The `cc` command won't auto indent |
+| Normal | Change | `c` `cc` `C` `s` | These commands are implemented as a delete then switch to insert mode <br/> `c` doesn't indicate that it's waiting for a motion, and using a `w` or `W` motion may not behave exactly correctly <br/> The `cc` command won't auto indent |
+| Normal | Replace | `r` | |
 | Normal | Yank | `y` `yy` | `y` doesn't indicate that it's waiting for a motion |
 | Normal | Put | `p` `P` | |
 | Normal | Indentation | `>>` `<<` | |
@@ -93,6 +94,7 @@ Notable missing functionality:
 
 - Named registers
 - `.` (repeat) command
+- Support for extended characters
 
 ## Options
 
@@ -172,8 +174,3 @@ where `lnum` is the line number of the new cursor, `col` is the column, and `cur
 - In insert or replace mode, if a line has been auto-indented after a carriage return and nothing has been added to the line, the indentation will not be removed when exiting back to normal mode
 - In insert or replace mode, anything to do with tabs may not behave correctly, in particular if you are using less common options
 - Please use the [Issues](https://github.com/brenton-leighton/multiple-cursors.nvim/issues) page to report issues, and please include any relevant Neovim options
-
-## Planned features
-
-- Create virtual cursors from a search
-- `.` (repeat) command

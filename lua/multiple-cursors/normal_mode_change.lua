@@ -189,6 +189,19 @@ local function _C()
 
 end
 
+local function _s()
+
+  -- Real cursor
+  local ve = vim.wo.ve
+  vim.wo.ve = "onemore"
+  common.normal_bang("dl", count)
+  vim.wo.ve = ve
+
+  -- Virtual cursors
+  virtual_cursors.normal_mode_delete_yank("dl", count)
+
+end
+
 -- Callback for the mode changed event
 function M.mode_changed()
 
@@ -208,6 +221,7 @@ function M.mode_changed()
   elseif mode_cmd == "c" then _c()
   elseif mode_cmd == "cc" then _cc()
   elseif mode_cmd == "C" then _C()
+  elseif mode_cmd == "s" then _s()
   end
 
   count = nil
@@ -277,6 +291,14 @@ function M.C()
 
   count = vim.v.count
   mode_cmd = "C"
+  common.feedkeys("i", 0)
+
+end
+
+function M.s()
+
+  count = vim.v.count
+  mode_cmd = "s"
   common.feedkeys("i", 0)
 
 end
