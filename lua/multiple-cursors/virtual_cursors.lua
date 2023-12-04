@@ -175,9 +175,11 @@ end
 -- Visit all virtual cursors
 function M.visit_all(func)
 
+  -- Save cursor position
+  -- This is because changing virtualedit causes curswant to be reset
+  local cursor_pos = vim.fn.getcurpos()
 
-local cursor_pos = vim.fn.getcurpos()
-
+  -- Save virtualedit
   local ve = vim.wo.ve
 
   -- Set virtualedit to onemore in insert or replace modes
@@ -207,7 +209,10 @@ local cursor_pos = vim.fn.getcurpos()
   if common.is_mode_insert_replace() then
     vim.wo.ve = ve
   end
-vim.fn.cursor({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
+
+  -- Restore cursor
+  vim.fn.cursor({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
+
   clean_up()
   check_for_collisions()
 
@@ -227,17 +232,13 @@ end
 -- Visit virtual cursors within the buffer with the real cursor
 function M.visit_with_cursor(func)
 
-  -- Save cursor position
   ignore_cursor_movement = true
-  local cursor_pos = vim.fn.getcurpos()
 
   M.visit_in_buffer(function(vc, idx)
     common.set_cursor_to_virtual_cursor(vc)
     func(vc, idx)
   end)
 
-  -- Restore cursor
-  vim.fn.cursor({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
   ignore_cursor_movement = false
 
 end
