@@ -87,6 +87,7 @@ default_key_maps = {
   {"n", "c", normal_mode_change.c},
   {"n", "cc", normal_mode_change.cc},
   {"n", "C", normal_mode_change.C},
+  {"n", "s", normal_mode_change.s},
 
   -- Change case in normal mode
   {"n", "gu", normal_edit.gu},
