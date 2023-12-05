@@ -10,6 +10,7 @@ The plugin doesn't initially bind any keys, but creates three commands:
 | `MultipleCursorsAddDown` | Add a new virtual cursor, then move the real cursor down |
 | `MultipleCursorsAddUp` | Add a new virtual cursor, then move the real cursor up |
 | `MultipleCursorsMouseAddDelete` | Add a new virtual cursor to the mouse click position, unless there is already a virtual cursor at the mouse click position, in which case it is removed |
+| `MultipleCursorsAddToWordUnderCursor` | Search for the word under the cursor and add cursors to each match. If called in visual mode, the visual area is saved and visual mode is exited. When the command is next called in normal mode, cursors will be added to only the matching words that begin within the saved visual area. |
 
 These commands can be bound to keys, e.g.:
 ```
@@ -41,6 +42,7 @@ keys = {
   {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i"}},
   {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>"},
   {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}},
+  {"<Leader>*", "<Cmd>MultipleCursorsAddToWordUnderCursor<CR>", mode = {"n", "v"}},
 },
 ```
 
@@ -51,6 +53,7 @@ This configures the plugin with the default options, and sets the following key 
 - `Ctrl+Up` in normal and insert modes: `MultipleCursorsAddUp`
 - `Ctrl+k` in normal mode: `MultipleCursorsAddUp`
 - `Ctrl+LeftClick` in normal and insert modes: `MultipleCursorsMouseAddDelete`
+- `Leader+*` in normal and visual modes: `MultipleCursorsAddToWordUnderCursor` (note: `<Leader>` must have been set previously)
 
 ## Usage
 
@@ -92,8 +95,10 @@ After adding a new cursor the following functions are available:
 
 Notable missing functionality:
 
-- Named registers
+- Scrolling
 - `.` (repeat) command
+- Named registers
+- Marks
 - Support for extended characters
 
 ## Options
