@@ -140,6 +140,10 @@ function M.clear()
   virtual_cursors = {}
 end
 
+function M.set_ignore_cursor_movement(_ignore_cursor_movement)
+  ignore_cursor_movement = _ignore_cursor_movement
+end
+
 -- Callback for the CursorMoved event
 -- Set editable to false for any virtual cursors that collide with the real
 -- cursor

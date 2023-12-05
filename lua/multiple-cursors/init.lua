@@ -305,6 +305,108 @@ function M.add_cursor(lnum, col, curswant)
 
 end
 
+-- ToDo Visual mode
+local function search_and_move_cursor(word)
+
+  -- Save real cursor
+  local cursor_pos = vim.fn.getcurpos()
+
+  virtual_cursors.set_ignore_cursor_movement(true)
+
+  -- Move cursor to start of buffer
+  vim.fn.cursor({1, 1, 0, 1})
+
+  -- Find matches
+  local matches = {}
+
+  local first = true
+
+  while true do
+    local match  = {0, 0}
+
+    -- First match can include the cursor position
+    if first then
+      match = vim.fn.searchpos(word, "cW")
+      first = false
+    else
+      match = vim.fn.searchpos(word, "W")
+    end
+
+    if match[1] == 0 or match[2] == 0 then
+      break
+    end
+
+    table.insert(matches, match)
+  end
+
+  -- If there is one or no matches
+  if #matches <= 1 then
+    -- Restore cursor and return nil
+    vim.fn.cursor({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
+    virtual_cursors.set_ignore_cursor_movement(false)
+    return nil
+  end
+
+  -- Find the match for the real cursor
+  for idx = 1, #matches do
+    local match = matches[idx]
+
+    -- If match is on the same line as the cursor
+    if match[1] == cursor_pos[2] then
+
+      -- If the cursor is within match or this first match before the cursor
+      if cursor_pos[3] >= match[2] and cursor_pos[3] < match[2] + #word or
+          cursor_pos[3] < match[2] then
+
+        -- Move the cursor
+        vim.fn.cursor({match[1], match[2], 0, match[2]})
+
+        -- Remove the match
+        table.remove(matches, idx)
+
+        break
+      end
+
+    end
+
+  end
+
+  virtual_cursors.set_ignore_cursor_movement(false)
+  return matches
+
+end
+
+-- Add cursors to each instance of the word under the real cursor
+function M.add_cursors_to_word_under_cursor()
+
+  local word = vim.fn.expand("<cword>")
+
+  -- No word under cursor
+  if word == "" then
+    return
+  end
+
+  -- Find matches (without the one for the cursor) and move the cursor to its match
+  local matches = search_and_move_cursor(word)
+
+  if matches == nil then
+    return
+  end
+
+  -- Initialise if not already initialised
+  init()
+
+  -- Clear any existing cursors
+  virtual_cursors.clear()
+
+  -- Create a virtual cursor at every match
+  for idx = 1, #matches do
+    local match = matches[idx]
+    virtual_cursors.add(match[1], match[2], match[2])
+  end
+
+end
+
 function M.setup(opts)
 
   -- Options
@@ -332,6 +434,7 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("MultipleCursorsAddDown", M.add_cursor_down, {})
   vim.api.nvim_create_user_command("MultipleCursorsAddUp", M.add_cursor_up, {})
   vim.api.nvim_create_user_command("MultipleCursorsMouseAddDelete", M.mouse_add_delete_cursor, {})
+  vim.api.nvim_create_user_command("MultipleCursorsAddToWordUnderCursor", M.add_cursors_to_word_under_cursor, {})
 
 end
 
