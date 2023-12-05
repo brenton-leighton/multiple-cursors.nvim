@@ -305,7 +305,9 @@ function M.add_cursor(lnum, col, curswant)
 
 end
 
--- ToDo Visual mode
+local visual_mode_start_pos = nil
+local visual_mode_end_pos = nil
+
 local function search_and_move_cursor(word)
 
   -- Save real cursor
@@ -313,8 +315,14 @@ local function search_and_move_cursor(word)
 
   virtual_cursors.set_ignore_cursor_movement(true)
 
-  -- Move cursor to start of buffer
-  vim.fn.cursor({1, 1, 0, 1})
+  -- If there's a saved visual area
+  if visual_mode_start_pos then
+    -- Move the cursor to the start of the visual area
+    vim.fn.cursor({visual_mode_start_pos[1], visual_mode_start_pos[2] + 1, 0, visual_mode_start_pos[2] + 1})
+  else
+    -- Move cursor to start of buffer
+    vim.fn.cursor({1, 1, 0, 1})
+  end
 
   -- Find matches
   local matches = {}
@@ -336,8 +344,21 @@ local function search_and_move_cursor(word)
       break
     end
 
+    -- If there's a visual area
+    if visual_mode_start_pos then
+      -- End if the match is past the visual area
+      if match[1] >= visual_mode_end_pos[1] and match[2] > visual_mode_end_pos[2] + 1 then
+        break
+      end
+    end
+
+    -- Add the match
     table.insert(matches, match)
   end
+
+  -- Clear any saved visual area
+  visual_mode_start_pos = nil
+  visual_mode_end_pos = nil
 
   -- If there is one or no matches
   if #matches <= 1 then
@@ -378,6 +399,15 @@ end
 
 -- Add cursors to each instance of the word under the real cursor
 function M.add_cursors_to_word_under_cursor()
+
+  -- If visual mode
+  if common.is_mode("v") then
+    -- Just exit visual mode and save the area
+    vim.cmd("normal!:")
+    visual_mode_start_pos = vim.api.nvim_buf_get_mark(0, "<")
+    visual_mode_end_pos = vim.api.nvim_buf_get_mark(0, ">")
+    return
+  end
 
   local word = vim.fn.expand("<cword>")
 
