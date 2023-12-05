@@ -42,7 +42,7 @@ keys = {
   {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i"}},
   {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>"},
   {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}},
-  {"<Leader>*", "<Cmd>MultipleCursorsAddToWordUnderCursor<CR>", mode = {"n", "v"}},
+  {"<Leader>a", "<Cmd>MultipleCursorsAddToWordUnderCursor<CR>", mode = {"n", "v"}},
 },
 ```
 
@@ -53,7 +53,7 @@ This configures the plugin with the default options, and sets the following key 
 - `Ctrl+Up` in normal and insert modes: `MultipleCursorsAddUp`
 - `Ctrl+k` in normal mode: `MultipleCursorsAddUp`
 - `Ctrl+LeftClick` in normal and insert modes: `MultipleCursorsMouseAddDelete`
-- `Leader+*` in normal and visual modes: `MultipleCursorsAddToWordUnderCursor` (note: `<Leader>` must have been set previously)
+- `Leader+a` in normal and visual modes: `MultipleCursorsAddToWordUnderCursor` (note: `<Leader>` must have been set previously)
 
 ## Usage
 
