@@ -11,6 +11,7 @@ local normal_mode_change = require("multiple-cursors.normal_mode_change")
 local insert_mode = require("multiple-cursors.insert_mode")
 local visual_mode = require("multiple-cursors.visual_mode")
 local paste = require("multiple-cursors.paste")
+local search = require("multiple-cursors.search")
 
 local initialised = false
 local autocmd_group_id = nil
@@ -305,98 +306,6 @@ function M.add_cursor(lnum, col, curswant)
 
 end
 
-local visual_mode_start_pos = nil
-local visual_mode_end_pos = nil
-
-local function search_and_move_cursor(word)
-
-  -- Save real cursor
-  local cursor_pos = vim.fn.getcurpos()
-
-  virtual_cursors.set_ignore_cursor_movement(true)
-
-  -- If there's a saved visual area
-  if visual_mode_start_pos then
-    -- Move the cursor to the start of the visual area
-    vim.fn.cursor({visual_mode_start_pos[1], visual_mode_start_pos[2] + 1, 0, visual_mode_start_pos[2] + 1})
-  else
-    -- Move cursor to start of buffer
-    vim.fn.cursor({1, 1, 0, 1})
-  end
-
-  -- Find matches
-  local matches = {}
-
-  local first = true
-
-  while true do
-    local match  = {0, 0}
-
-    -- First match can include the cursor position
-    if first then
-      match = vim.fn.searchpos(word, "cW")
-      first = false
-    else
-      match = vim.fn.searchpos(word, "W")
-    end
-
-    if match[1] == 0 or match[2] == 0 then
-      break
-    end
-
-    -- If there's a visual area
-    if visual_mode_start_pos then
-      -- End if the match is past the visual area
-      if match[1] >= visual_mode_end_pos[1] and match[2] > visual_mode_end_pos[2] + 1 then
-        break
-      end
-    end
-
-    -- Add the match
-    table.insert(matches, match)
-  end
-
-  -- Clear any saved visual area
-  visual_mode_start_pos = nil
-  visual_mode_end_pos = nil
-
-  -- If there is one or no matches
-  if #matches <= 1 then
-    -- Restore cursor and return nil
-    vim.fn.cursor({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
-    virtual_cursors.set_ignore_cursor_movement(false)
-    return nil
-  end
-
-  -- Find the match for the real cursor
-  for idx = 1, #matches do
-    local match = matches[idx]
-
-    -- If match is on the same line as the cursor
-    if match[1] == cursor_pos[2] then
-
-      -- If the cursor is within match or this first match before the cursor
-      if cursor_pos[3] >= match[2] and cursor_pos[3] < match[2] + #word or
-          cursor_pos[3] < match[2] then
-
-        -- Move the cursor
-        vim.fn.cursor({match[1], match[2], 0, match[2]})
-
-        -- Remove the match
-        table.remove(matches, idx)
-
-        break
-      end
-
-    end
-
-  end
-
-  virtual_cursors.set_ignore_cursor_movement(false)
-  return matches
-
-end
-
 -- Add cursors to each instance of the word under the real cursor
 function M.add_cursors_to_word_under_cursor()
 
@@ -404,8 +313,7 @@ function M.add_cursors_to_word_under_cursor()
   if common.is_mode("v") then
     -- Just exit visual mode and save the area
     vim.cmd("normal!:")
-    visual_mode_start_pos = vim.api.nvim_buf_get_mark(0, "<")
-    visual_mode_end_pos = vim.api.nvim_buf_get_mark(0, ">")
+    search.save_previous_visual_area()
     return
   end
 
@@ -417,7 +325,7 @@ function M.add_cursors_to_word_under_cursor()
   end
 
   -- Find matches (without the one for the cursor) and move the cursor to its match
-  local matches = search_and_move_cursor(word)
+  local matches = search.get_matches_and_move_cursor(word)
 
   if matches == nil then
     return
