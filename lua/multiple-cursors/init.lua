@@ -343,6 +343,8 @@ function M.add_cursors_to_word_under_cursor()
     virtual_cursors.add(match[1], match[2], match[2])
   end
 
+  vim.print(#matches .. " cursors added")
+
 end
 
 function M.setup(opts)
