@@ -51,7 +51,8 @@ function M.get_matches_and_move_cursor(word)
     -- If there's a visual area
     if visual_area_start then
       -- End if the match is past the visual area
-      if match[1] >= visual_area_end[1] and match[2] > visual_area_end[2] + 1 then
+      if match[1] > visual_area_end[1] or
+          (match[1] == visual_area_end[1] and match[2] > visual_area_end[2] + 1) then
         break
       end
     else
