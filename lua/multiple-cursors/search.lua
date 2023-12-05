@@ -2,8 +2,16 @@ local M = {}
 
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
 
+-- Only add cursors to matches that are visible
+local match_visible_only = true
+
+-- For saving the visual area
 local visual_area_start = nil
 local visual_area_end = nil
+
+function M.setup(_match_visible_only)
+  match_visible_only = _match_visible_only
+end
 
 function M.save_previous_visual_area()
   visual_area_start = vim.api.nvim_buf_get_mark(0, "<")
@@ -21,17 +29,20 @@ function M.get_matches_and_move_cursor(word)
   if visual_area_start then
     -- Move the cursor to the start of the visual area
     vim.fn.cursor({visual_area_start[1], visual_area_start[2] + 1, 0, visual_area_start[2] + 1})
-  else
+  elseif match_visible_only then
     -- Move cursor to start of the visible buffer
     local start_lnum = vim.fn.line("w0")
     vim.fn.cursor({start_lnum, 1, 0, 1})
+  else
+    -- Move the cursor to the start of the buffer
+    vim.fn.cursor({1, 1, 0, 1})
   end
 
   -- Find matches
   local matches = {}
 
   local first = true
-  local end_lnum = vim.fn.line("w$")
+  local visible_end_lnum = vim.fn.line("w$")
 
   while true do
     local match  = {0, 0}
@@ -55,9 +66,9 @@ function M.get_matches_and_move_cursor(word)
           (match[1] == visual_area_end[1] and match[2] > visual_area_end[2] + 1) then
         break
       end
-    else
-      -- No visual area
-      if match[1] > end_lnum then
+    elseif match_visible_only then
+      -- No visual area and matching visible only
+      if match[1] > visible_end_lnum then
         -- Past the visible buffer
         break
       end

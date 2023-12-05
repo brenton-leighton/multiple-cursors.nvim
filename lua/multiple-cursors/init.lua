@@ -354,7 +354,10 @@ function M.setup(opts)
 
   local disabled_default_key_maps = opts.disabled_default_key_maps or {}
   local custom_key_maps = opts.custom_key_maps or {}
+
   local enable_split_paste = opts.enable_split_paste or true
+
+  local match_visible_only = opts.match_visible_only or true
 
   pre_hook = opts.pre_hook or nil
   post_hook = opts.post_hook or nil
@@ -367,6 +370,9 @@ function M.setup(opts)
 
   -- Set up paste
   paste.setup(enable_split_paste)
+
+  -- Set up search
+  search.setup(match_visible_only)
 
   -- Autocmds
   autocmd_group_id = vim.api.nvim_create_augroup("MultipleCursors", {})

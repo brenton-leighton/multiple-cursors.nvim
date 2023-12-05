@@ -10,7 +10,7 @@ The plugin doesn't initially bind any keys, but creates three commands:
 | `MultipleCursorsAddDown` | Add a new virtual cursor, then move the real cursor down |
 | `MultipleCursorsAddUp` | Add a new virtual cursor, then move the real cursor up |
 | `MultipleCursorsMouseAddDelete` | Add a new virtual cursor to the mouse click position, unless there is already a virtual cursor at the mouse click position, in which case it is removed |
-| `MultipleCursorsAddToWordUnderCursor` | Search for the word under the cursor and add cursors to each match that is visible. <br/> If called in visual mode, the visual area is saved and visual mode is exited. When the command is next called in normal mode, cursors will be added to only the matching words that begin within the saved visual area. |
+| `MultipleCursorsAddToWordUnderCursor` | Search for the word under the cursor and add cursors to each match. <br/> If called in visual mode, the visual area is saved and visual mode is exited. When the command is next called in normal mode, cursors will be added to only the matching words that begin within the saved visual area. |
 
 These commands can be bound to keys, e.g.:
 ```
@@ -132,6 +132,12 @@ keys = {
 Default value: `true`
 
 This option allows for disabling the "split pasting" function, where if the number of lines in the paste text matches the number of cursors, each line of the text will be inserted at each cursor.
+
+### `match_visible_only`
+
+Default value: `true`
+
+When adding cursors to the word under the cursor (i.e. using the `MultipleCursorsAddToWordUnderCursor` command), if `match_visible_only = true` then cursors will only be added to matches that are visible. This option doesn't apply if a visual area has been set.
 
 ### `disabled_default_key_maps`
 
