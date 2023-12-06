@@ -4,28 +4,36 @@ A multiple cursors plugin for Neovim.
 
 Most Neovim functionality is working. See the [Usage](#usage) section for more information.
 
+## Demos
+
+### Basic usage
+
+![Basic usage](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/4ea42343-6784-458c-aedb-f16b958551e3)
+
+### Pasting
+
+![Copying multi-line text and pasting to each cursor](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/2c063495-cf0a-4884-9c5a-9a3b86770c31)
+
+### Creating cursors from the word under the cursor
+
+![Creating cursors from the word under the cursor](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/1c4c59f6-7e15-4993-a7ca-cadfdc8e9901)
+
+## Overview
+
 The plugin doesn't initially bind any keys, but creates three commands:
+
 | Command | Description |
 | --- | --- |
 | `MultipleCursorsAddDown` | Add a new virtual cursor, then move the real cursor down |
 | `MultipleCursorsAddUp` | Add a new virtual cursor, then move the real cursor up |
 | `MultipleCursorsMouseAddDelete` | Add a new virtual cursor to the mouse click position, unless there is already a virtual cursor at the mouse click position, in which case it is removed |
+| `MultipleCursorsAddToWordUnderCursor` | Search for the word under the cursor and add cursors to each match. <br/> If called in visual mode, the visual area is saved and visual mode is exited. When the command is next called in normal mode, cursors will be added to only the matching words that begin within the saved visual area. |
 
 These commands can be bound to keys, e.g.:
 ```
 vim.keymap.set({"n", "i"}, "<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>")
 ```
 to bind the `MultipleCursorsAddDown` command to `Ctrl+Down` in normal and insert modes.
-
-## Demo videos
-
-### Basic usage
-
-https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/4d8ee172-3c32-4ad7-ac0f-f180c6890e64
-
-### Pasting
-
-https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/3af9bfcd-78c0-4f03-8e84-665e10749398
 
 ## Installation
 
@@ -41,6 +49,7 @@ keys = {
   {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i"}},
   {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>"},
   {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}},
+  {"<Leader>a", "<Cmd>MultipleCursorsAddToWordUnderCursor<CR>", mode = {"n", "v"}},
 },
 ```
 
@@ -51,6 +60,7 @@ This configures the plugin with the default options, and sets the following key 
 - `Ctrl+Up` in normal and insert modes: `MultipleCursorsAddUp`
 - `Ctrl+k` in normal mode: `MultipleCursorsAddUp`
 - `Ctrl+LeftClick` in normal and insert modes: `MultipleCursorsMouseAddDelete`
+- `Leader+a` in normal and visual modes: `MultipleCursorsAddToWordUnderCursor` (note: `<Leader>` must have been set previously)
 
 ## Usage
 
@@ -92,8 +102,10 @@ After adding a new cursor the following functions are available:
 
 Notable missing functionality:
 
-- Named registers
+- Scrolling
 - `.` (repeat) command
+- Named registers
+- Marks
 - Support for extended characters
 
 ## Options
@@ -127,6 +139,12 @@ keys = {
 Default value: `true`
 
 This option allows for disabling the "split pasting" function, where if the number of lines in the paste text matches the number of cursors, each line of the text will be inserted at each cursor.
+
+### `match_visible_only`
+
+Default value: `true`
+
+When adding cursors to the word under the cursor (i.e. using the `MultipleCursorsAddToWordUnderCursor` command), if `match_visible_only = true` then cursors will only be added to matches that are visible. This option doesn't apply if a visual area has been set.
 
 ### `disabled_default_key_maps`
 

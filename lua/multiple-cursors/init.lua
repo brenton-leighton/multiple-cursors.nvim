@@ -11,6 +11,7 @@ local normal_mode_change = require("multiple-cursors.normal_mode_change")
 local insert_mode = require("multiple-cursors.insert_mode")
 local visual_mode = require("multiple-cursors.visual_mode")
 local paste = require("multiple-cursors.paste")
+local search = require("multiple-cursors.search")
 
 local initialised = false
 local autocmd_group_id = nil
@@ -305,6 +306,47 @@ function M.add_cursor(lnum, col, curswant)
 
 end
 
+-- Add cursors to each instance of the word under the real cursor
+function M.add_cursors_to_word_under_cursor()
+
+  -- If visual mode
+  if common.is_mode("v") then
+    -- Just exit visual mode and save the area
+    vim.cmd("normal!:")
+    search.save_previous_visual_area()
+    return
+  end
+
+  local word = vim.fn.expand("<cword>")
+
+  -- No word under cursor
+  if word == "" then
+    return
+  end
+
+  -- Find matches (without the one for the cursor) and move the cursor to its match
+  local matches = search.get_matches_and_move_cursor(word)
+
+  if matches == nil then
+    return
+  end
+
+  -- Initialise if not already initialised
+  init()
+
+  -- Clear any existing cursors
+  virtual_cursors.clear()
+
+  -- Create a virtual cursor at every match
+  for idx = 1, #matches do
+    local match = matches[idx]
+    virtual_cursors.add(match[1], match[2], match[2])
+  end
+
+  vim.print(#matches .. " cursors added")
+
+end
+
 function M.setup(opts)
 
   -- Options
@@ -312,7 +354,10 @@ function M.setup(opts)
 
   local disabled_default_key_maps = opts.disabled_default_key_maps or {}
   local custom_key_maps = opts.custom_key_maps or {}
+
   local enable_split_paste = opts.enable_split_paste or true
+
+  local match_visible_only = opts.match_visible_only or true
 
   pre_hook = opts.pre_hook or nil
   post_hook = opts.post_hook or nil
@@ -326,12 +371,16 @@ function M.setup(opts)
   -- Set up paste
   paste.setup(enable_split_paste)
 
+  -- Set up search
+  search.setup(match_visible_only)
+
   -- Autocmds
   autocmd_group_id = vim.api.nvim_create_augroup("MultipleCursors", {})
 
   vim.api.nvim_create_user_command("MultipleCursorsAddDown", M.add_cursor_down, {})
   vim.api.nvim_create_user_command("MultipleCursorsAddUp", M.add_cursor_up, {})
   vim.api.nvim_create_user_command("MultipleCursorsMouseAddDelete", M.mouse_add_delete_cursor, {})
+  vim.api.nvim_create_user_command("MultipleCursorsAddToWordUnderCursor", M.add_cursors_to_word_under_cursor, {})
 
 end
 
