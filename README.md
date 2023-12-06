@@ -4,7 +4,24 @@ A multiple cursors plugin for Neovim.
 
 Most Neovim functionality is working. See the [Usage](#usage) section for more information.
 
+## Demos
+
+### Basic usage
+
+![Basic usage](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/4ea42343-6784-458c-aedb-f16b958551e3)
+
+### Pasting
+
+![Copying multi-line text and pasting to each cursor](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/2c063495-cf0a-4884-9c5a-9a3b86770c31)
+
+### Creating cursors from the word under the cursor
+
+![Creating cursors from the word under the cursor](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/1c4c59f6-7e15-4993-a7ca-cadfdc8e9901)
+
+## Overview
+
 The plugin doesn't initially bind any keys, but creates three commands:
+
 | Command | Description |
 | --- | --- |
 | `MultipleCursorsAddDown` | Add a new virtual cursor, then move the real cursor down |
@@ -17,16 +34,6 @@ These commands can be bound to keys, e.g.:
 vim.keymap.set({"n", "i"}, "<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>")
 ```
 to bind the `MultipleCursorsAddDown` command to `Ctrl+Down` in normal and insert modes.
-
-## Demo videos
-
-### Basic usage
-
-https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/4d8ee172-3c32-4ad7-ac0f-f180c6890e64
-
-### Pasting
-
-https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/3af9bfcd-78c0-4f03-8e84-665e10749398
 
 ## Installation
 
