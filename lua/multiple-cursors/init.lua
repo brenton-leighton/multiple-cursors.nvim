@@ -96,6 +96,7 @@ default_key_maps = {
   {"n", "g~", normal_edit.g_tilde},
 
   -- Yank and put in normal mode
+  {"n", "y", normal_edit.y},
   {"n", "yy", normal_edit.yy},
   {"n", "p", normal_edit.p},
   {"n", "P", normal_edit.P},
