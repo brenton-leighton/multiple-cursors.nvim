@@ -277,7 +277,7 @@ end
 -- Execute a normal command to perform a put at each virtual cursor
 -- The register is first saved, the replaced by the virtual cursor register
 -- After executing the command the unnamed register is restored
-function M.normal_mode_put(register, cmd, count)
+function M.normal_mode_put(register, count, cmd)
 
   M.edit_with_cursor(function(vc, idx)
 

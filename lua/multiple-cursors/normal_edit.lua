@@ -120,12 +120,12 @@ end
 -- Put in normal mode
 function M.p()
   common.feedkeys_with_register(vim.v.register, "p", vim.v.count)
-  virtual_cursors.normal_mode_put(vim.v.register, "p", vim.v.count)
+  virtual_cursors.normal_mode_put(vim.v.register, vim.v.count, "p")
 end
 
 function M.P()
   common.feedkeys_with_register(vim.v.register, "P", vim.v.count)
-  virtual_cursors.normal_mode_put(vim.v.register, "P", vim.v.count)
+  virtual_cursors.normal_mode_put(vim.v.register, vim.v.count, "P")
 end
 
 return M
