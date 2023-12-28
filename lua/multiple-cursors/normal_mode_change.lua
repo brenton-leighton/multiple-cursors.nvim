@@ -156,7 +156,7 @@ local function _cc()
   -- Virtual cursors
   virtual_cursors.move_with_normal_command(0, "0")
   insert_mode.all_virtual_cursors_carriage_return()
-  virtual_cursors.normal_mode_delete_yank(register, "dd", count)
+  virtual_cursors.normal_mode_delete_yank(register, count, "dd", nil)
   virtual_cursors.move_with_normal_command(0, "k")
 
   -- Real cursor
@@ -200,7 +200,7 @@ local function _s()
   local register = vim.v.register
 
   -- Virtual cursors
-  virtual_cursors.normal_mode_delete_yank(register, "dl", count)
+  virtual_cursors.normal_mode_delete_yank(register, count, "d", "l")
 
   -- Real cursor
   local ve = vim.wo.ve

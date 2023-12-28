@@ -42,12 +42,12 @@ end
 -- Delete in normal mode
 function M.x() -- Also <Del>
   common.feedkeys_with_register(vim.v.register, "x", vim.v.count)
-  virtual_cursors.normal_mode_delete_yank(vim.v.register, "x", vim.v.count)
+  virtual_cursors.normal_mode_delete_yank(vim.v.register, vim.v.count, "x", nil)
 end
 
 function M.X()
   common.feedkeys_with_register(vim.v.register, "X", vim.v.count)
-  virtual_cursors.normal_mode_delete_yank(vim.v.register, "X", vim.v.count)
+  virtual_cursors.normal_mode_delete_yank(vim.v.register, vim.v.count, "X", nil)
 end
 
 function M.d()
@@ -56,18 +56,18 @@ function M.d()
 
   if motion_cmd ~= nil then
     common.feedkeys_with_register(vim.v.register, "d" .. motion_cmd, count)
-    virtual_cursors.normal_mode_delete_yank(vim.v.register, "d" .. motion_cmd, count)
+    virtual_cursors.normal_mode_delete_yank(vim.v.register, count, "d", motion_cmd)
   end
 end
 
 function M.dd()
   common.feedkeys_with_register(vim.v.register, "dd", vim.v.count)
-  virtual_cursors.normal_mode_delete_yank(vim.v.register, "dd", vim.v.count)
+  virtual_cursors.normal_mode_delete_yank(vim.v.register, vim.v.count, "dd", nil)
 end
 
 function M.D()
   common.feedkeys_with_register(vim.v.register, "D", vim.v.count)
-  virtual_cursors.normal_mode_delete_yank(vim.v.register, "D", vim.v.count)
+  virtual_cursors.normal_mode_delete_yank(vim.v.register, vim.v.count, "D", nil)
 end
 
 -- Switch case in normal mode
@@ -108,13 +108,13 @@ function M.y()
 
   if motion_cmd ~= nil then
     common.feedkeys_with_register(vim.v.register, "y" .. motion_cmd, count)
-    virtual_cursors.normal_mode_delete_yank(vim.v.register, "y" .. motion_cmd, count)
+    virtual_cursors.normal_mode_delete_yank(vim.v.register, count, "y", motion_cmd)
   end
 end
 
 function M.yy()
   common.feedkeys_with_register(vim.v.register, "yy", vim.v.count)
-  virtual_cursors.normal_mode_delete_yank(vim.v.register, "yy", vim.v.count)
+  virtual_cursors.normal_mode_delete_yank(vim.v.register, vim.v.count, "yy", nil)
 end
 
 -- Put in normal mode

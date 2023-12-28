@@ -263,13 +263,11 @@ end
 
 -- Execute a normal command to perform a delete or yank at each virtual cursor
 -- The virtual cursor position is set after calling func
-function M.normal_mode_delete_yank(register, cmd, count)
-
-  -- ToDo save register
+function M.normal_mode_delete_yank(register, count, cmd, motion_cmd)
 
   -- Delete or yank command
   M.edit_with_cursor(function(vc, idx)
-    common.normal_bang(register, count, cmd, nil)
+    common.normal_bang(register, count, cmd, motion_cmd)
     vc.register_info = vim.fn.getreginfo(register)
     vc:save_cursor_position()
   end)
