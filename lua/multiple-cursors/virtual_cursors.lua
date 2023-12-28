@@ -268,7 +268,7 @@ function M.normal_mode_delete_yank(register, count, cmd, motion_cmd)
   -- Delete or yank command
   M.edit_with_cursor(function(vc, idx)
     common.normal_bang(register, count, cmd, motion_cmd)
-    vc.register_info = vim.fn.getreginfo(register)
+    vc:save_register(register)
     vc:save_cursor_position()
   end)
 
@@ -281,14 +281,14 @@ function M.normal_mode_put(register, count, cmd)
 
   M.edit_with_cursor(function(vc, idx)
 
-    local tmp_register_info = nil
+    local register_info = nil
 
-    -- If the virtual cursor has register info
-    if vc.register_info then
-      -- Save the unnamed register
-      tmp_register_info = vim.fn.getreginfo(register)
-      -- Set the virtual cursor register info to the register
-      vim.fn.setreg(register, vc.register_info)
+    -- If the virtual cursor has data for the register
+    if vc:has_register(register) then
+      -- Save the register
+      register_info = vim.fn.getreginfo(register)
+      -- Set the register from the virtual cursor
+      vc:set_register(register)
     end
 
     -- Put the register
@@ -297,8 +297,8 @@ function M.normal_mode_put(register, count, cmd)
     vc:save_cursor_position()
 
     -- Restore the register
-    if tmp_register_info then
-      vim.fn.setreg(register, tmp_register_info)
+    if register_info then
+      vim.fn.setreg(register, register_info)
     end
 
   end)
@@ -376,7 +376,7 @@ function M.visual_mode_delete_yank(register, cmd)
 
   M.visual_mode_edit(function(vc, idx)
     common.normal_bang(register, 0, cmd, nil)
-    vc.register_info = vim.fn.getreginfo(register)
+    vc:save_register(register)
   end)
 
 end

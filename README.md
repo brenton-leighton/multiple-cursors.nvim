@@ -104,7 +104,6 @@ Notable missing functionality:
 
 - Scrolling
 - `.` (repeat) command
-- Named registers
 - Marks
 - Support for extended characters
 

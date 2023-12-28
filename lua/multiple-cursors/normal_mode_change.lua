@@ -94,7 +94,7 @@ local up_down_motions = {
   ["-"] = true,
 }
 
-local function open_new_line_above(actual_motion_cmd, register_info)
+local function open_new_line_above(actual_motion_cmd, num_register_lines)
 
   if actual_motion_cmd == "_" then
     common.normal_bang(nil, 0, "O", nil)
@@ -102,7 +102,7 @@ local function open_new_line_above(actual_motion_cmd, register_info)
   end
 
   -- If it's an up/down motion and more than one line has been deleted
-  if up_down_motions[actual_motion_cmd] and #register_info.regcontents > 1 then
+  if up_down_motions[actual_motion_cmd] and num_register_lines > 1 then
     common.normal_bang(nil, 0, "O", nil)
   end
 
@@ -139,8 +139,8 @@ local function _c()
   -- Virtual cursors
   virtual_cursors.edit_with_cursor(function(vc, idx)
     common.normal_bang(register, count, "d", c_motion_cmd)
-    vc.register_info = vim.fn.getreginfo(register)
-    open_new_line_above(actual_motion_cmd, vc.register_info)
+    local num_register_lines = vc:save_register(register)
+    open_new_line_above(actual_motion_cmd, num_register_lines)
     vc:save_cursor_position()
   end)
 
@@ -189,7 +189,7 @@ local function _C()
     else
       common.normal_bang(register, count, "D", nil)
     end
-    vc.register_info = vim.fn.getreginfo(register)
+    vc:save_register(register)
     vc:save_cursor_position()
   end)
 

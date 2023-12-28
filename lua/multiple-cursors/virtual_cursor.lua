@@ -1,23 +1,4 @@
-local VirtualCursor = {
-  lnum = 0,
-  col = 0,
-  curswant = 0,
-
-  visual_start_lnum = 0,            -- lnum for the start of the visual area
-  visual_start_col = 0,             -- col for the start of the visual area
-
-  mark_id = 0,                      -- extmark ID
-  visual_start_mark_id = 0,         -- ID of the hidden extmark that stores the start of the visual area
-  visual_multiline_mark_id = 0,     -- ID of the visual area extmark then spans multiple lines
-  visual_empty_line_mark_ids = {},  -- IDs of the visual area extmarks for empty lines
-
-  within_buffer = true,             -- lnum is within the buffer
-  editable = true,                  -- To disable editing the virtual cursor when
-                                    -- in collision with the real cursor
-  delete = false,                   -- To mark the virtual cursor for deletion
-
-  register_info = nil
-}
+local VirtualCursor = {}
 
 function VirtualCursor.new(lnum, col, curswant)
   local self = setmetatable({}, VirtualCursor)
@@ -25,6 +6,21 @@ function VirtualCursor.new(lnum, col, curswant)
   self.lnum = lnum
   self.col = col
   self.curswant = curswant
+
+  self.visual_start_lnum = 0            -- lnum for the start of the visual area
+  self.visual_start_col = 0             -- col for the start of the visual area
+
+  self.mark_id = 0                      -- extmark ID
+  self.visual_start_mark_id = 0         -- ID of the hidden extmark that stores the start of the visual area
+  self.visual_multiline_mark_id = 0     -- ID of the visual area extmark then spans multiple lines
+  self.visual_empty_line_mark_ids = {}  -- IDs of the visual area extmarks for empty lines
+
+  self.within_buffer = true             -- lnum is within the buffer
+  self.editable = true                  -- To disable editing the virtual cursor when
+                                        -- in collision with the real cursor
+  self.delete = false                   -- To mark the virtual cursor for deletion
+
+  self.registers = {}
 
   return self
 end
@@ -153,6 +149,31 @@ function VirtualCursor:set_visual_area()
 
   -- Return to visual mode
   vim.cmd("normal! gv")
+
+end
+
+-- Save the register to the virtual cursor
+-- returns the number of lines saved
+function VirtualCursor:save_register(register)
+  local register_info = vim.fn.getreginfo(register)
+  self.registers[register] = register_info
+  return #register_info.regcontents
+
+end
+
+-- Does the virtual cursor have the register?
+function VirtualCursor:has_register(register)
+  return self.registers[register] ~= nil
+end
+
+-- Set the register from the virtual cursor
+function VirtualCursor:set_register(register)
+
+  local register_info = self.registers[register]
+
+  if register_info then
+    vim.fn.setreg(register, register_info)
+  end
 
 end
 
