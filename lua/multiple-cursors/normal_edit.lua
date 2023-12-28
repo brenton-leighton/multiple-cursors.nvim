@@ -8,23 +8,23 @@ local normal_mode_change = require("multiple-cursors.normal_mode_change")
 
 -- Indentation
 function M.indent()
-  common.feedkeys(">>", vim.v.count)
+  common.feedkeys(nil, vim.v.count, ">>", nil)
   virtual_cursors.edit_with_normal_command(vim.v.count, ">>", nil)
 end
 
 function M.deindent()
-  common.feedkeys("<<", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "<<", nil)
   virtual_cursors.edit_with_normal_command(vim.v.count, "<<", nil)
 end
 
 -- Join lines
 function M.J()
-  common.feedkeys("J", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "J", nil)
   virtual_cursors.edit_with_normal_command(vim.v.count, "J", nil)
 end
 
 function M.gJ()
-  common.feedkeys("gJ", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "gJ", nil)
   virtual_cursors.edit_with_normal_command(vim.v.count, "gJ", nil)
 end
 
@@ -34,19 +34,19 @@ function M.r()
   local char = input.get_char()
 
   if char ~= nil then
-    common.feedkeys("r" .. char, count)
+    common.feedkeys(nil, count, "r" .. char, nil)
     virtual_cursors.edit_with_normal_command(vim.v.count, "r" .. char, nil)
   end
 end
 
 -- Delete in normal mode
 function M.x() -- Also <Del>
-  common.feedkeys_with_register(vim.v.register, "x", vim.v.count)
+  common.feedkeys(vim.v.register, vim.v.count, "x", nil)
   virtual_cursors.normal_mode_delete_yank(vim.v.register, vim.v.count, "x", nil)
 end
 
 function M.X()
-  common.feedkeys_with_register(vim.v.register, "X", vim.v.count)
+  common.feedkeys(vim.v.register, vim.v.count, "X", nil)
   virtual_cursors.normal_mode_delete_yank(vim.v.register, vim.v.count, "X", nil)
 end
 
@@ -55,18 +55,18 @@ function M.d()
   local motion_cmd = input.get_motion_cmd()
 
   if motion_cmd ~= nil then
-    common.feedkeys_with_register(vim.v.register, "d" .. motion_cmd, count)
+    common.feedkeys(vim.v.register, count, "d", motion_cmd)
     virtual_cursors.normal_mode_delete_yank(vim.v.register, count, "d", motion_cmd)
   end
 end
 
 function M.dd()
-  common.feedkeys_with_register(vim.v.register, "dd", vim.v.count)
+  common.feedkeys_with_register(vim.v.register, vim.v.count, "dd", nil)
   virtual_cursors.normal_mode_delete_yank(vim.v.register, vim.v.count, "dd", nil)
 end
 
 function M.D()
-  common.feedkeys_with_register(vim.v.register, "D", vim.v.count)
+  common.feedkeys_with_register(vim.v.register, vim.v.count, "D", nil)
   virtual_cursors.normal_mode_delete_yank(vim.v.register, vim.v.count, "D", nil)
 end
 
@@ -76,7 +76,7 @@ function M.gu()
   local motion_cmd = input.get_motion_cmd()
 
   if motion_cmd ~= nil then
-    common.feedkeys("gu" .. motion_cmd, count)
+    common.feedkeys(nil, count, "gu", motion_cmd)
     virtual_cursors.edit_with_normal_command(count, "gu", motion_cmd)
   end
 end
@@ -86,7 +86,7 @@ function M.gU()
   local motion_cmd = input.get_motion_cmd()
 
   if motion_cmd ~= nil then
-    common.feedkeys("gU" .. motion_cmd, count)
+    common.feedkeys(nil, count, "gU", motion_cmd)
     virtual_cursors.edit_with_normal_command(count, "gU", motion_cmd)
   end
 end
@@ -96,7 +96,7 @@ function M.g_tilde()
   local motion_cmd = input.get_motion_cmd()
 
   if motion_cmd ~= nil then
-    common.feedkeys("g~" .. motion_cmd, count)
+    common.feedkeys(nil, count, "g~", motion_cmd)
     virtual_cursors.edit_with_normal_command(count, "g~", motion_cmd)
   end
 end
@@ -107,24 +107,24 @@ function M.y()
   local motion_cmd = input.get_motion_cmd()
 
   if motion_cmd ~= nil then
-    common.feedkeys_with_register(vim.v.register, "y" .. motion_cmd, count)
+    common.feedkeys(vim.v.register, count, "y", motion_cmd)
     virtual_cursors.normal_mode_delete_yank(vim.v.register, count, "y", motion_cmd)
   end
 end
 
 function M.yy()
-  common.feedkeys_with_register(vim.v.register, "yy", vim.v.count)
+  common.feedkeys(vim.v.register, vim.v.count, "yy", nil)
   virtual_cursors.normal_mode_delete_yank(vim.v.register, vim.v.count, "yy", nil)
 end
 
 -- Put in normal mode
 function M.p()
-  common.feedkeys_with_register(vim.v.register, "p", vim.v.count)
+  common.feedkeys(vim.v.register, vim.v.count, "p", nil)
   virtual_cursors.normal_mode_put(vim.v.register, vim.v.count, "p")
 end
 
 function M.P()
-  common.feedkeys_with_register(vim.v.register, "P", vim.v.count)
+  common.feedkeys(vim.v.register, vim.v.count, "P", nil)
   virtual_cursors.normal_mode_put(vim.v.register, vim.v.count, "P")
 end
 

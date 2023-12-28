@@ -191,7 +191,7 @@ end
 
 -- Backspace command
 function M.bs()
-  common.feedkeys("<BS>", 0)
+  common.feedkeys(nil, 0, "<BS>", nil)
   all_virtual_cursors_backspace()
 end
 
@@ -220,7 +220,7 @@ end
 
 -- Delete command
 function M.del()
-  common.feedkeys("<Del>", 0)
+  common.feedkeys(nil, 0, "<Del>", nil)
   all_virtual_cursors_delete()
 end
 
@@ -255,7 +255,7 @@ end
 -- Carriage return command
 -- Also for <kEnter>
 function M.cr()
-  common.feedkeys("<CR>", 0)
+  common.feedkeys(nil, 0, "<CR>", nil)
   M.all_virtual_cursors_carriage_return()
 end
 
@@ -313,7 +313,7 @@ end
 
 -- Tab command
 function M.tab()
-  common.feedkeys("<Tab>", 0)
+  common.feedkeys(nil, 0, "<Tab>", nil)
   all_virtual_cursors_tab()
 end
 

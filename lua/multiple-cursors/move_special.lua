@@ -35,12 +35,12 @@ end
 
 -- Up command
 function M.normal_k()
-  common.feedkeys("k", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "k", nil)
   all_virtual_cursors_up(vim.v.count)
 end
 
 function M.insert_up()
-  common.feedkeys("<Up>", 0)
+  common.feedkeys(nil, 0, "<Up>", nil)
   all_virtual_cursors_up(0)
 end
 
@@ -76,12 +76,12 @@ local function all_virtual_cursors_down(count)
 end
 
 function M.normal_j()
-  common.feedkeys("j", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "j", nil)
   all_virtual_cursors_down(vim.v.count)
 end
 
 function M.insert_down()
-  common.feedkeys("<Down>", 0)
+  common.feedkeys(nil, 0, "<Down>", nil)
   all_virtual_cursors_down(0)
 end
 
@@ -125,20 +125,20 @@ end
 
 -- Normal mode backspace command
 function M.normal_bs()
-  common.feedkeys("<BS>", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "<BS>", nil)
   all_virtual_cursors_normal_backspace(vim.v.count)
 end
 
 -- Normal mode -: up N lines to first non-blank character
 function M.normal_minus()
-  common.feedkeys("-", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "-", nil)
   all_virtual_cursors_up(vim.v.count)
   virtual_cursors.move_with_normal_command(0, "^")
 end
 
 -- Normal mode +: down N lines to first non-blank character
 function M.normal_plus() -- Also <CR> and <kEnter>
-  common.feedkeys("+", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "+", nil)
   all_virtual_cursors_down(vim.v.count)
   virtual_cursors.move_with_normal_command(0, "^")
 end
@@ -146,10 +146,10 @@ end
 -- Normal mode _: down N-1 lines to first non-blank character
 function M.normal_underscore()
   if vim.v.count <= 1 then
-    common.feedkeys("_", vim.v.count)
+    common.feedkeys(nil, vim.v.count, "_", nil)
     virtual_cursors.move_with_normal_command(vim.v.count, "_")
   else
-    common.feedkeys("_", vim.v.count)
+    common.feedkeys(nil, vim.v.count, "_", nil)
     all_virtual_cursors_down(vim.v.count - 1)
     virtual_cursors.move_with_normal_command(0, "^")
   end

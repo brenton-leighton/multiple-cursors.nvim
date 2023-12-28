@@ -6,6 +6,7 @@ local M = {}
 -- motion_cmd may also contain a count
 function M.normal_bang(register, count, cmd, motion_cmd)
 
+  -- Command string
   local str = ""
 
   if register then
@@ -26,23 +27,32 @@ function M.normal_bang(register, count, cmd, motion_cmd)
 
 end
 
--- Wrapper around nvim_feedkeys
-function M.feedkeys(cmd, count)
+-- Abstraction of nvim_feedkeys
+-- register and motion_cmd may be nil
+-- count may be 0
+-- motion_cmd may also contain a count
+function M.feedkeys(register, count, cmd, motion_cmd)
 
-  if count ~= 0 then
-    vim.api.nvim_feedkeys(tostring(count), "n", false)
+  -- Command string
+  local str = ""
+
+  if register then
+    str = str .. "\"" .. register
   end
 
-  local key = vim.api.nvim_replace_termcodes(cmd, true, false, true)
-  vim.api.nvim_feedkeys(key, "n", false)
+  if count ~= 0 then
+    str = str .. count
+  end
 
-end
+  str = str .. cmd
 
-function M.feedkeys_with_register(register, cmd, count)
-  local key = vim.api.nvim_replace_termcodes("\"" .. register, true, false, true)
-  vim.api.nvim_feedkeys(key, "n", false)
+  if motion_cmd then
+    str = str .. motion_cmd
+  end
 
-  M.feedkeys(cmd, count)
+  local tmp = vim.api.nvim_replace_termcodes(str, true, false, true)
+  vim.api.nvim_feedkeys(tmp, "n", false)
+
 end
 
 -- Check if mode is given mode

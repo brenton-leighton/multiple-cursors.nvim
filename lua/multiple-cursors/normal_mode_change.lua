@@ -178,7 +178,7 @@ local function _C()
   else
     -- Delete and move the cursor right
     common.normal_bang(register, count, "D", nil)
-    common.feedkeys("<Right>", 0)
+    common.feedkeys(nil, 0, "<Right>", nil)
   end
 
   -- Virtual cursors
@@ -238,37 +238,37 @@ function M.mode_changed()
 end
 
 function M.a()
-  common.feedkeys("a", 0)
+  common.feedkeys(nil, 0, "a", nil)
   mode_cmd = "a"
 end
 
 function M.A()
-  common.feedkeys("A", 0)
+  common.feedkeys(nil, 0, "A", nil)
   mode_cmd = "A"
 end
 
 function M.i() -- Also <Insert>
-  common.feedkeys("i", 0)
+  common.feedkeys(nil, 0, "i", nil)
   mode_cmd = "i"
 end
 
 function M.I()
-  common.feedkeys("I", 0)
+  common.feedkeys(nil, 0, "I", nil)
   mode_cmd = "I"
 end
 
 function M.o()
-  common.feedkeys("o", 0)
+  common.feedkeys(nil, 0, "o", nil)
   mode_cmd = "o"
 end
 
 function M.O()
-  common.feedkeys("O", 0)
+  common.feedkeys(nil, 0, "O", nil)
   mode_cmd = "O"
 end
 
 function M.v()
-  common.feedkeys("v", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "v", nil)
   count = vim.v.count - 1
   mode_cmd = "v"
 end
@@ -282,7 +282,7 @@ function M.c()
     count = nil
   else
     mode_cmd = "c"
-    common.feedkeys("i", 0)
+    common.feedkeys(nil, 0, "i", nil)
   end
 
 end
@@ -291,7 +291,7 @@ function M.cc()
 
   count = vim.v.count
   mode_cmd = "cc"
-  common.feedkeys("i", 0)
+  common.feedkeys(nil, 0, "i", nil)
 
 end
 
@@ -299,7 +299,7 @@ function M.C()
 
   count = vim.v.count
   mode_cmd = "C"
-  common.feedkeys("i", 0)
+  common.feedkeys(nil, 0, "i", nil)
 
 end
 
@@ -307,7 +307,7 @@ function M.s()
 
   count = vim.v.count
   mode_cmd = "s"
-  common.feedkeys("i", 0)
+  common.feedkeys(nil, 0, "i", nil)
 
 end
 

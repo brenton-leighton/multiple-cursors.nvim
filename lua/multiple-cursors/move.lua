@@ -6,32 +6,32 @@ local input = require("multiple-cursors.input")
 
 -- Left/right motion in normal/visual modes
 function M.normal_h()
-  common.feedkeys("h", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "h", nil)
   virtual_cursors.move_with_normal_command(vim.v.count, "h")
 end
 
 function M.normal_l()
-  common.feedkeys("l", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "l", nil)
   virtual_cursors.move_with_normal_command(vim.v.count, "l")
 end
 
 function M.normal_0()
-  common.feedkeys("0", 0)
+  common.feedkeys(nil, 0, "0", nil)
   virtual_cursors.move_with_normal_command(0, "0")
 end
 
 function M.normal_dollar()
-  common.feedkeys("$", 0)
+  common.feedkeys(nil, 0, "$", nil)
   virtual_cursors.move_with_normal_command(0, "$")
 end
 
 function M.normal_caret()
-  common.feedkeys("^", 0)
+  common.feedkeys(nil, 0, "^", nil)
   virtual_cursors.move_with_normal_command(0, "^")
 end
 
 function M.normal_bar()
-  common.feedkeys("|", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "|", nil)
   virtual_cursors.move_with_normal_command(vim.v.count, "|")
 end
 
@@ -41,7 +41,7 @@ local function normal_fFtT(cmd)
   local char = input.get_char()
 
   if char ~= nil then
-    common.feedkeys(cmd .. char, count)
+    common.feedkeys(nil, count, cmd .. char, nil)
     virtual_cursors.move_with_normal_command(count, cmd .. char)
   end
 
@@ -65,82 +65,82 @@ end
 
 -- Left/right motion in insert/replace modes
 function M.insert_left()
-  common.feedkeys("<Left>", 0)
+  common.feedkeys(nil, 0, "<Left>", nil)
   virtual_cursors.move_with_normal_command(0, "h")
 end
 
 function M.insert_right()
-  common.feedkeys("<Right>", 0)
+  common.feedkeys(nil, 0, "<Right>", nil)
   virtual_cursors.move_with_normal_command(0, "l")
 end
 
 -- Home/End motion in all modes
 function M.home()
-  common.feedkeys("<Home>", 0)
+  common.feedkeys(nil, 0, "<Home>", nil)
   virtual_cursors.move_with_normal_command(0, "0")
 end
 
 function M.eol()
-  common.feedkeys("<End>", 0)
+  common.feedkeys(nil, 0, "<End>", nil)
   virtual_cursors.move_with_normal_command(0, "$")
 end
 
 -- Text object movement in normal/visual mode
 function M.normal_b()
-  common.feedkeys("b", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "b", nil)
   virtual_cursors.move_with_normal_command(vim.v.count, "b")
 end
 
 function M.normal_B()
-  common.feedkeys("B", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "B", nil)
   virtual_cursors.move_with_normal_command(vim.v.count, "B")
 end
 
 function M.normal_w()
-  common.feedkeys("w", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "w", nil)
   virtual_cursors.move_with_normal_command(vim.v.count, "w")
 end
 
 function M.normal_W()
-  common.feedkeys("W", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "W", nil)
   virtual_cursors.move_with_normal_command(vim.v.count, "W")
 end
 
 function M.normal_e()
-  common.feedkeys("e", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "e", nil)
   virtual_cursors.move_with_normal_command(vim.v.count, "e")
 end
 
 function M.normal_E()
-  common.feedkeys("E", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "E", nil)
   virtual_cursors.move_with_normal_command(vim.v.count, "E")
 end
 
 function M.normal_ge()
-  common.feedkeys("ge", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "ge", nil)
   virtual_cursors.move_with_normal_command(vim.v.count, "ge")
 end
 
 function M.normal_gE()
-  common.feedkeys("gE", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "gE", nil)
   virtual_cursors.move_with_normal_command(vim.v.count, "gE")
 end
 
 -- Text object motion in insert/replace modes
 function M.insert_word_left()
-  common.feedkeys("<C-Left>", 0)
+  common.feedkeys(nil, 0, "<C-Left>", nil)
   virtual_cursors.move_with_normal_command(0, "b")
 end
 
 function M.insert_word_right()
-  common.feedkeys("<C-Right>", 0)
+  common.feedkeys(nil, 0, "<C-Right>", nil)
   virtual_cursors.move_with_normal_command(0, "w")
 end
 
 -- Various motions in normal/visual modes
 function M.normal_percent()
   -- Count is ignored, match command only
-  common.feedkeys("%", 0)
+  common.feedkeys(nil, 0, "%", nil)
   virtual_cursors.move_with_normal_command(0, "%")
 end
 
