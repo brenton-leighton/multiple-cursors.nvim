@@ -13,7 +13,7 @@ local function delete_if_replace_mode(vc)
     -- ToDo save and restore register info
     if vc.col == common.get_length_of_line(vc.lnum) then
       vim.cmd("normal! \"_x")
-      common.set_cursor_to_virtual_cursor(vc)
+      vc:set_cursor_position()
     elseif vc.col < common.get_length_of_line(vc.lnum) then
       vim.cmd("normal! \"_x")
     end
@@ -38,7 +38,7 @@ function M.escape()
   virtual_cursors.visit_with_cursor(function(vc)
     if vc.col ~= 1 then
       common.normal_bang("h", 0)
-      common.set_virtual_cursor_from_cursor(vc)
+      vc:save_cursor_position()
     end
   end)
 end
@@ -61,7 +61,7 @@ function M.text_changed_i(event)
     virtual_cursors.edit_with_cursor(function(vc)
       delete_if_replace_mode(vc)
       vim.api.nvim_put({char}, "c", false, true)
-      common.set_virtual_cursor_from_cursor(vc)
+      vc:save_cursor_position()
     end)
     char = nil
   end
@@ -136,7 +136,7 @@ local function virtual_cursor_insert_mode_backspace(vc)
         vc.curswant = vim.v.maxcol
       else
         vim.cmd("normal! k$gJ") -- Join with previous line
-        common.set_virtual_cursor_from_cursor(vc)
+        vc:save_cursor_position()
       end
 
     end
@@ -233,12 +233,12 @@ function M.virtual_cursor_carriage_return(vc)
   if vc.col <= common.get_length_of_line(vc.lnum) then
     vim.api.nvim_put({"", ""}, "c", false, true)
     vim.cmd("normal! ==^")
-    common.set_virtual_cursor_from_cursor(vc)
+    vc:save_cursor_position()
   else
     -- Special case for EOL: add a character to auto indent, then delete it
     vim.api.nvim_put({"", "x"}, "c", false, true)
     vim.cmd("normal! ==^\"_x")
-    common.set_virtual_cursor_from_cursor(vc)
+    vc:save_cursor_position()
     vc.col = common.get_col(vc.lnum, vc.col + 1) -- Shift cursor 1 right limited to max col
     vc.curswant = vc.col
   end
@@ -300,7 +300,7 @@ local function virtual_cursor_tab(vc)
     return
   end
 
-  common.set_virtual_cursor_from_cursor(vc)
+  vc:save_cursor_position()
 end
 
 -- Tab command for all virtual cursors

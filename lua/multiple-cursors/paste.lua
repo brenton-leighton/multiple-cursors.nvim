@@ -64,7 +64,7 @@ end
 -- Paste in visual mode for a virtual cursor
 local function virtual_cursor_visual_mode_paste(lines, vc)
 
-  lnum1, col1, lnum2, col2 = common.get_normalised_visual_area(vc)
+  lnum1, col1, lnum2, col2 = vc:get_normalised_visual_area()
 
   local eol_before = col2 >= (common.get_max_col(lnum2) - 1)
 
@@ -132,7 +132,7 @@ local function paste(lines)
         end
 
         if set_position then
-          common.set_virtual_cursor_from_cursor(vc)
+          vc:save_cursor_position()
         end
 
       end)

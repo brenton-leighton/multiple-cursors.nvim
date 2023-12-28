@@ -139,7 +139,7 @@ local function _c()
     common.normal_bang("d" .. c_motion_cmd, count)
     vc.register_info = vim.fn.getreginfo('"')
     open_new_line_above(actual_motion_cmd, vc.register_info)
-    common.set_virtual_cursor_from_cursor(vc)
+    vc:save_cursor_position()
   end)
 
   c_motion_cmd = nil
@@ -184,7 +184,7 @@ local function _C()
       common.normal_bang("D", count)
     end
     vc.register_info = vim.fn.getreginfo('"')
-    common.set_virtual_cursor_from_cursor(vc)
+    vc:save_cursor_position()
   end)
 
 end

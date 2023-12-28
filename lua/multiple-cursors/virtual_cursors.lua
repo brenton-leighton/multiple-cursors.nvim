@@ -3,6 +3,8 @@ local M = {}
 local common = require("multiple-cursors.common")
 local extmarks = require("multiple-cursors.extmarks")
 
+local VirtualCursor = require("multiple-cursors.virtual_cursor")
+
 -- A table of the virtual cursors
 local virtual_cursors = {}
 
@@ -28,16 +30,12 @@ local function check_for_collisions()
   end
 
   for idx1 = 1, #virtual_cursors - 1 do
-    vc1 = virtual_cursors[idx1]
-
     for idx2 = idx1 + 1, #virtual_cursors do
-      vc2 = virtual_cursors[idx2]
-
-      if vc1.lnum == vc2.lnum and vc1.col == vc2.col then
-        vc2.delete = true
+      if virtual_cursors[idx1] == virtual_cursors[idx2] then
+        virtual_cursors[idx2].delete = true
       end
-    end -- idx2
-  end -- idx1
+    end
+  end
 
   clean_up()
 
@@ -50,31 +48,7 @@ end
 
 -- Sort virtual cursors by position
 function M.sort()
-  table.sort(virtual_cursors, function(vc1, vc2)
-
-    -- If not visual mode
-    if not common.is_visual_area_valid(vc1) or not common.is_visual_area_valid(vc2) then
-
-      if vc1.lnum == vc2.lnum then
-        return vc1.col < vc2.col
-      else
-        return vc1.lnum < vc2.lnum
-      end
-
-    else -- Visual mode
-
-      -- Normalise first
-      local vc1_lnum, vc1_col = common.get_normalised_visual_area(vc1)
-      local vc2_lnum, vc2_col = common.get_normalised_visual_area(vc2)
-
-      if vc1_lnum == vc2_lnum then
-        return vc1_col < vc2_col
-      else
-        return vc1_lnum < vc2_lnum
-      end
-
-    end
-  end)
+  table.sort(virtual_cursors)
 end
 
 -- Add a new virtual cursor
@@ -88,26 +62,7 @@ function M.add(lnum, col, curswant)
     end
   end
 
-  table.insert(virtual_cursors,
-    {
-      lnum = lnum,
-      col = col,
-      curswant = curswant,
-      within_buffer = true,  -- lnum is within the buffer
-      mark_id = 0,           -- extmark ID
-
-      visual_start_lnum = 0,            -- lnum for the start of the visual area
-      visual_start_col = 0,             -- col for the start of the visual area
-      visual_start_mark_id = 0,         -- ID of the hidden extmark that stores the start of the visual area
-      visual_multiline_mark_id = 0,     -- ID of the visual area extmark then spans multiple lines
-      visual_empty_line_mark_ids = {},  -- IDs of the visual area extmarks for empty lines
-
-      editable = true,      -- To disable editing the virtual cursor when
-                            -- in collision with the real cursor
-      delete = false,       -- To mark the virtual cursor for deletion
-      register_info = nil,  -- Output from getreginfo()
-    }
-  )
+  table.insert(virtual_cursors, VirtualCursor.new(lnum, col, curswant))
 
   -- Create an extmark
   extmarks.update_virtual_cursor_extmarks(virtual_cursors[#virtual_cursors])
@@ -239,7 +194,7 @@ function M.visit_with_cursor(func)
   ignore_cursor_movement = true
 
   M.visit_in_buffer(function(vc, idx)
-    common.set_cursor_to_virtual_cursor(vc)
+    vc:set_cursor_position()
     func(vc, idx)
   end)
 
@@ -252,7 +207,7 @@ function M.move_with_normal_command(cmd, count)
 
   M.visit_with_cursor(function(vc)
     common.normal_bang(cmd, count)
-    common.set_virtual_cursor_from_cursor(vc)
+    vc:save_cursor_position()
 
     -- Fix for $ not setting col correctly in insert mode even with onemore
     if common.is_mode_insert_replace() then
@@ -289,7 +244,7 @@ end
 function M.edit_with_cursor(func)
 
   M.edit(function(vc, idx)
-    common.set_cursor_to_virtual_cursor(vc)
+    vc:set_cursor_position()
     func(vc, idx)
   end)
 
@@ -301,7 +256,7 @@ function M.edit_with_normal_command(cmd, count)
 
   M.edit_with_cursor(function(vc)
     common.normal_bang(cmd, count)
-    common.set_virtual_cursor_from_cursor(vc)
+    vc:save_cursor_position()
   end)
 
 end
@@ -314,7 +269,7 @@ function M.normal_mode_delete_yank(cmd, count)
   M.edit_with_cursor(function(vc, idx)
     common.normal_bang(cmd, count)
     vc.register_info = vim.fn.getreginfo('"')
-    common.set_virtual_cursor_from_cursor(vc)
+    vc:save_cursor_position()
   end)
 
 end
@@ -340,7 +295,7 @@ function M.normal_mode_put(cmd, count)
     -- Put the unnamed register
     common.normal_bang(cmd, count)
 
-    common.set_virtual_cursor_from_cursor(vc)
+    vc:save_cursor_position()
 
     -- If the virtual cursor has register info
     if vc.register_info then
@@ -373,13 +328,13 @@ function M.visual_mode_modify_area(func)
 
   M.visit_in_buffer(function(vc, idx)
     -- Set visual area
-    common.set_visual_area_from_virtual_cursor(vc)
+    vc:set_visual_area()
 
     -- Call func
     func(vc, idx)
 
     -- Save visual area to virtual cursor
-    common.set_virtual_cursor_from_visual_area(vc)
+    vc:save_visual_area()
   end)
 
   -- Restore the visual area
@@ -399,13 +354,13 @@ function M.visual_mode_edit(func)
 
   M.visit_in_buffer(function(vc, idx)
     -- Set visual area
-    common.set_visual_area_from_virtual_cursor(vc)
+    vc:set_visual_area()
 
     -- Call func
     func(vc, idx)
     -- Edit commands will exit
 
-    common.set_virtual_cursor_from_cursor(vc)
+    vc:save_cursor_position()
 
     -- Clear the visual area
     vc.visual_start_lnum = 0

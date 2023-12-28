@@ -53,96 +53,12 @@ function M.get_col(lnum, curswant)
   return vim.fn.min({M.get_max_col(lnum), curswant})
 end
 
--- Set the real cursor position to the virtual cursor
-function M.set_cursor_to_virtual_cursor(vc)
-  vim.fn.cursor({vc.lnum, vc.col, 0, vc.curswant})
-end
-
--- Set a virtual cursor position from the real cursor
-function M.set_virtual_cursor_from_cursor(vc)
-  local pos = vim.fn.getcurpos()
-
-  vc.lnum = pos[2]
-  vc.col = pos[3]
-  vc.curswant = pos[5]
-end
-
-function M.is_visual_area_valid(vc)
-
-  if vc.visual_start_lnum == 0 or vc.visual_start_col == 0 then
-    return false
-  end
-
-  if vc.visual_start_lnum > vim.fn.line("$") then
-    return false
-  end
-
-  return true
-
-end
-
--- Is the visual area defined in a forward direction?
-function M.is_visual_area_forward(vc)
-  if vc.visual_start_lnum == vc.lnum then
-    return vc.visual_start_col <= vc.col
-  else
-    return vc.visual_start_lnum <= vc.lnum
-  end
-end
-
--- Get the positions of the visual area in a forward direction
-function M.get_normalised_visual_area(vc)
-  -- Get start and end positions for the extmarks representing the visual area
-  local lnum1 = vc.visual_start_lnum
-  local col1 = vc.visual_start_col
-  local lnum2 = vc.lnum
-  local col2 = vc.col
-
-  if not M.is_visual_area_forward(vc) then
-    lnum1 = vc.lnum
-    col1 = vc.col
-    lnum2 = vc.visual_start_lnum
-    col2 = vc.visual_start_col
-  end
-
-  return lnum1, col1, lnum2, col2
-end
-
--- Set the previous visual area from a virtual cursor
-function M.set_visual_area_from_virtual_cursor(vc)
-  -- Exit visual mode
-  vim.cmd("normal!:")
-
-  -- Set start mark
-  vim.api.nvim_buf_set_mark(0, "<", vc.visual_start_lnum, vc.visual_start_col - 1, {})
-
-  -- Set end mark
-  vim.api.nvim_buf_set_mark(0, ">", vc.lnum, vc.col - 1, {})
-
-  -- Return to visual mode
-  vim.cmd("normal! gv")
-end
-
 -- Get current visual area
 -- Returns {lnum1, col1, lnum2, col2}
 function M.get_visual_area()
   local cursor_pos = vim.fn.getcurpos()
   local visual_start_pos = vim.fn.getpos("v")
   return {visual_start_pos[2], visual_start_pos[3], cursor_pos[2], cursor_pos[3]}
-end
-
--- Set a virtual cursor's visual area from the previous visual area
-function M.set_virtual_cursor_from_visual_area(vc)
-
-  local visual_area = M.get_visual_area()
-
-  vc.visual_start_lnum = visual_area[1]
-  vc.visual_start_col = visual_area[2]
-
-  vc.lnum = visual_area[3]
-  vc.col = visual_area[4]
-  vc.curswant = vc.col
-
 end
 
 return M
