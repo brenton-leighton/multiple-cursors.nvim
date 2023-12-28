@@ -142,7 +142,7 @@ end
 local function custom_function_with_motion(func)
 
   -- Get a printable character
-  local motion = input.get_motion_char()
+  local motion = input.get_motion_cmd()
 
   if motion == nil then
     return

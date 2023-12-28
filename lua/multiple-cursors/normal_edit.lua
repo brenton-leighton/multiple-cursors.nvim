@@ -52,7 +52,7 @@ end
 
 function M.d()
   local count = vim.v.count
-  local motion_cmd = input.get_motion_char()
+  local motion_cmd = input.get_motion_cmd()
 
   if motion_cmd ~= nil then
     common.feedkeys_with_register(vim.v.register, "d" .. motion_cmd, count)
@@ -73,7 +73,7 @@ end
 -- Switch case in normal mode
 function M.gu()
   local count = vim.v.count
-  local motion_cmd = input.get_motion_char()
+  local motion_cmd = input.get_motion_cmd()
 
   if motion_cmd ~= nil then
     virtual_cursors.edit_with_normal_command("gu" .. motion_cmd, count)
@@ -83,7 +83,7 @@ end
 
 function M.gU()
   local count = vim.v.count
-  local motion_cmd = input.get_motion_char()
+  local motion_cmd = input.get_motion_cmd()
 
   if motion_cmd ~= nil then
     virtual_cursors.edit_with_normal_command("gU" .. motion_cmd, count)
@@ -93,7 +93,7 @@ end
 
 function M.g_tilde()
   local count = vim.v.count
-  local motion_cmd = input.get_motion_char()
+  local motion_cmd = input.get_motion_cmd()
 
   if motion_cmd ~= nil then
     virtual_cursors.edit_with_normal_command("g~" .. motion_cmd, count)
@@ -104,7 +104,7 @@ end
 -- Yank in normal mode
 function M.y()
   local count = vim.v.count
-  local motion_cmd = input.get_motion_char()
+  local motion_cmd = input.get_motion_cmd()
 
   if motion_cmd ~= nil then
     common.feedkeys_with_register(vim.v.register, "y" .. motion_cmd, count)

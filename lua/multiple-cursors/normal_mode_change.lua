@@ -276,7 +276,7 @@ end
 function M.c()
 
   count = vim.v.count
-  c_motion_cmd = input.get_motion_char()
+  c_motion_cmd = input.get_motion_cmd()
 
   if c_motion_cmd == nil then
     count = nil
