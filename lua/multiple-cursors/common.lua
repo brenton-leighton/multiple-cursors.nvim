@@ -1,20 +1,29 @@
 local M = {}
 
 -- Execute a command with normal!
-function M.normal_bang(cmd, count)
-  if count == 0 then
-    vim.cmd("normal! " .. cmd)
-  else
-    vim.cmd("normal! " .. tostring(count) .. cmd)
-  end
-end
+-- register and motion_cmd may be nil
+-- count may be 0
+-- motion_cmd may also contain a count
+function M.normal_bang(register, count, cmd, motion_cmd)
 
-function M.normal_bang_with_register(register, cmd, count)
-  if count == 0 then
-    vim.cmd("normal! \"" .. register .. cmd)
-  else
-    vim.cmd("normal! \"" .. register .. tostring(count) .. cmd)
+  local str = ""
+
+  if register then
+    str = str .. "\"" .. register
   end
+
+  if count ~= 0 then
+    str = str .. count
+  end
+
+  str = str .. cmd
+
+  if motion_cmd then
+    str = str .. motion_cmd
+  end
+
+  vim.cmd("normal! " .. str)
+
 end
 
 -- Wrapper around nvim_feedkeys

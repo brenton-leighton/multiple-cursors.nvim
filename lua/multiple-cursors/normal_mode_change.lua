@@ -97,13 +97,13 @@ local up_down_motions = {
 local function open_new_line_above(actual_motion_cmd, register_info)
 
   if actual_motion_cmd == "_" then
-    common.normal_bang("O", 0)
+    common.normal_bang(nil, 0, "O", nil)
     return
   end
 
   -- If it's an up/down motion and more than one line has been deleted
   if up_down_motions[actual_motion_cmd] and #register_info.regcontents > 1 then
-    common.normal_bang("O", 0)
+    common.normal_bang(nil, 0, "O", nil)
   end
 
 end
@@ -132,13 +132,13 @@ local function _c()
   -- Real cursor
   local ve = vim.wo.ve
   vim.wo.ve = "onemore"
-  common.normal_bang("d" .. c_motion_cmd, count)
+  common.normal_bang(register, count, "d", c_motion_cmd)
   open_new_line_above(actual_motion_cmd, vim.fn.getreginfo(register))
   vim.wo.ve = ve
 
   -- Virtual cursors
   virtual_cursors.edit_with_cursor(function(vc, idx)
-    common.normal_bang("d" .. c_motion_cmd, count)
+    common.normal_bang(register, count, "d", c_motion_cmd)
     vc.register_info = vim.fn.getreginfo(register)
     open_new_line_above(actual_motion_cmd, vc.register_info)
     vc:save_cursor_position()
@@ -160,8 +160,8 @@ local function _cc()
   virtual_cursors.move_with_normal_command("k", 0)
 
   -- Real cursor
-  common.normal_bang_with_register(register, "dd", count)
-  common.normal_bang("O", 0)
+  common.normal_bang(register, count, "dd", nil)
+  common.normal_bang(nil, 0, "O", nil)
 
 end
 
@@ -173,21 +173,21 @@ local function _C()
   -- If the cursor is at the start of the line and count > 1
   if vim.fn.getcurpos()[3] == 1 and count > 1 then
     -- Delete and open a new line
-    common.normal_bang_with_register(register, "D", count)
-    common.normal_bang("O", 0)
+    common.normal_bang(register, count, "D", nil)
+    common.normal_bang(nil, 0, "O", nil)
   else
     -- Delete and move the cursor right
-    common.normal_bang_with_register(register, "D", count)
+    common.normal_bang(register, count, "D", nil)
     common.feedkeys("<Right>", 0)
   end
 
   -- Virtual cursors
   virtual_cursors.edit_with_cursor(function(vc, idx)
     if vc.col == 1 and count > 1 then
-      common.normal_bang_with_register(register, "D", count)
-      common.normal_bang("O", 0)
+      common.normal_bang(register, count, "D", nil)
+      common.normal_bang(nil, 0, "O", nil)
     else
-      common.normal_bang_with_register(register, "D", count)
+      common.normal_bang(register, count, "D", nil)
     end
     vc.register_info = vim.fn.getreginfo(register)
     vc:save_cursor_position()
@@ -205,7 +205,7 @@ local function _s()
   -- Real cursor
   local ve = vim.wo.ve
   vim.wo.ve = "onemore"
-  common.normal_bang_with_register(register, "dl", count)
+  common.normal_bang(register, count, "dl", nil)
   vim.wo.ve = ve
 
 end

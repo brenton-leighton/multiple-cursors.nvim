@@ -68,8 +68,8 @@ local function virtual_cursor_visual_mode_paste(lines, vc)
 
   local eol_before = col2 >= (common.get_max_col(lnum2) - 1)
 
-  -- Delete visual area
-  common.normal_bang("\"_d", 0)
+  -- Delete visual area to the black hole register
+  common.normal_bang("_", 0, "d", nil)
 
   -- Get cursor position
   local cursor_pos = vim.fn.getcurpos()

@@ -206,7 +206,7 @@ end
 function M.move_with_normal_command(cmd, count)
 
   M.visit_with_cursor(function(vc)
-    common.normal_bang(cmd, count)
+    common.normal_bang(nil, count, cmd, nil)
     vc:save_cursor_position()
 
     -- Fix for $ not setting col correctly in insert mode even with onemore
@@ -255,7 +255,7 @@ end
 function M.edit_with_normal_command(cmd, count)
 
   M.edit_with_cursor(function(vc)
-    common.normal_bang(cmd, count)
+    common.normal_bang(nil, count, cmd, nil)
     vc:save_cursor_position()
   end)
 
@@ -269,7 +269,7 @@ function M.normal_mode_delete_yank(register, cmd, count)
 
   -- Delete or yank command
   M.edit_with_cursor(function(vc, idx)
-    common.normal_bang_with_register(register, cmd, count)
+    common.normal_bang(register, count, cmd, nil)
     vc.register_info = vim.fn.getreginfo(register)
     vc:save_cursor_position()
   end)
@@ -294,7 +294,7 @@ function M.normal_mode_put(register, cmd, count)
     end
 
     -- Put the register
-    common.normal_bang_with_register(register, cmd, count)
+    common.normal_bang(register, count, cmd, nil)
 
     vc:save_cursor_position()
 
@@ -377,7 +377,7 @@ end
 function M.visual_mode_delete_yank(register, cmd)
 
   M.visual_mode_edit(function(vc, idx)
-    common.normal_bang_with_register(register, cmd, 0)
+    common.normal_bang(register, 0, cmd, nil)
     vc.register_info = vim.fn.getreginfo(register)
   end)
 

@@ -37,7 +37,7 @@ function M.escape()
   -- Move the cursor back
   virtual_cursors.visit_with_cursor(function(vc)
     if vc.col ~= 1 then
-      common.normal_bang("h", 0)
+      common.normal_bang(nil, 0, "h", nil)
       vc:save_cursor_position()
     end
   end)
