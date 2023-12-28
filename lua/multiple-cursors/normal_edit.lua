@@ -9,23 +9,23 @@ local normal_mode_change = require("multiple-cursors.normal_mode_change")
 -- Indentation
 function M.indent()
   common.feedkeys(">>", vim.v.count)
-  virtual_cursors.edit_with_normal_command(">>", vim.v.count)
+  virtual_cursors.edit_with_normal_command(vim.v.count, ">>", nil)
 end
 
 function M.deindent()
   common.feedkeys("<<", vim.v.count)
-  virtual_cursors.edit_with_normal_command("<<", vim.v.count)
+  virtual_cursors.edit_with_normal_command(vim.v.count, "<<", nil)
 end
 
 -- Join lines
 function M.J()
   common.feedkeys("J", vim.v.count)
-  virtual_cursors.edit_with_normal_command("J", vim.v.count)
+  virtual_cursors.edit_with_normal_command(vim.v.count, "J", nil)
 end
 
 function M.gJ()
   common.feedkeys("gJ", vim.v.count)
-  virtual_cursors.edit_with_normal_command("gJ", vim.v.count)
+  virtual_cursors.edit_with_normal_command(vim.v.count, "gJ", nil)
 end
 
 -- Replace char
@@ -35,7 +35,7 @@ function M.r()
 
   if char ~= nil then
     common.feedkeys("r" .. char, count)
-    virtual_cursors.edit_with_normal_command("r" .. char, vim.v.count)
+    virtual_cursors.edit_with_normal_command(vim.v.count, "r" .. char, nil)
   end
 end
 
@@ -76,8 +76,8 @@ function M.gu()
   local motion_cmd = input.get_motion_cmd()
 
   if motion_cmd ~= nil then
-    virtual_cursors.edit_with_normal_command("gu" .. motion_cmd, count)
     common.feedkeys("gu" .. motion_cmd, count)
+    virtual_cursors.edit_with_normal_command(count, "gu", motion_cmd)
   end
 end
 
@@ -86,8 +86,8 @@ function M.gU()
   local motion_cmd = input.get_motion_cmd()
 
   if motion_cmd ~= nil then
-    virtual_cursors.edit_with_normal_command("gU" .. motion_cmd, count)
     common.feedkeys("gU" .. motion_cmd, count)
+    virtual_cursors.edit_with_normal_command(count, "gU", motion_cmd)
   end
 end
 
@@ -96,8 +96,8 @@ function M.g_tilde()
   local motion_cmd = input.get_motion_cmd()
 
   if motion_cmd ~= nil then
-    virtual_cursors.edit_with_normal_command("g~" .. motion_cmd, count)
     common.feedkeys("g~" .. motion_cmd, count)
+    virtual_cursors.edit_with_normal_command(count, "g~", motion_cmd)
   end
 end
 

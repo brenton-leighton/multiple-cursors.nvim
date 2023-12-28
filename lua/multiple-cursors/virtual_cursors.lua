@@ -252,10 +252,10 @@ end
 
 -- Execute a normal command to perform an edit at each virtual cursor
 -- The virtual cursor position is set after calling func
-function M.edit_with_normal_command(cmd, count)
+function M.edit_with_normal_command(count, cmd, motion_cmd)
 
   M.edit_with_cursor(function(vc)
-    common.normal_bang(nil, count, cmd, nil)
+    common.normal_bang(nil, count, cmd, motion_cmd)
     vc:save_cursor_position()
   end)
 
