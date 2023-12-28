@@ -368,8 +368,8 @@ function M.visual_mode_modify_area(func)
 
   ignore_cursor_movement = true
 
-  -- Save the previous visual area
-  local prev_visual_area = common.get_visual_area()
+  -- Save the visual area
+  local visual_area = common.get_visual_area()
 
   M.visit_in_buffer(function(vc, idx)
     -- Set visual area
@@ -383,7 +383,7 @@ function M.visual_mode_modify_area(func)
   end)
 
   -- Restore the visual area
-  restore_visual_area(prev_visual_area)
+  restore_visual_area(visual_area)
 
   ignore_cursor_movement = false
 
