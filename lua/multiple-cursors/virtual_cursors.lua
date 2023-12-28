@@ -203,7 +203,7 @@ function M.visit_with_cursor(func)
 end
 
 -- Visit virtual cursors and execute a normal command to move them
-function M.move_with_normal_command(cmd, count)
+function M.move_with_normal_command(count, cmd)
 
   M.visit_with_cursor(function(vc)
     common.normal_bang(nil, count, cmd, nil)

@@ -16,12 +16,12 @@ local c_motion_cmd = nil
 
 local function _a()
   -- Shift cursors right
-  virtual_cursors.move_with_normal_command("l", 0)
+  virtual_cursors.move_with_normal_command(0, "l")
 end
 
 local function _A()
   -- Cursors to end of line
-  virtual_cursors.move_with_normal_command("$", 0)
+  virtual_cursors.move_with_normal_command(0, "$")
 end
 
 local function _i()
@@ -33,12 +33,12 @@ end
 
 local function _I()
   -- Cursor to start of line
-  virtual_cursors.move_with_normal_command("^", 0)
+  virtual_cursors.move_with_normal_command(0, "^")
 end
 
 local function _o()
   -- New line after current line
-  virtual_cursors.move_with_normal_command("$", 0)
+  virtual_cursors.move_with_normal_command(0, "$")
   insert_mode.all_virtual_cursors_carriage_return()
 end
 
@@ -154,10 +154,10 @@ local function _cc()
   local register = vim.v.register
 
   -- Virtual cursors
-  virtual_cursors.move_with_normal_command("0", 0)
+  virtual_cursors.move_with_normal_command(0, "0")
   insert_mode.all_virtual_cursors_carriage_return()
   virtual_cursors.normal_mode_delete_yank(register, "dd", count)
-  virtual_cursors.move_with_normal_command("k", 0)
+  virtual_cursors.move_with_normal_command(0, "k")
 
   -- Real cursor
   common.normal_bang(register, count, "dd", nil)

@@ -133,25 +133,25 @@ end
 function M.normal_minus()
   common.feedkeys("-", vim.v.count)
   all_virtual_cursors_up(vim.v.count)
-  virtual_cursors.move_with_normal_command("^", 0)
+  virtual_cursors.move_with_normal_command(0, "^")
 end
 
 -- Normal mode +: down N lines to first non-blank character
 function M.normal_plus() -- Also <CR> and <kEnter>
   common.feedkeys("+", vim.v.count)
   all_virtual_cursors_down(vim.v.count)
-  virtual_cursors.move_with_normal_command("^", 0)
+  virtual_cursors.move_with_normal_command(0, "^")
 end
 
 -- Normal mode _: down N-1 lines to first non-blank character
 function M.normal_underscore()
   if vim.v.count <= 1 then
     common.feedkeys("_", vim.v.count)
-    virtual_cursors.move_with_normal_command("_", vim.v.count)
+    virtual_cursors.move_with_normal_command(vim.v.count, "_")
   else
     common.feedkeys("_", vim.v.count)
     all_virtual_cursors_down(vim.v.count - 1)
-    virtual_cursors.move_with_normal_command("^", 0)
+    virtual_cursors.move_with_normal_command(0, "^")
   end
 end
 
