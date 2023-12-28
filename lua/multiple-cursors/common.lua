@@ -9,6 +9,14 @@ function M.normal_bang(cmd, count)
   end
 end
 
+function M.normal_bang_with_register(register, cmd, count)
+  if count == 0 then
+    vim.cmd("normal! \"" .. register .. cmd)
+  else
+    vim.cmd("normal! \"" .. register .. tostring(count) .. cmd)
+  end
+end
+
 -- Wrapper around nvim_feedkeys
 function M.feedkeys(cmd, count)
 
@@ -19,6 +27,13 @@ function M.feedkeys(cmd, count)
   local key = vim.api.nvim_replace_termcodes(cmd, true, false, true)
   vim.api.nvim_feedkeys(key, "n", false)
 
+end
+
+function M.feedkeys_with_register(register, cmd, count)
+  local key = vim.api.nvim_replace_termcodes("\"" .. register, true, false, true)
+  vim.api.nvim_feedkeys(key, "n", false)
+
+  M.feedkeys(cmd, count)
 end
 
 -- Check if mode is given mode

@@ -79,19 +79,19 @@ function M.gU() edit("gU") end
 -- Yank/delete -----------------------------------------------------------------
 
 function M.y()
-  virtual_cursors.visual_mode_delete_yank("y")
-  common.feedkeys("y", 0)
+  common.feedkeys_with_register(vim.v.register, "y", 0)
+  virtual_cursors.visual_mode_delete_yank(vim.v.register, "y")
 end
 
 function M.d()
-  virtual_cursors.visual_mode_delete_yank("d")
-  common.feedkeys("d", 0)
+  common.feedkeys_with_register(vim.v.register, "d", 0)
+  virtual_cursors.visual_mode_delete_yank(vim.v.register, "d")
 end
 
 function M.c()
-  virtual_cursors.visual_mode_delete_yank("d")
-  common.feedkeys("d", 0)
+  common.feedkeys_with_register(vim.v.register, "d", 0)
   common.feedkeys("i", 0)
+  virtual_cursors.visual_mode_delete_yank(vim.v.register, "d")
 end
 
 return M

@@ -263,22 +263,23 @@ end
 
 -- Execute a normal command to perform a delete or yank at each virtual cursor
 -- The virtual cursor position is set after calling func
-function M.normal_mode_delete_yank(cmd, count)
+function M.normal_mode_delete_yank(register, cmd, count)
+
+  -- ToDo save register
 
   -- Delete or yank command
   M.edit_with_cursor(function(vc, idx)
-    common.normal_bang(cmd, count)
-    vc.register_info = vim.fn.getreginfo('"')
+    common.normal_bang_with_register(register, cmd, count)
+    vc.register_info = vim.fn.getreginfo(register)
     vc:save_cursor_position()
   end)
 
 end
 
 -- Execute a normal command to perform a put at each virtual cursor
--- The unnamed register is first saved, the replaced by the virtual cursor
--- register
+-- The register is first saved, the replaced by the virtual cursor register
 -- After executing the command the unnamed register is restored
-function M.normal_mode_put(cmd, count)
+function M.normal_mode_put(register, cmd, count)
 
   M.edit_with_cursor(function(vc, idx)
 
@@ -287,20 +288,19 @@ function M.normal_mode_put(cmd, count)
     -- If the virtual cursor has register info
     if vc.register_info then
       -- Save the unnamed register
-      tmp_register_info = vim.fn.getreginfo('"')
-      -- Set the virtual cursor register info to the unnamed register
-      vim.fn.setreg('"', vc.register_info)
+      tmp_register_info = vim.fn.getreginfo(register)
+      -- Set the virtual cursor register info to the register
+      vim.fn.setreg(register, vc.register_info)
     end
 
-    -- Put the unnamed register
-    common.normal_bang(cmd, count)
+    -- Put the register
+    common.normal_bang_with_register(register, cmd, count)
 
     vc:save_cursor_position()
 
-    -- If the virtual cursor has register info
-    if vc.register_info then
-      -- Restore the unnamed register
-      vim.fn.setreg('"', tmp_register_info)
+    -- Restore the register
+    if tmp_register_info then
+      vim.fn.setreg(register, tmp_register_info)
     end
 
   end)
@@ -374,11 +374,11 @@ function M.visual_mode_edit(func)
 
 end
 
-function M.visual_mode_delete_yank(cmd)
+function M.visual_mode_delete_yank(register, cmd)
 
   M.visual_mode_edit(function(vc, idx)
-    common.normal_bang(cmd, 0)
-    vc.register_info = vim.fn.getreginfo('"')
+    common.normal_bang_with_register(register, cmd, 0)
+    vc.register_info = vim.fn.getreginfo(register)
   end)
 
 end

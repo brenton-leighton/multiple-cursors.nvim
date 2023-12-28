@@ -127,17 +127,19 @@ local function _c()
     count = vim.fn.max({1, count})
   end
 
+  local register = vim.v.register
+
   -- Real cursor
   local ve = vim.wo.ve
   vim.wo.ve = "onemore"
   common.normal_bang("d" .. c_motion_cmd, count)
-  open_new_line_above(actual_motion_cmd, vim.fn.getreginfo('"'))
+  open_new_line_above(actual_motion_cmd, vim.fn.getreginfo(register))
   vim.wo.ve = ve
 
   -- Virtual cursors
   virtual_cursors.edit_with_cursor(function(vc, idx)
     common.normal_bang("d" .. c_motion_cmd, count)
-    vc.register_info = vim.fn.getreginfo('"')
+    vc.register_info = vim.fn.getreginfo(register)
     open_new_line_above(actual_motion_cmd, vc.register_info)
     vc:save_cursor_position()
   end)
@@ -149,41 +151,45 @@ end
 -- ToDo fix auto indent?
 local function _cc()
 
-  -- Real cursor
-  common.normal_bang("dd", count)
-  common.normal_bang("O", 0)
+  local register = vim.v.register
 
   -- Virtual cursors
   virtual_cursors.move_with_normal_command("0", 0)
   insert_mode.all_virtual_cursors_carriage_return()
-  virtual_cursors.normal_mode_delete_yank("dd", count)
+  virtual_cursors.normal_mode_delete_yank(register, "dd", count)
   virtual_cursors.move_with_normal_command("k", 0)
+
+  -- Real cursor
+  common.normal_bang_with_register(register, "dd", count)
+  common.normal_bang("O", 0)
 
 end
 
 local function _C()
 
+  local register = vim.v.register
+
   -- Real cursor
   -- If the cursor is at the start of the line and count > 1
   if vim.fn.getcurpos()[3] == 1 and count > 1 then
     -- Delete and open a new line
-    common.normal_bang("D", count)
+    common.normal_bang_with_register(register, "D", count)
     common.normal_bang("O", 0)
   else
     -- Delete and move the cursor right
-    common.normal_bang("D", count)
+    common.normal_bang_with_register(register, "D", count)
     common.feedkeys("<Right>", 0)
   end
 
   -- Virtual cursors
   virtual_cursors.edit_with_cursor(function(vc, idx)
     if vc.col == 1 and count > 1 then
-      common.normal_bang("D", count)
+      common.normal_bang_with_register(register, "D", count)
       common.normal_bang("O", 0)
     else
-      common.normal_bang("D", count)
+      common.normal_bang_with_register(register, "D", count)
     end
-    vc.register_info = vim.fn.getreginfo('"')
+    vc.register_info = vim.fn.getreginfo(register)
     vc:save_cursor_position()
   end)
 
@@ -191,14 +197,16 @@ end
 
 local function _s()
 
+  local register = vim.v.register
+
+  -- Virtual cursors
+  virtual_cursors.normal_mode_delete_yank(register, "dl", count)
+
   -- Real cursor
   local ve = vim.wo.ve
   vim.wo.ve = "onemore"
-  common.normal_bang("dl", count)
+  common.normal_bang_with_register(register, "dl", count)
   vim.wo.ve = ve
-
-  -- Virtual cursors
-  virtual_cursors.normal_mode_delete_yank("dl", count)
 
 end
 
