@@ -279,12 +279,21 @@ end
 -- After executing the command the unnamed register is restored
 function M.normal_mode_put(register, count, cmd)
 
+  local use_own_register = true
+
+  for _, vc in ipairs(virtual_cursors) do
+    if vc.editable and not vc:has_register(register) then
+      use_own_register = false
+      break
+    end
+  end
+
   M.edit_with_cursor(function(vc, idx)
 
     local register_info = nil
 
     -- If the virtual cursor has data for the register
-    if vc:has_register(register) then
+    if use_own_register then
       -- Save the register
       register_info = vim.fn.getreginfo(register)
       -- Set the register from the virtual cursor
@@ -382,7 +391,7 @@ function M.visual_mode_delete_yank(register, cmd)
 end
 
 
--- Split pasting ---------------------------------------------------------------------
+-- Split pasting ---------------------------------------------------------------
 
 -- Does the number of lines match the number of editable cursors + 1 (for the
 -- real cursor)
