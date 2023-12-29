@@ -288,6 +288,15 @@ function M.normal_mode_put(register, count, cmd)
     end
   end
 
+  -- If not using each virtual cursor's register
+  if not use_own_register then
+    -- Return if the main register doesn't have data
+    local register_info = vim.fn.getreginfo(register)
+    if next(register_info) == nil then
+      return
+    end
+  end
+
   M.edit_with_cursor(function(vc, idx)
 
     local register_info = nil
