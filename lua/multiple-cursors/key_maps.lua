@@ -129,37 +129,50 @@ end
 
 -- Function to execute a custom key map
 local function custom_function(func)
+
+  -- Save register and count1 because they may be lost
+  local register = vim.v.register
+  local count1 = vim.v.count1
+
   -- Call func for the real cursor
-  func()
+  func(register, count1)
 
   -- Call func for each virtual cursor and set the virtual cursor position
   virtual_cursors.edit_with_cursor(function(vc)
-    func()
+    func(register, count1)
     vc:save_cursor_position()
   end)
 end
 
 local function custom_function_with_motion(func)
 
-  -- Get a printable character
-  local motion = input.get_motion_cmd()
+  -- Save register and count1 because they may be lost
+  local register = vim.v.register
+  local count1 = vim.v.count1
 
-  if motion == nil then
+  -- Get a printable character
+  local motion_cmd = input.get_motion_cmd()
+
+  if motion_cmd == nil then
     return
   end
 
   -- Call func for the real cursor
-  func(motion)
+  func(register, count1, motion_cmd)
 
   -- Call func for each virtual cursor and set the virtual cursor position
   virtual_cursors.edit_with_cursor(function(vc)
-    func(motion)
+    func(register, count1, motion_cmd)
     vc:save_cursor_position()
   end)
 
 end
 
 local function custom_function_with_char(func)
+
+  -- Save register and count1 because they may be lost
+  local register = vim.v.register
+  local count1 = vim.v.count1
 
   -- Get a printable character
   local char = input.get_char()
@@ -169,17 +182,21 @@ local function custom_function_with_char(func)
   end
 
   -- Call func for the real cursor
-  func(char)
+  func(register, count1, char)
 
   -- Call func for each virtual cursor and set the virtual cursor position
   virtual_cursors.edit_with_cursor(function(vc)
-    func(char)
+    func(register, count1, char)
     vc:save_cursor_position()
   end)
 
 end
 
 local function custom_function_with_two_chars(func)
+
+  -- Save register and count1 because they may be lost
+  local register = vim.v.register
+  local count1 = vim.v.count1
 
   -- Get two printable characters
   local char1, char2 = input.get_two_chars()
@@ -189,12 +206,12 @@ local function custom_function_with_two_chars(func)
   end
 
   -- Call func for the real cursor
-  func(char1, char2)
+  func(register, count1, char1, char2)
 
   -- Call func for each virtual cursor and set the virtual cursor position
   virtual_cursors.edit_with_cursor(function(vc)
-    func(char1, char2)
-    common.set_virtual_cursor_from_cursor(vc)
+    func(register, count1, char1, char2)
+    vc:save_cursor_position()
   end)
 
 end
