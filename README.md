@@ -1,8 +1,8 @@
 # multiple-cursors.nvim
 
-A multiple cursors plugin for Neovim.
+A multiple cursors plugin for Neovim that works the way multiple cursors work in other editors (such as Visual Studio Code or JetBrains IDEs). I.e. create extra cursors and then use Neovim as you normally would.
 
-Most Neovim functionality is working. See the [Usage](#usage) section for more information.
+Multiple cursors is a way of making edits at multiple positions, that's easier, faster, and/or more versatile than other methods available in Neovim (e.g. visual block mode or macros).
 
 ## Demos
 
@@ -84,7 +84,7 @@ After adding a new cursor the following functions are available:
 | Normal | Indentation | `>>` `<<` | |
 | Normal | Join | `J` `gJ` | |
 | Normal | Change to insert/replace mode | `a` `A` `i` `I` `o` `O` `R` | Count is ignored |
-| Insert/repalce | Character insertion | | |
+| Insert/replace | Character insertion | | |
 | Insert/replace | Other edits | `<BS>` `<Del>` `<CR>` `<Tab>` | These commands are implemented manually, and may not behave correctly <br/> In replace mode `<BS>` will only move any virtual cursors back, and not undo edits |
 | Insert/replace | Paste | | By default if the number of lines in the paste text matches the number of cursors, each line of the text will be inserted at each cursor |
 | Insert | Change to replace mode | `<Insert>` | |
@@ -121,8 +121,12 @@ opts = {
   custom_key_maps = {
     {{"n", "i"}, "<C-/>", function() vim.cmd("ExampleCommand") end},
   },
-  pre_hook = function() vim.print("Hello") end,
-  post_hook = function() vim.print("Goodbye") end,
+  pre_hook = function()
+    vim.opt.cursorline = false
+  end,
+  post_hook = function()
+    vim.opt.cursorline = true
+  end,
 },
 keys = {
   {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i"}},
