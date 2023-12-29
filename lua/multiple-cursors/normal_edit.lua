@@ -61,12 +61,12 @@ function M.d()
 end
 
 function M.dd()
-  common.feedkeys_with_register(vim.v.register, vim.v.count, "dd", nil)
+  common.feedkeys(vim.v.register, vim.v.count, "dd", nil)
   virtual_cursors.normal_mode_delete_yank(vim.v.register, vim.v.count, "dd", nil)
 end
 
 function M.D()
-  common.feedkeys_with_register(vim.v.register, vim.v.count, "D", nil)
+  common.feedkeys(vim.v.register, vim.v.count, "D", nil)
   virtual_cursors.normal_mode_delete_yank(vim.v.register, vim.v.count, "D", nil)
 end
 
