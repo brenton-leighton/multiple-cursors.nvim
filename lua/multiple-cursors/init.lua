@@ -238,7 +238,7 @@ end
 -- Normal mode undo will exit because cursor positions can't be restored
 function M.undo()
   deinit()
-  common.feedkeys("u", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "u", nil)
 end
 
 -- Escape key
@@ -251,7 +251,7 @@ function M.escape()
     visual_mode.escape()
   end
 
-  common.feedkeys("<Esc>", 0)
+  common.feedkeys(nil, 0, "<Esc>", nil)
 end
 
 -- Add a virtual cursor then move the real cursor up or down
@@ -265,9 +265,9 @@ local function add_virtual_cursor_at_real_cursor(down)
 
   -- Move the real cursor
   if down then
-    common.feedkeys("<Down>", vim.v.count)
+    common.feedkeys(nil, vim.v.count, "<Down>", nil)
   else
-    common.feedkeys("<Up>", vim.v.count)
+    common.feedkeys(nil, vim.v.count, "<Up>", nil)
   end
 
 end

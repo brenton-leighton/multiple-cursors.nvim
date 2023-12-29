@@ -16,12 +16,12 @@ local c_motion_cmd = nil
 
 local function _a()
   -- Shift cursors right
-  virtual_cursors.move_with_normal_command("l", 0)
+  virtual_cursors.move_with_normal_command(0, "l")
 end
 
 local function _A()
   -- Cursors to end of line
-  virtual_cursors.move_with_normal_command("$", 0)
+  virtual_cursors.move_with_normal_command(0, "$")
 end
 
 local function _i()
@@ -33,12 +33,12 @@ end
 
 local function _I()
   -- Cursor to start of line
-  virtual_cursors.move_with_normal_command("^", 0)
+  virtual_cursors.move_with_normal_command(0, "^")
 end
 
 local function _o()
   -- New line after current line
-  virtual_cursors.move_with_normal_command("$", 0)
+  virtual_cursors.move_with_normal_command(0, "$")
   insert_mode.all_virtual_cursors_carriage_return()
 end
 
@@ -94,16 +94,16 @@ local up_down_motions = {
   ["-"] = true,
 }
 
-local function open_new_line_above(actual_motion_cmd, register_info)
+local function open_new_line_above(actual_motion_cmd, num_register_lines)
 
   if actual_motion_cmd == "_" then
-    common.normal_bang("O", 0)
+    common.normal_bang(nil, 0, "O", nil)
     return
   end
 
   -- If it's an up/down motion and more than one line has been deleted
-  if up_down_motions[actual_motion_cmd] and #register_info.regcontents > 1 then
-    common.normal_bang("O", 0)
+  if up_down_motions[actual_motion_cmd] and num_register_lines > 1 then
+    common.normal_bang(nil, 0, "O", nil)
   end
 
 end
@@ -127,19 +127,21 @@ local function _c()
     count = vim.fn.max({1, count})
   end
 
+  local register = vim.v.register
+
   -- Real cursor
   local ve = vim.wo.ve
   vim.wo.ve = "onemore"
-  common.normal_bang("d" .. c_motion_cmd, count)
-  open_new_line_above(actual_motion_cmd, vim.fn.getreginfo('"'))
+  common.normal_bang(register, count, "d", c_motion_cmd)
+  open_new_line_above(actual_motion_cmd, vim.fn.getreginfo(register))
   vim.wo.ve = ve
 
   -- Virtual cursors
   virtual_cursors.edit_with_cursor(function(vc, idx)
-    common.normal_bang("d" .. c_motion_cmd, count)
-    vc.register_info = vim.fn.getreginfo('"')
-    open_new_line_above(actual_motion_cmd, vc.register_info)
-    common.set_virtual_cursor_from_cursor(vc)
+    common.normal_bang(register, count, "d", c_motion_cmd)
+    local num_register_lines = vc:save_register(register)
+    open_new_line_above(actual_motion_cmd, num_register_lines)
+    vc:save_cursor_position()
   end)
 
   c_motion_cmd = nil
@@ -149,56 +151,62 @@ end
 -- ToDo fix auto indent?
 local function _cc()
 
-  -- Real cursor
-  common.normal_bang("dd", count)
-  common.normal_bang("O", 0)
+  local register = vim.v.register
 
   -- Virtual cursors
-  virtual_cursors.move_with_normal_command("0", 0)
+  virtual_cursors.move_with_normal_command(0, "0")
   insert_mode.all_virtual_cursors_carriage_return()
-  virtual_cursors.normal_mode_delete_yank("dd", count)
-  virtual_cursors.move_with_normal_command("k", 0)
+  virtual_cursors.normal_mode_delete_yank(register, count, "dd", nil)
+  virtual_cursors.move_with_normal_command(0, "k")
+
+  -- Real cursor
+  common.normal_bang(register, count, "dd", nil)
+  common.normal_bang(nil, 0, "O", nil)
 
 end
 
 local function _C()
 
+  local register = vim.v.register
+
   -- Real cursor
   -- If the cursor is at the start of the line and count > 1
   if vim.fn.getcurpos()[3] == 1 and count > 1 then
     -- Delete and open a new line
-    common.normal_bang("D", count)
-    common.normal_bang("O", 0)
+    common.normal_bang(register, count, "D", nil)
+    common.normal_bang(nil, 0, "O", nil)
   else
     -- Delete and move the cursor right
-    common.normal_bang("D", count)
-    common.feedkeys("<Right>", 0)
+    common.normal_bang(register, count, "D", nil)
+    common.feedkeys(nil, 0, "<Right>", nil)
   end
 
   -- Virtual cursors
   virtual_cursors.edit_with_cursor(function(vc, idx)
     if vc.col == 1 and count > 1 then
-      common.normal_bang("D", count)
-      common.normal_bang("O", 0)
+      common.normal_bang(register, count, "D", nil)
+      common.normal_bang(nil, 0, "O", nil)
     else
-      common.normal_bang("D", count)
+      common.normal_bang(register, count, "D", nil)
     end
-    vc.register_info = vim.fn.getreginfo('"')
-    common.set_virtual_cursor_from_cursor(vc)
+    vc:save_register(register)
+    vc:save_cursor_position()
   end)
 
 end
 
 local function _s()
 
+  local register = vim.v.register
+
+  -- Virtual cursors
+  virtual_cursors.normal_mode_delete_yank(register, count, "d", "l")
+
   -- Real cursor
   local ve = vim.wo.ve
   vim.wo.ve = "onemore"
-  common.normal_bang("dl", count)
+  common.normal_bang(register, count, "dl", nil)
   vim.wo.ve = ve
-
-  -- Virtual cursors
-  virtual_cursors.normal_mode_delete_yank("dl", count)
 
 end
 
@@ -230,37 +238,37 @@ function M.mode_changed()
 end
 
 function M.a()
-  common.feedkeys("a", 0)
+  common.feedkeys(nil, 0, "a", nil)
   mode_cmd = "a"
 end
 
 function M.A()
-  common.feedkeys("A", 0)
+  common.feedkeys(nil, 0, "A", nil)
   mode_cmd = "A"
 end
 
 function M.i() -- Also <Insert>
-  common.feedkeys("i", 0)
+  common.feedkeys(nil, 0, "i", nil)
   mode_cmd = "i"
 end
 
 function M.I()
-  common.feedkeys("I", 0)
+  common.feedkeys(nil, 0, "I", nil)
   mode_cmd = "I"
 end
 
 function M.o()
-  common.feedkeys("o", 0)
+  common.feedkeys(nil, 0, "o", nil)
   mode_cmd = "o"
 end
 
 function M.O()
-  common.feedkeys("O", 0)
+  common.feedkeys(nil, 0, "O", nil)
   mode_cmd = "O"
 end
 
 function M.v()
-  common.feedkeys("v", vim.v.count)
+  common.feedkeys(nil, vim.v.count, "v", nil)
   count = vim.v.count - 1
   mode_cmd = "v"
 end
@@ -268,13 +276,13 @@ end
 function M.c()
 
   count = vim.v.count
-  c_motion_cmd = input.get_motion_char()
+  c_motion_cmd = input.get_motion_cmd()
 
   if c_motion_cmd == nil then
     count = nil
   else
     mode_cmd = "c"
-    common.feedkeys("i", 0)
+    common.feedkeys(nil, 0, "i", nil)
   end
 
 end
@@ -283,7 +291,7 @@ function M.cc()
 
   count = vim.v.count
   mode_cmd = "cc"
-  common.feedkeys("i", 0)
+  common.feedkeys(nil, 0, "i", nil)
 
 end
 
@@ -291,7 +299,7 @@ function M.C()
 
   count = vim.v.count
   mode_cmd = "C"
-  common.feedkeys("i", 0)
+  common.feedkeys(nil, 0, "i", nil)
 
 end
 
@@ -299,7 +307,7 @@ function M.s()
 
   count = vim.v.count
   mode_cmd = "s"
-  common.feedkeys("i", 0)
+  common.feedkeys(nil, 0, "i", nil)
 
 end
 

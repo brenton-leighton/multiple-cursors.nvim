@@ -77,7 +77,7 @@ end
 -- Wait for a motion command
 -- Returns a normal motion command (which may inclue a count) or nil if no valid
 -- motion was given
-function M.get_motion_char()
+function M.get_motion_cmd()
 
   -- Wait for a character
   local motion_char = vim.fn.getcharstr()

@@ -214,7 +214,7 @@ local function get_normalised_visual_area(vc)
   local lnum2 = vc.lnum
   local col2 = vc.col
 
-  if not common.is_visual_area_forward(vc) then
+  if not vc:is_visual_area_forward() then
     lnum1 = vc.lnum
     col1 = vc.col
     lnum2 = vc.visual_start_lnum
@@ -251,7 +251,7 @@ end
 local function update_virtual_cursor_visual_extmarks(vc)
 
   -- If there's no visual area
-  if not common.is_visual_area_valid(vc) or
+  if not vc:is_visual_area_valid() or
       (vc.visual_start_lnum == vc.lnum and vc.visual_start_col == vc.col) then
 
     -- Clear any visual marks

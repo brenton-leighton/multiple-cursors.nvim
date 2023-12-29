@@ -135,14 +135,14 @@ local function custom_function(func)
   -- Call func for each virtual cursor and set the virtual cursor position
   virtual_cursors.edit_with_cursor(function(vc)
     func()
-    common.set_virtual_cursor_from_cursor(vc)
+    vc:save_cursor_position()
   end)
 end
 
 local function custom_function_with_motion(func)
 
   -- Get a printable character
-  local motion = input.get_motion_char()
+  local motion = input.get_motion_cmd()
 
   if motion == nil then
     return
@@ -154,7 +154,7 @@ local function custom_function_with_motion(func)
   -- Call func for each virtual cursor and set the virtual cursor position
   virtual_cursors.edit_with_cursor(function(vc)
     func(motion)
-    common.set_virtual_cursor_from_cursor(vc)
+    vc:save_cursor_position()
   end)
 
 end
@@ -174,7 +174,7 @@ local function custom_function_with_char(func)
   -- Call func for each virtual cursor and set the virtual cursor position
   virtual_cursors.edit_with_cursor(function(vc)
     func(char)
-    common.set_virtual_cursor_from_cursor(vc)
+    vc:save_cursor_position()
   end)
 
 end

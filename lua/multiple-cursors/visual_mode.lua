@@ -23,10 +23,10 @@ local function modify_area(cmd)
   local count = vim.v.count
 
   virtual_cursors.visual_mode_modify_area(function()
-    common.normal_bang(cmd, count)
+    common.normal_bang(nil, count, cmd, nil)
   end)
 
-  common.feedkeys(cmd, count)
+  common.feedkeys(nil, count, cmd, nil)
 end
 
 function M.o() modify_area("o") end
@@ -56,10 +56,10 @@ local function edit(cmd)
   local count = vim.v.count
 
   virtual_cursors.visual_mode_edit(function()
-    common.normal_bang(cmd, count)
+    common.normal_bang(nil, count, cmd, nil)
   end)
 
-  common.feedkeys(cmd, count)
+  common.feedkeys(nil, count, cmd, nil)
 end
 
 function M.J() edit("J") end
@@ -79,19 +79,19 @@ function M.gU() edit("gU") end
 -- Yank/delete -----------------------------------------------------------------
 
 function M.y()
-  virtual_cursors.visual_mode_delete_yank("y")
-  common.feedkeys("y", 0)
+  common.feedkeys(vim.v.register, 0, "y", nil)
+  virtual_cursors.visual_mode_delete_yank(vim.v.register, "y")
 end
 
 function M.d()
-  virtual_cursors.visual_mode_delete_yank("d")
-  common.feedkeys("d", 0)
+  common.feedkeys(vim.v.register, 0, "d", nil)
+  virtual_cursors.visual_mode_delete_yank(vim.v.register, "d")
 end
 
 function M.c()
-  virtual_cursors.visual_mode_delete_yank("d")
-  common.feedkeys("d", 0)
-  common.feedkeys("i", 0)
+  common.feedkeys(vim.v.register, 0, "d", nil)
+  common.feedkeys(nil, 0, "i", nil)
+  virtual_cursors.visual_mode_delete_yank(vim.v.register, "d")
 end
 
 return M
