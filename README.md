@@ -202,7 +202,7 @@ opts = {
 }
 ```
 
-See the [Plugin compatibility](plugin-compatibility) section for more examples.
+See the [Plugin compatibility](#plugin-compatibility) section for more examples.
 
 ### `pre_hook` and `post_hook`
 
