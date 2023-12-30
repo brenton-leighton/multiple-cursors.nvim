@@ -30,7 +30,7 @@ The plugin doesn't initially bind any keys, but creates three commands:
 | `MultipleCursorsAddToWordUnderCursor` | Search for the word under the cursor and add cursors to each match. <br/> If called in visual mode, the visual area is saved and visual mode is exited. When the command is next called in normal mode, cursors will be added to only the matching words that begin within the saved visual area. |
 
 These commands can be bound to keys, e.g.:
-```
+```lua
 vim.keymap.set({"n", "i"}, "<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>")
 ```
 to bind the `MultipleCursorsAddDown` command to `Ctrl+Down` in normal and insert modes.
@@ -40,9 +40,9 @@ to bind the `MultipleCursorsAddDown` command to `Ctrl+Down` in normal and insert
 ### Using [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 Add a section to the Lazy plugins table, e.g.:
-```
+```lua
 "brenton-leighton/multiple-cursors.nvim",
-config = true,
+opts = {},
 keys = {
   {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i"}},
   {"<C-j>", "<Cmd>MultipleCursorsAddDown<CR>"},
@@ -111,7 +111,7 @@ Notable missing functionality:
 
 Options can be configured by providing an options table to the setup function, e.g. with Lazy:
 
-```
+```lua
 "brenton-leighton/multiple-cursors.nvim",
 opts = {
   enable_split_paste = false,
@@ -162,19 +162,96 @@ This option can be used to disabled any of the default key maps. Each element in
 
 Default value: `{}`
 
-This option allows for mapping keys to custom functions for use with multiple cursors. Each element in the `custom_key_maps` table must have three elements:
+This option allows for mapping keys to custom functions for use with multiple cursors. Each element in the `custom_key_maps` table must have three or four elements:
 
 - Mode (string|table): Mode short-name string (`"n"`, `"i"`, or `"v"`), or a table of mode short-name strings
 - Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
-- Function: Lua function, e.g. `function() vim.cmd("ExampleCommand") end`
+- Function: A Lua function that will be called at each cursor, which receives [`register`](https://neovim.io/doc/user/vvars.html#v%3Aregister) and [`count1`](https://neovim.io/doc/user/vvars.html#v%3Acount1) as arguments
+- Option: A optional string containing "m", "c", or "cc". These enable getting input from the user, which is then forwarded to the function:
+	- "m" indicates that a motion command (which can include a count in addition to the `count1` variable) is requested (i.e. operator pending mode)
+	- "c" indicates that a printable character is requested (e.g. for character search)
+	- "cc" indicates that two printable characters are requested
+	- If valid input isn't given by the user the function will not be called
+	- There will be no indication that Neovim is waiting for a motion command or character
 
-When a mapping is executed the given function will be called at each cursor.
+```lua
+opts = {
+  custom_key_maps = {
+
+    -- No option
+    {"n", "<Leader>a", function(register, count1)
+      vim.print(register .. count1 .. "a")
+    end}
+
+    -- Motion command
+    {"n", "<Leader>b", function(register, count1, motion_cmd)
+      vim.print(register .. count1 .. "b" .. motion_cmd)
+    end, "m"}
+
+    -- Character
+    {"n", "<Leader>c", function(register, count1, char)
+      vim.print(register .. count1 .. "c" .. char)
+    end, "c"}
+
+    -- Two characters
+    {"n", "<Leader>d", function(register, count1, char1, char2)
+      vim.print(register .. count1 .. "d" .. char1 .. char2)
+    end, "cc"}
+
+  }
+}
+```
+
+See the [Plugin compatibility](#plugin-compatibility) section for more examples.
 
 ### `pre_hook` and `post_hook`
 
 Default values: `nil`
 
 These options are to provide functions that are called a the start of initialisation and at the end of de-initialisation respectively.
+
+E.g. to disable `cursorline` while multiple cursors are active:
+
+```lua
+opts = {
+  pre_hook = function()
+    vim.opt.cursorline = false
+  end,
+  post_hook = function()
+    vim.opt.cursorline = true
+  end,
+}
+```
+
+## Plugin compatibility
+
+### [`chrisgrieser/nvim-spider`](https://github.com/chrisgrieser/nvim-spider)
+
+Improves `w`, `e`, and `b` motions. `count1` must be set before the motion function is called.
+
+```lua
+opts = {
+  custom_key_maps = {
+    -- w
+    {{"n", "x"}, "w", function(_, count1)
+      vim.cmd("normal! " .. count1)
+      require('spider').motion('w')
+    end},
+
+    -- e
+    {{"n", "x"}, "e", function(_, count1)
+      vim.cmd("normal! " .. count1)
+      require('spider').motion('e')
+    end},
+
+    -- b
+    {{"n", "x"}, "b", function(_, count1)
+      vim.cmd("normal! " .. count1)
+      require('spider').motion('b')
+    end},
+  }
+}
+```
 
 ## API
 
