@@ -232,7 +232,30 @@ opts = {
 
 ## Plugin compatibility
 
-### [`chrisgrieser/nvim-spider`](https://github.com/chrisgrieser/nvim-spider)
+### [windwp/nvim-autopairs](https://github.com/windwp/nvim-autopairs)
+
+Automatically inserts and deletes paired characters.
+There are a couple of issues with this plugin that mean it can't be installed along with multiple-cursors.nvim (the issues are that it creates mappings on the `InsertEnter` event, and that the mappings can't be overridden).
+An alternative is the [mini.pairs](#mini.pairs) plugin.
+
+### [mini.pairs](https://github.com/echasnovski/mini.nvim/blob/main/readmes/mini-pairs.md)
+
+Automatically inserts and deletes paired characters.
+If it were possible to call the plugin functions directly they could be mapped in `custom_key_maps`, but that doesn't seem to work.
+Therefore the plugin needs to be disabled while using multiple cursors:
+
+```lua
+opts = {
+  pre_hook = function()
+    vim.g.minipairs_disable = true
+  end,
+  post_hook = function()
+    vim.g.minipairs_disable = false
+  end,
+}
+```
+
+### [chrisgrieser/nvim-spider](https://github.com/chrisgrieser/nvim-spider)
 
 Improves `w`, `e`, and `b` motions. `count` must be set before the motion function is called.
 
