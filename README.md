@@ -2,7 +2,12 @@
 
 A multiple cursors plugin for Neovim that works the way multiple cursors work in other editors (such as Visual Studio Code or JetBrains IDEs). I.e. create extra cursors and then use Neovim as you normally would.
 
-Multiple cursors is a way of making edits at multiple positions, that's easier, faster, and/or more versatile than other methods available in Neovim (e.g. visual block mode or macros).
+Multiple cursors is a way of making edits at multiple positions, that's easier, faster, and/or more versatile than other methods available in Neovim (e.g. visual block mode, the repeat command, or macros). Cursors can be added with an up or down keyboard movement, a mouse click, or by finding matches to the word currently under the cursor.
+
+This plugin also has the ability to do "split pasting": if the number of lines of paste text matches the number of cursors, each line will be inserted at each cursor. This is only implmented for pasting, and not the put commands.
+
+The plugin works by overriding key mappings while multiple cursors are active. Any user defined key mappings will need to be added to the [custom_key_maps](#custom_key_maps) table to be used with multiple cursors.
+See the [Plugin compatibility](#plugin-compatibility) section for examples of how to work with specific plugins.
 
 ## Demos
 
@@ -10,7 +15,7 @@ Multiple cursors is a way of making edits at multiple positions, that's easier, 
 
 ![Basic usage](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/4ea42343-6784-458c-aedb-f16b958551e3)
 
-### Pasting
+### Split pasting
 
 ![Copying multi-line text and pasting to each cursor](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/2c063495-cf0a-4884-9c5a-9a3b86770c31)
 
@@ -86,7 +91,7 @@ After adding a new cursor the following functions are available:
 | Normal | Change to insert/replace mode | `a` `A` `i` `I` `o` `O` `R` | Count is ignored |
 | Insert/replace | Character insertion | | |
 | Insert/replace | Other edits | `<BS>` `<Del>` `<CR>` `<Tab>` | These commands are implemented manually, and may not behave correctly <br/> In replace mode `<BS>` will only move any virtual cursors back, and not undo edits |
-| Insert/replace | Paste | | By default if the number of lines in the paste text matches the number of cursors, each line of the text will be inserted at each cursor |
+| Insert/replace | Paste | | [Split pasting](#enable_split_paste) is enabled by default |
 | Insert | Change to replace mode | `<Insert>` | |
 | Normal | Change to visual mode | `v` | |
 | Visual | Swap cursor to other end of visual area | `o` | |
@@ -168,11 +173,13 @@ This option allows for mapping keys to custom functions for use with multiple cu
 - Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
 - Function: A Lua function that will be called at each cursor, which receives [`register`](https://neovim.io/doc/user/vvars.html#v%3Aregister) and [`count1`](https://neovim.io/doc/user/vvars.html#v%3Acount1) as arguments
 - Option: A optional string containing "m", "c", or "cc". These enable getting input from the user, which is then forwarded to the function:
-	- "m" indicates that a motion command (which can include a count in addition to the `count1` variable) is requested (i.e. operator pending mode)
+	- "m" indicates that a motion command is requested (i.e. operator pending mode). The motion command can can include a count in addition to the `count1` variable.
 	- "c" indicates that a printable character is requested (e.g. for character search)
 	- "cc" indicates that two printable characters are requested
 	- If valid input isn't given by the user the function will not be called
 	- There will be no indication that Neovim is waiting for a motion command or character
+
+Example usage:
 
 ```lua
 opts = {
@@ -210,7 +217,7 @@ Default values: `nil`
 
 These options are to provide functions that are called a the start of initialisation and at the end of de-initialisation respectively.
 
-E.g. to disable `cursorline` while multiple cursors are active:
+E.g. to disable [`cursorline`](https://neovim.io/doc/user/options.html#'cursorline') while multiple cursors are active:
 
 ```lua
 opts = {
@@ -227,7 +234,7 @@ opts = {
 
 ### [`chrisgrieser/nvim-spider`](https://github.com/chrisgrieser/nvim-spider)
 
-Improves `w`, `e`, and `b` motions. `count1` must be set before the motion function is called.
+Improves `w`, `e`, and `b` motions. `count` must be set before the motion function is called.
 
 ```lua
 opts = {
