@@ -150,7 +150,7 @@ local function custom_function_with_motion(func)
   local register = vim.v.register
   local count1 = vim.v.count1
 
-  -- Get a printable character
+  -- Get a motion command
   local motion_cmd = input.get_motion_cmd()
 
   if motion_cmd == nil then
@@ -187,6 +187,37 @@ local function custom_function_with_char(func)
   -- Call func for each virtual cursor and set the virtual cursor position
   virtual_cursors.edit_with_cursor(function(vc)
     func(register, count1, char)
+    vc:save_cursor_position()
+  end)
+
+end
+
+local function custom_function_with_motion_then_char(func)
+
+  -- Save register and count1 because they may be lost
+  local register = vim.v.register
+  local count1 = vim.v.count1
+
+  -- Get a motion command
+  local motion_cmd = input.get_motion_cmd()
+
+  if motion_cmd == nil then
+    return
+  end
+
+  -- Get a printable character
+  local char = input.get_char()
+
+  if char == nil then
+    return
+  end
+
+  -- Call func for the real cursor
+  func(register, count1, motion_cmd, char)
+
+  -- Call func for each virtual cursor and set the virtual cursor position
+  virtual_cursors.edit_with_cursor(function(vc)
+    func(register, count1, motion_cmd, char)
     vc:save_cursor_position()
   end)
 
@@ -238,6 +269,8 @@ function M.set_custom()
         wrapped_func = function() custom_function_with_motion(func) end
       elseif opt == "c" then -- Standard character
         wrapped_func = function() custom_function_with_char(func) end
+      elseif opt == "mc" then -- Standard character
+        wrapped_func = function() custom_function_with_motion_then_char(func) end
       elseif opt == "cc" then -- Two standard characters
         wrapped_func = function() custom_function_with_two_chars(func) end
       end

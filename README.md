@@ -177,6 +177,7 @@ This option allows for mapping keys to custom functions for use with multiple cu
 - Option: A optional string containing "m", "c", or "cc". These enable getting input from the user, which is then forwarded to the function:
 	- "m" indicates that a motion command is requested (i.e. operator pending mode). The motion command can can include a count in addition to the `count1` variable.
 	- "c" indicates that a printable character is requested (e.g. for character search)
+	- "mc" indicates that a motion command and a printable character is requested (e.g. for a surround action)
 	- "cc" indicates that two printable characters are requested
 	- If valid input isn't given by the user the function will not be called
 	- There will be no indication that Neovim is waiting for a motion command or character
@@ -189,22 +190,27 @@ opts = {
 
     -- No option
     {"n", "<Leader>a", function(register, count1)
-      vim.print(register .. count1 .. "a")
+      vim.print(register .. count1)
     end}
 
     -- Motion command
     {"n", "<Leader>b", function(register, count1, motion_cmd)
-      vim.print(register .. count1 .. "b" .. motion_cmd)
+      vim.print(register .. count1 .. motion_cmd)
     end, "m"}
 
     -- Character
     {"n", "<Leader>c", function(register, count1, char)
-      vim.print(register .. count1 .. "c" .. char)
+      vim.print(register .. count1 .. char)
     end, "c"}
+
+    -- Motion command then character
+    {"n", "<Leader>b", function(register, count1, motion_cmd, char)
+      vim.print(register .. count1 .. motion_cmd .. char)
+    end, "mc"}
 
     -- Two characters
     {"n", "<Leader>d", function(register, count1, char1, char2)
-      vim.print(register .. count1 .. "d" .. char1 .. char2)
+      vim.print(register .. count1 .. char1 .. char2)
     end, "cc"}
 
   }
