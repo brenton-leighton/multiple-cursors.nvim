@@ -47,7 +47,8 @@ to bind the `MultipleCursorsAddDown` command to `Ctrl+Down` in normal and insert
 Add a section to the Lazy plugins table, e.g.:
 ```lua
 "brenton-leighton/multiple-cursors.nvim",
-opts = {},
+version = "*",  -- Use the latest tagged version
+opts = {},  -- This causes the plugin setup function to be called
 keys = {
   {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i"}},
   {"<C-j>", "<Cmd>MultipleCursorsAddDown<CR>"},
@@ -118,6 +119,7 @@ Options can be configured by providing an options table to the setup function, e
 
 ```lua
 "brenton-leighton/multiple-cursors.nvim",
+version = "*",
 opts = {
   enable_split_paste = false,
   disabled_default_key_maps = {
