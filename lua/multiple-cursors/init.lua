@@ -123,24 +123,8 @@ default_key_maps = {
   {"x", "o", visual_mode.o},
 
   -- Modify visual area
-  {"x", "aw", visual_mode.aw},
-  {"x", "iw", visual_mode.iw},
-  {"x", "aW", visual_mode.aW},
-  {"x", "iW", visual_mode.iW},
-  {"x", "ab", visual_mode.ab},
-  {"x", "ib", visual_mode.ib},
-  {"x", "aB", visual_mode.aB},
-  {"x", "iB", visual_mode.iB},
-  {"x", "a>", visual_mode.a_greater_than},
-  {"x", "i>", visual_mode.i_greater_than},
-  {"x", "at", visual_mode.at},
-  {"x", "it", visual_mode.it},
-  {"x", [[a']], visual_mode.a_quote},
-  {"x", [[i']], visual_mode.i_quote},
-  {"x", [[a"]], visual_mode.a_double_quote},
-  {"x", [[i"]], visual_mode.i_double_quote},
-  {"x", "a`", visual_mode.a_backtick},
-  {"x", "i`", visual_mode.i_backtick},
+  {"x", "a", visual_mode.a},
+  {"x", "i", visual_mode.i},
 
   -- Join lines in visual mode
   {"x", "J", visual_mode.J},

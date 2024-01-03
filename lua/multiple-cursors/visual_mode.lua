@@ -2,6 +2,7 @@ local M = {}
 
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
+local input = require("multiple-cursors.input")
 
 -- Escape command
 function M.escape()
@@ -29,25 +30,32 @@ local function modify_area(cmd)
   common.feedkeys(nil, count, cmd, nil)
 end
 
-function M.o() modify_area("o") end
-function M.aw() modify_area("aw") end
-function M.iw() modify_area("iw") end
-function M.aW() modify_area("aW") end
-function M.iW() modify_area("iW") end
-function M.ab() modify_area("ab") end
-function M.ib() modify_area("ib") end
-function M.aB() modify_area("aB") end
-function M.iB() modify_area("iB") end
-function M.a_greater_than() modify_area("a>") end
-function M.i_greater_than() modify_area("i>") end
-function M.at() modify_area("at") end
-function M.it() modify_area("it") end
-function M.a_quote() modify_area([[a']]) end
-function M.i_quote() modify_area([[i']]) end
-function M.a_double_quote() modify_area([[a"]]) end
-function M.i_double_quote() modify_area([[i"]]) end
-function M.a_backtick() modify_area("a`") end
-function M.i_backtick() modify_area("i`") end
+-- o command
+function M.o()
+  modify_area("o")
+end
+
+-- "a" text object selection commands
+function M.a()
+  local char2 = input.get_text_object_sel_second_char()
+
+  if char2 then
+    modify_area("a" .. char2)
+  end
+
+  return
+end
+
+-- "i" text object selection commands
+function M.i()
+  local char2 = input.get_text_object_sel_second_char()
+
+  if char2 then
+    modify_area("i" .. char2)
+  end
+
+  return
+end
 
 
 -- Edit ------------------------------------------------------------------------
