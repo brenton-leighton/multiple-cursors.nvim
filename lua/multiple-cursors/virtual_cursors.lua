@@ -91,8 +91,13 @@ end
 
 -- Clear all virtual cursors
 function M.clear()
-  extmarks.clear()
   virtual_cursors = {}
+end
+
+function M.update_extmarks()
+  for _, vc in ipairs(virtual_cursors) do
+    extmarks.update_virtual_cursor_extmarks(vc)
+  end
 end
 
 function M.set_ignore_cursor_movement(_ignore_cursor_movement)

@@ -15,9 +15,12 @@ local search = require("multiple-cursors.search")
 
 local initialised = false
 local autocmd_group_id = nil
+local buf_enter_autocmd_id = nil
 
 local pre_hook = nil
 local post_hook = nil
+
+local bufnr = nil
 
 default_key_maps = {
   -- Left/right motion in normal/visual modes
@@ -170,6 +173,23 @@ default_key_maps = {
   {{"n", "i", "x"}, "<Esc>", function() M.escape() end},
 }
 
+local function buf_delete()
+  M.deinit(true)
+end
+
+local function buf_leave()
+  -- Deinitialise without clearing virtual cursors
+  M.deinit(false)
+end
+
+local function buf_enter()
+  -- Returning to buffer with multiple cursors
+  if vim.fn.bufnr() == bufnr then
+    M.init()
+    virtual_cursors.update_extmarks()
+  end
+end
+
 -- Create autocmds used by this plug-in
 local function create_autocmds()
 
@@ -206,29 +226,61 @@ local function create_autocmds()
       })
     end
 
+    vim.api.nvim_create_autocmd({"BufLeave"},
+      { group = autocmd_group_id, callback = buf_leave }
+    )
+
+    vim.api.nvim_create_autocmd({"BufDelete"},
+      { group = autocmd_group_id, callback = buf_delete }
+    )
+
 end
 
 -- Initialise
-local function init()
+function M.init()
   if not initialised then
+
     if pre_hook then pre_hook() end
+
     key_maps.save_existing()
     key_maps.set()
+
     create_autocmds()
+
     paste.override_handler()
+
+    -- Initialising in a new buffer
+    if not bufnr or vim.fn.bufnr() ~= bufnr then
+      extmarks.clear()
+      virtual_cursors.clear()
+      bufnr = vim.fn.bufnr()
+      buf_enter_autocmd_id = vim.api.nvim_create_autocmd({"BufEnter"}, {callback=buf_enter})
+    end
 
     initialised = true
   end
 end
 
 -- Deinitialise
-local function deinit()
+function M.deinit(clear_virtual_cursors)
   if initialised then
-    virtual_cursors.clear()
+
+    if clear_virtual_cursors then
+      virtual_cursors.clear()
+      bufnr = nil
+      vim.api.nvim_del_autocmd(buf_enter_autocmd_id)
+      buf_enter_autocmd_id = nil
+    end
+
+    extmarks.clear()
+
     key_maps.delete()
     key_maps.restore_existing()
+
     vim.api.nvim_clear_autocmds({group = autocmd_group_id}) -- Clear autocmds
+
     paste.revert_handler()
+
     if post_hook then post_hook() end
 
     initialised = false
@@ -237,14 +289,14 @@ end
 
 -- Normal mode undo will exit because cursor positions can't be restored
 function M.undo()
-  deinit()
+  M.deinit(true)
   common.feedkeys(nil, vim.v.count, "u", nil)
 end
 
 -- Escape key
 function M.escape()
   if common.is_mode("n") then
-    deinit()
+    M.deinit(true)
   elseif common.is_mode_insert_replace() then
     insert_mode.escape()
   elseif common.is_mode("v") then
@@ -257,7 +309,7 @@ end
 -- Add a virtual cursor then move the real cursor up or down
 local function add_virtual_cursor_at_real_cursor(down)
   -- Initialise if this is the first cursor
-  init()
+  M.init()
 
   -- Add virtual cursor at the real cursor position
   local pos = vim.fn.getcurpos()
@@ -284,7 +336,7 @@ end
 
 -- Add or delete a virtual cursor at the mouse position
 function M.mouse_add_delete_cursor()
-  init() -- Initialise if this is the first cursor
+  M.init() -- Initialise if this is the first cursor
 
   local mouse_pos = vim.fn.getmousepos()
 
@@ -292,7 +344,7 @@ function M.mouse_add_delete_cursor()
   virtual_cursors.add_or_delete(mouse_pos.line, mouse_pos.column)
 
   if virtual_cursors.get_num_virtual_cursors() == 0 then
-    deinit() -- Deinitialise if there are no more cursors
+    M.deinit(true) -- Deinitialise if there are no more cursors
   end
 end
 
@@ -300,7 +352,7 @@ end
 function M.add_cursor(lnum, col, curswant)
 
   -- Initialise if this is the first cursor
-  init()
+  M.init()
 
   -- Add a virtual cursor
   virtual_cursors.add(lnum, col, curswant)
@@ -333,10 +385,7 @@ function M.add_cursors_to_word_under_cursor()
   end
 
   -- Initialise if not already initialised
-  init()
-
-  -- Clear any existing cursors
-  virtual_cursors.clear()
+  M.init()
 
   -- Create a virtual cursor at every match
   for idx = 1, #matches do
