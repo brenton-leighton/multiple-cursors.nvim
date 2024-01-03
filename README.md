@@ -291,6 +291,23 @@ opts = {
 }
 ```
 
+### [mini.surround](https://github.com/echasnovski/mini.surround) and [kylechui/nvim-surround](https://github.com/kylechui/nvim-surround)
+
+Adds characters to surround text.
+The issue with both of these plugins is that they don't have functions that can be given the motion and character as arguments.
+
+One workaround would be to use a different key sequence to execute the command while using multiple cursors, e.g. for mini.pairs `sa` command:
+
+```lua
+custom_key_maps = {
+  {"n", "<Leader>sa", function(_, count1, motion_cmd, char)
+    vim.cmd("normal " .. count1 .. "sa" .. motion_cmd .. char)
+  end, "mc"},
+},
+```
+
+This would map `<Leader>sa` to work like `sa`.
+
 ## API
 
 ### `add_cursor(lnum, col, curswant)`
