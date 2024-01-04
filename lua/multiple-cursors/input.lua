@@ -60,6 +60,30 @@ local search_motions = {
   ["T"] = true,
 }
 
+-- The second character in a text object selection
+local text_object_selections = {
+
+  ["w"] = true,
+  ["W"] = true,
+  ["s"] = true,
+  ["p"] = true,
+  ["]"] = true,
+  ["["] = true,
+  [")"] = true,
+  ["("] = true,
+  ["b"] = true,
+  ["B"] = true,
+  [">"] = true,
+  ["<"] = true,
+  ["t"] = true,
+  ["}"] = true,
+  ["{"] = true,
+  ["\'"] = true,
+  ["\""] = true,
+  ["`"] = true,
+
+}
+
 -- Get a standard character and returns nil for anything else
 function M.get_char()
 
@@ -99,9 +123,21 @@ function M.get_two_chars()
 
 end
 
+-- Get the second character of a text object selection
+function M.get_text_object_sel_second_char()
+  local char = vim.fn.getcharstr()
+
+  -- If the character is a valid text object selection second character
+  if text_object_selections[char] then
+    return char
+  end
+
+  return nil
+end
+
 -- Wait for a motion command
--- Returns a normal motion command (which may inclue a count) or nil if no valid
--- motion was given
+-- Returns a normal motion command (which may include a count) or nil if no
+-- valid motion was given
 function M.get_motion_cmd()
 
   -- Wait for a character
@@ -125,16 +161,26 @@ function M.get_motion_cmd()
 
     if char then -- Valid character
       return count .. motion_char .. char
-    else
-      return nil
     end
+
+    return nil
+  end
+
+  -- If the character is a text object selection first character
+  if motion_char == "a" or motion_char == "i" then
+    -- Get a text object selection second character
+    local char2 = M.get_text_object_sel_second_char()
+
+    if char2 then
+      return count .. motion_char .. char2
+    end
+
+    return nil
   end
 
   -- If the character is a valid motion
   if motions[motion_char] then
     return count .. motions[motion_char]
-  else
-    return nil
   end
 
   return nil
