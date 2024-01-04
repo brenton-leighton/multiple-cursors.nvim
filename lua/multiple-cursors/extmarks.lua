@@ -41,7 +41,13 @@ local function set_extmark(lnum, col, mark_id, hl_group, priority)
     opts.virt_text_pos = "overlay"
   else
     -- Otherwise highlight the character
-    opts.end_col = col
+
+    -- Convert col to char index
+    local line = vim.fn.getline(lnum)
+    local col_char = vim.fn.charidx(line, col - 1)
+
+    -- end_col is the byte index of the next character
+    opts.end_col = vim.fn.byteidx(line, col_char + 1)
     opts.hl_group = hl_group
   end
 
