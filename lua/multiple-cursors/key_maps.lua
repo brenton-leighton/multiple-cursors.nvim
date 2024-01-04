@@ -223,30 +223,6 @@ local function custom_function_with_motion_then_char(func)
 
 end
 
-local function custom_function_with_two_chars(func)
-
-  -- Save register and count1 because they may be lost
-  local register = vim.v.register
-  local count1 = vim.v.count1
-
-  -- Get two printable characters
-  local char1, char2 = input.get_two_chars()
-
-  if char1 == nil or char2 == nil then
-    return
-  end
-
-  -- Call func for the real cursor
-  func(register, count1, char1, char2)
-
-  -- Call func for each virtual cursor and set the virtual cursor position
-  virtual_cursors.edit_with_cursor(function(vc)
-    func(register, count1, char1, char2)
-    vc:save_cursor_position()
-  end)
-
-end
-
 -- Set any custom key maps
 -- This is a separate function because it's also used by the LazyLoad autocmd
 function M.set_custom()
@@ -271,8 +247,6 @@ function M.set_custom()
         wrapped_func = function() custom_function_with_char(func) end
       elseif opt == "mc" then -- Standard character
         wrapped_func = function() custom_function_with_motion_then_char(func) end
-      elseif opt == "cc" then -- Two standard characters
-        wrapped_func = function() custom_function_with_two_chars(func) end
       end
     end
 
