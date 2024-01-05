@@ -91,8 +91,7 @@ function M.get_matches_and_move_cursor(word)
   end
 
   -- Find the match for the real cursor
-  for idx = 1, #matches do
-    local match = matches[idx]
+  for idx, match in ipairs(matches) do
 
     -- If match is on the same line as the cursor
     if match[1] == cursor_pos[2] then

@@ -55,8 +55,7 @@ end
 function M.add(lnum, col, curswant)
 
   -- Check for existing virtual cursor
-  for idx = 1, #virtual_cursors do
-    local vc = virtual_cursors[idx]
+  for _, vc in ipairs(virtual_cursors) do
     if vc.col == col and vc.lnum == lnum then
       return
     end
@@ -74,8 +73,7 @@ function M.add_or_delete(lnum, col)
   -- Find any existing virtual cursor
   local delete = false
 
-  for idx = 1, #virtual_cursors do
-    local vc = virtual_cursors[idx]
+  for _, vc in ipairs(virtual_cursors) do
     if vc.col == col and vc.lnum == lnum then
       vc.delete = true
       delete = true
@@ -151,8 +149,7 @@ function M.visit_all(func)
     vim.wo.ve = "onemore"
   end
 
-  for idx = 1, #virtual_cursors do
-    local vc = virtual_cursors[idx]
+  for _, vc in ipairs(virtual_cursors) do
 
     if vc.within_buffer then
       -- Set virtual cursor position from extmark in case there were any changes
@@ -413,8 +410,7 @@ function M.can_split_paste(num_lines)
   -- Get the number of editable virtual cursors
   local count = 0
 
-  for idx = 1, #virtual_cursors do
-    local vc = virtual_cursors[idx]
+  for _, vc in ipairs(virtual_cursors) do
     if vc.within_buffer and vc.editable then
       count = count + 1
     end
@@ -435,8 +431,7 @@ function M.reorder_lines_for_split_pasting(lines)
 
   local cursor_line_idx = 0
 
-  for idx = 1, #virtual_cursors do
-    local vc = virtual_cursors[idx]
+  for idx, vc in ipairs(virtual_cursors) do
 
     if vc.lnum == real_cursor_pos[2] then
       if vc.col > real_cursor_pos[3] then
