@@ -328,42 +328,8 @@ end
 
 -- Visual mode -----------------------------------------------------------------
 
--- Restore a saved visual area
-local function restore_visual_area(prev_visual_area)
-  vim.cmd("normal!:") -- Exit to normal mode
-  vim.api.nvim_buf_set_mark(0, "<", prev_visual_area[1], prev_visual_area[2] - 1, {})
-  vim.api.nvim_buf_set_mark(0, ">", prev_visual_area[3], prev_visual_area[4] - 1, {})
-  vim.cmd("normal! gv") -- Return to visual mode
-end
-
--- Modify visual areas without changing the buffer
-function M.visual_mode_modify_area(func)
-
-  ignore_cursor_movement = true
-
-  -- Save the visual area
-  local visual_area = common.get_visual_area()
-
-  M.visit_in_buffer(function(vc, idx)
-    -- Set visual area
-    vc:set_visual_area()
-
-    -- Call func
-    func(vc, idx)
-
-    -- Save visual area to virtual cursor
-    vc:save_visual_area()
-  end)
-
-  -- Restore the visual area
-  restore_visual_area(visual_area)
-
-  ignore_cursor_movement = false
-
-end
-
--- Perform edit on each visual area
-function M.visual_mode_edit(func)
+-- Call func on the visual area of each virtual cursor
+function M.visual_mode(func)
 
   ignore_cursor_movement = true
 
@@ -376,13 +342,19 @@ function M.visual_mode_edit(func)
 
     -- Call func
     func(vc, idx)
-    -- Edit commands will exit
 
-    vc:save_cursor_position()
+    -- Did func exit visual mode?
+    if common.is_mode("v") then
+      -- Save visual area to virtual cursor
+      vc:save_visual_area()
+    else  -- Edit commands will exit visual mode
+      -- Save cursor
+      vc:save_cursor_position()
 
-    -- Clear the visual area
-    vc.visual_start_lnum = 0
-    vc.visual_start_col = 0
+      -- Clear the visual area
+      vc.visual_start_lnum = 0
+      vc.visual_start_col = 0
+    end
   end)
 
   -- Restore the visual area from extmarks
@@ -394,7 +366,7 @@ end
 
 function M.visual_mode_delete_yank(register, cmd)
 
-  M.visual_mode_edit(function(vc, idx)
+  M.visual_mode(function(vc, idx)
     common.normal_bang(register, 0, cmd, nil)
     vc:save_register(register)
   end)

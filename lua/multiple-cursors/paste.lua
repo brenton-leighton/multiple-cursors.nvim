@@ -99,7 +99,7 @@ local function paste(lines)
   -- Visual mode
   if common.is_mode("v") then
 
-    virtual_cursors.visual_mode_edit(function(vc, idx)
+    virtual_cursors.visual_mode(function(vc, idx)
       if split_paste then
         virtual_cursor_visual_mode_paste({lines[idx]}, vc)
       else
