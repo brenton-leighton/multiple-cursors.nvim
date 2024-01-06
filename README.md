@@ -171,7 +171,7 @@ Default value: `{}`
 
 This option allows for mapping keys to custom functions for use with multiple cursors. Each element in the `custom_key_maps` table must have three or four elements:
 
-- Mode (string|table): Mode short-name string (`"n"`, `"i"`, or `"v"`), or a table of mode short-name strings
+- Mode (string|table): Mode short-name string (`"n"` or `"i"`), or a table of mode short-name strings (custom key maps are not currently working in visual mode).
 - Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
 - Function: A Lua function that will be called at each cursor, which receives [`register`](https://neovim.io/doc/user/vvars.html#v%3Aregister) and [`count1`](https://neovim.io/doc/user/vvars.html#v%3Acount1) as arguments
 - Option: A optional string containing "m", "c", or "cc". These enable getting input from the user, which is then forwarded to the function:
@@ -265,19 +265,19 @@ Improves `w`, `e`, and `b` motions. `count` must be set before the motion functi
 opts = {
   custom_key_maps = {
     -- w
-    {{"n", "x"}, "w", function(_, count1)
+    {"n", "w", function(_, count1)
       vim.cmd("normal! " .. count1)
       require('spider').motion('w')
     end},
 
     -- e
-    {{"n", "x"}, "e", function(_, count1)
+    {"n", "e", function(_, count1)
       vim.cmd("normal! " .. count1)
       require('spider').motion('e')
     end},
 
     -- b
-    {{"n", "x"}, "b", function(_, count1)
+    {"n", "b", function(_, count1)
       vim.cmd("normal! " .. count1)
       require('spider').motion('b')
     end},
