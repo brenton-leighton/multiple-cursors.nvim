@@ -332,27 +332,8 @@ function M.mouse_add_delete_cursor()
   end
 end
 
--- Add a new cursor at given position
-function M.add_cursor(lnum, col, curswant)
-
-  -- Initialise if this is the first cursor
-  M.init()
-
-  -- Add a virtual cursor
-  virtual_cursors.add(lnum, col, curswant)
-
-end
-
--- Add cursors to each instance of the word under the real cursor
-function M.add_cursors_to_word_under_cursor()
-
-  -- If visual mode
-  if common.is_mode("v") then
-    -- Just exit visual mode and save the area
-    vim.cmd("normal!:")
-    search.save_previous_visual_area()
-    return
-  end
+-- Add cursors to each match of the word under the real cursor
+local function _add_cursors_to_cword(use_prev_visual_area)
 
   local word = vim.fn.expand("<cword>")
 
@@ -362,7 +343,7 @@ function M.add_cursors_to_word_under_cursor()
   end
 
   -- Find matches (without the one for the cursor) and move the cursor to its match
-  local matches = search.get_matches_and_move_cursor(word)
+  local matches = search.get_matches_and_move_cursor(word, use_prev_visual_area)
 
   if matches == nil then
     return
@@ -378,6 +359,24 @@ function M.add_cursors_to_word_under_cursor()
   end
 
   vim.print(#matches .. " cursors added")
+
+end
+
+-- Add cursors to each match of the word under the real cursor
+function M.add_cursors_to_cword() _add_cursors_to_cword(false) end
+
+-- Add cursors to each match of the word under the real cursor, only within the
+-- previous visual area
+function M.add_cursors_to_cword_v() _add_cursors_to_cword(true) end
+
+-- Add a new cursor at given position
+function M.add_cursor(lnum, col, curswant)
+
+  -- Initialise if this is the first cursor
+  M.init()
+
+  -- Add a virtual cursor
+  virtual_cursors.add(lnum, col, curswant)
 
 end
 
@@ -414,7 +413,8 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("MultipleCursorsAddDown", M.add_cursor_down, {})
   vim.api.nvim_create_user_command("MultipleCursorsAddUp", M.add_cursor_up, {})
   vim.api.nvim_create_user_command("MultipleCursorsMouseAddDelete", M.mouse_add_delete_cursor, {})
-  vim.api.nvim_create_user_command("MultipleCursorsAddToWordUnderCursor", M.add_cursors_to_word_under_cursor, {})
+  vim.api.nvim_create_user_command("MultipleCursorsAddToCword", M.add_cursors_to_cword, {})
+  vim.api.nvim_create_user_command("MultipleCursorsAddToCwordV", M.add_cursors_to_cword_v, {})
 
 end
 
