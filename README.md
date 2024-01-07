@@ -1,12 +1,13 @@
 # multiple-cursors.nvim
 
-A multiple cursors plugin for Neovim that works the way multiple cursors work in other editors (such as Visual Studio Code or JetBrains IDEs). I.e. create extra cursors and then use Neovim as you normally would.
+A multiple cursors plugin for Neovim that works the way multiple cursors work in other editors (such as Visual Studio Code or JetBrains IDEs).
+I.e. create extra cursors and then use Neovim as you normally would.
+Cursors can be added with an up/down movement, with a mouse click, or by searching for a pattern.
 
-Multiple cursors is a way of making edits at multiple positions, that's easier, faster, and/or more versatile than other methods available in Neovim (e.g. visual block mode, the repeat command, or macros). Cursors can be added with an up or down keyboard movement, a mouse click, or by finding matches to the word currently under the cursor.
+This plugin also has the ability to do "split pasting": if the number of lines of paste text matches the number of cursors, each line will be inserted at each cursor (this is only implemented for pasting, and not the put commands).
 
-This plugin also has the ability to do "split pasting": if the number of lines of paste text matches the number of cursors, each line will be inserted at each cursor. This is only implmented for pasting, and not the put commands.
-
-The plugin works by overriding key mappings while multiple cursors are active. Any user defined key mappings will need to be added to the [custom_key_maps](#custom_key_maps) table to be used with multiple cursors.
+The plugin works by overriding key mappings while multiple cursors are active.
+Any user defined key mappings will need to be added to the [custom_key_maps](#custom_key_maps) table to be used with multiple cursors.
 See the [Plugin compatibility](#plugin-compatibility) section for examples of how to work with specific plugins.
 
 ## Demos
@@ -32,7 +33,8 @@ The plugin doesn't initially bind any keys, but creates three commands:
 | `MultipleCursorsAddDown` | Add a new virtual cursor, then move the real cursor down |
 | `MultipleCursorsAddUp` | Add a new virtual cursor, then move the real cursor up |
 | `MultipleCursorsMouseAddDelete` | Add a new virtual cursor to the mouse click position, unless there is already a virtual cursor at the mouse click position, in which case it is removed |
-| `MultipleCursorsAddToWordUnderCursor` | Search for the word under the cursor and add cursors to each match. <br/> If called in visual mode, the visual area is saved and visual mode is exited. When the command is next called in normal mode, cursors will be added to only the matching words that begin within the saved visual area. |
+| `MultipleCursorsAddBySearch` | Search for the word under the cursor (in normal mode) or the visual area (in visual mode) and add cursors to each match |
+| `MultipleCursorsAddBySearchV` | As above, but limit matches to the previous visual area |
 
 These commands can be bound to keys, e.g.:
 ```lua
@@ -55,7 +57,8 @@ keys = {
   {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i"}},
   {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>"},
   {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}},
-  {"<Leader>a", "<Cmd>MultipleCursorsAddToWordUnderCursor<CR>", mode = {"n", "v"}},
+  {"<Leader>a", "<Cmd>MultipleCursorsAddBySearch<CR>", mode = {"n", "x"}},
+  {"<Leader>A", "<Cmd>MultipleCursorsAddBySearchV<CR>", mode = {"n", "x"}},
 },
 ```
 
@@ -66,7 +69,8 @@ This configures the plugin with the default options, and sets the following key 
 - `Ctrl+Up` in normal and insert modes: `MultipleCursorsAddUp`
 - `Ctrl+k` in normal mode: `MultipleCursorsAddUp`
 - `Ctrl+LeftClick` in normal and insert modes: `MultipleCursorsMouseAddDelete`
-- `Leader+a` in normal and visual modes: `MultipleCursorsAddToWordUnderCursor` (note: `<Leader>` must have been set previously)
+- `Leader+a` in normal and visual modes: `MultipleCursorsAddBySearch` (note: `<Leader>` must have been set previously)
+- `Leader+A` in normal and visual modes: `MultipleCursorsAddBySearchV`
 
 ## Usage
 
