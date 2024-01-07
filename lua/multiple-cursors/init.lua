@@ -332,21 +332,73 @@ function M.mouse_add_delete_cursor()
   end
 end
 
--- Add cursors to each match of the word under the real cursor
-local function _add_cursors_to_cword(use_prev_visual_area)
+-- Get the current visual area normalised
+local function get_visual_area()
+  local v_lnum = vim.fn.line("v")
+  local v_col = vim.fn.col("v")
+  local c_lnum = vim.fn.line(".")
+  local c_col = vim.fn.col(".")
 
-  local word = vim.fn.expand("<cword>")
+  if v_lnum == 0 or v_col == 0  or c_lnum == 0 or c_col == 0 then
+    return nil
+  end
 
-  -- No word under cursor
-  if word == "" then
+  -- Normalise
+  if v_lnum < c_lnum then
+    return v_lnum, v_col, c_lnum, c_col
+  elseif c_lnum < v_lnum then
+    return c_lnum, c_col, v_lnum, v_col
+  else -- v_lnum == c_lnum
+    if v_col <= c_col then
+      return v_lnum, v_col, c_lnum, c_col
+    else -- c_col < v_col
+      return c_lnum, c_col, v_lnum, v_col
+    end
+  end
+end
+
+local function get_visual_area_text()
+
+ local lnum1, col1, lnum2, col2 = get_visual_area()
+
+  if lnum1 ~= lnum2 then
+    vim.print("Search pattern must be a single line")
+    return nil
+  end
+
+  local line = vim.fn.getline(lnum1)
+  return line:sub(col1, col2)
+
+end
+
+-- Add cursors by searching for the word under the cursor or visual area
+local function _add_cursors_by_search(use_prev_visual_area)
+
+  local pattern = nil
+
+  if common.is_mode("v") then
+    pattern = get_visual_area_text()
+  else
+    -- Use the word under the cursor
+    pattern = vim.fn.expand("<cword>")
+  end
+
+  -- No pattern
+  if not pattern or pattern == "" then
     return
   end
 
   -- Find matches (without the one for the cursor) and move the cursor to its match
-  local matches = search.get_matches_and_move_cursor(word, use_prev_visual_area)
+  local matches = search.get_matches_and_move_cursor(pattern, use_prev_visual_area)
 
   if matches == nil then
+    vim.print("No matches found")
     return
+  end
+
+  -- Exit visual mode
+  if common.is_mode("v") then
+    vim.cmd("normal!:")
   end
 
   -- Initialise if not already initialised
@@ -363,11 +415,11 @@ local function _add_cursors_to_cword(use_prev_visual_area)
 end
 
 -- Add cursors to each match of the word under the real cursor
-function M.add_cursors_to_cword() _add_cursors_to_cword(false) end
+function M.add_cursors_by_search() _add_cursors_by_search(false) end
 
 -- Add cursors to each match of the word under the real cursor, only within the
 -- previous visual area
-function M.add_cursors_to_cword_v() _add_cursors_to_cword(true) end
+function M.add_cursors_by_search_v() _add_cursors_by_search(true) end
 
 -- Add a new cursor at given position
 function M.add_cursor(lnum, col, curswant)
@@ -413,8 +465,8 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("MultipleCursorsAddDown", M.add_cursor_down, {})
   vim.api.nvim_create_user_command("MultipleCursorsAddUp", M.add_cursor_up, {})
   vim.api.nvim_create_user_command("MultipleCursorsMouseAddDelete", M.mouse_add_delete_cursor, {})
-  vim.api.nvim_create_user_command("MultipleCursorsAddToCword", M.add_cursors_to_cword, {})
-  vim.api.nvim_create_user_command("MultipleCursorsAddToCwordV", M.add_cursors_to_cword_v, {})
+  vim.api.nvim_create_user_command("MultipleCursorsAddBySearch", M.add_cursors_by_search, {})
+  vim.api.nvim_create_user_command("MultipleCursorsAddBySearchV", M.add_cursors_by_search_v, {})
 
 end
 
