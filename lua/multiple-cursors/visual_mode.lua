@@ -23,7 +23,7 @@ end
 local function modify_area(cmd)
   local count = vim.v.count
 
-  virtual_cursors.visual_mode_modify_area(function()
+  virtual_cursors.visual_mode(function()
     common.normal_bang(nil, count, cmd, nil)
   end)
 
@@ -63,7 +63,7 @@ end
 local function edit(cmd)
   local count = vim.v.count
 
-  virtual_cursors.visual_mode_edit(function()
+  virtual_cursors.visual_mode(function()
     common.normal_bang(nil, count, cmd, nil)
   end)
 

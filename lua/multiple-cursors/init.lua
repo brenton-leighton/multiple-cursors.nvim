@@ -405,8 +405,7 @@ local function _add_cursors_by_search(use_prev_visual_area)
   M.init()
 
   -- Create a virtual cursor at every match
-  for idx = 1, #matches do
-    local match = matches[idx]
+  for _, match in ipairs(matches) do
     virtual_cursors.add(match[1], match[2], match[2])
   end
 

@@ -35,7 +35,7 @@ function M.r()
 
   if char ~= nil then
     common.feedkeys(nil, count, "r" .. char, nil)
-    virtual_cursors.edit_with_normal_command(vim.v.count, "r" .. char, nil)
+    virtual_cursors.edit_with_normal_command(count, "r" .. char, nil)
   end
 end
 

@@ -39,7 +39,7 @@ local function wrap_in_table(x)
   end
 end
 
--- Is the mode and key in custom_key_maps or override default key maps?
+-- Is the mode and key in custom_key_maps or disabled_default_key_maps?
 local function is_in_table(t, mode, key)
 
   if next(t) == nil then
@@ -47,12 +47,12 @@ local function is_in_table(t, mode, key)
   end
 
   for i=1, #t do
-    local modes = wrap_in_table(t[i][1])
-    local keys = wrap_in_table(t[i][2])
+    local t_modes = wrap_in_table(t[i][1])
+    local t_keys = wrap_in_table(t[i][2])
 
-    for j=1, #modes do
-      for k=1, #keys do
-        if mode == modes[j] and key == keys[k] then
+    for _, t_mode in ipairs(t_modes) do
+      for _, t_key in ipairs(t_keys) do
+        if mode == t_mode and key == t_key then
           return true
         end
       end
@@ -86,27 +86,27 @@ end
 function M.save_existing()
 
   -- Default key maps
-  for i=1, #default_key_maps do
-    local modes = wrap_in_table(default_key_maps[i][1])
-    local keys = wrap_in_table(default_key_maps[i][2])
+  for _, default_key_map in ipairs(default_key_maps) do
+    local modes = wrap_in_table(default_key_map[1])
+    local keys = wrap_in_table(default_key_map[2])
 
-    for j=1, #modes do
-      for k=1, #keys do
-        if is_default_key_map_allowed(modes[j], keys[k]) then
-          save_existing_key_map(modes[j], keys[k])
+    for _, mode in ipairs(modes) do
+      for _, key in ipairs(keys) do
+        if is_default_key_map_allowed(mode, key) then
+          save_existing_key_map(mode, key)
         end
       end
     end
   end
 
   -- Custom key maps
-  for i=1, #custom_key_maps do
-    local custom_modes = wrap_in_table(custom_key_maps[i][1])
-    local custom_keys = wrap_in_table(custom_key_maps[i][2])
+  for _, custom_key_map in ipairs(custom_key_maps) do
+    local custom_modes = wrap_in_table(custom_key_map[1])
+    local custom_keys = wrap_in_table(custom_key_map[2])
 
-    for j=1, #custom_modes do
-      for k=1, #custom_keys do
-        save_existing_key_map(custom_modes[j], custom_keys[k])
+    for _, custom_mode in ipairs(custom_modes) do
+      for _, custom_key in ipairs(custom_keys) do
+        save_existing_key_map(custom_mode, custom_key)
       end
     end
   end
@@ -116,9 +116,9 @@ end
 -- Restore key maps
 function M.restore_existing()
 
-  for i=1, #existing_key_maps do
-    local mode = existing_key_maps[i][1]
-    local dict = existing_key_maps[i][2]
+  for _, existing_key_map in ipairs(existing_key_maps) do
+    local mode = existing_key_map[1]
+    local dict = existing_key_map[2]
 
     vim.fn.mapset(mode, false, dict)
   end
@@ -227,9 +227,7 @@ end
 -- This is a separate function because it's also used by the LazyLoad autocmd
 function M.set_custom()
 
-  for i=1, #custom_key_maps do
-
-    custom_key_map = custom_key_maps[i]
+  for _, custom_key_map in ipairs(custom_key_maps) do
 
     local custom_modes = wrap_in_table(custom_key_map[1])
     local custom_keys = wrap_in_table(custom_key_map[2])
@@ -264,15 +262,15 @@ end
 function M.set()
 
   -- Default key maps
-  for i=1, #default_key_maps do
-    local modes = wrap_in_table(default_key_maps[i][1])
-    local keys = wrap_in_table(default_key_maps[i][2])
-    local func = default_key_maps[i][3]
+  for _, default_key_map in ipairs(default_key_maps) do
+    local modes = wrap_in_table(default_key_map[1])
+    local keys = wrap_in_table(default_key_map[2])
+    local func = default_key_map[3]
 
-    for j=1, #modes do
-      for k=1, #keys do
-        if is_default_key_map_allowed(modes[j], keys[k]) then
-          vim.keymap.set(modes[j], keys[k], func)
+    for _, mode in ipairs(modes) do
+      for _, key in ipairs(keys) do
+        if is_default_key_map_allowed(mode, key) then
+          vim.keymap.set(mode, key, func)
         end
       end
     end
@@ -287,28 +285,28 @@ end
 function M.delete()
 
   -- Default key maps
-  for i=1, #default_key_maps do
-    local modes = wrap_in_table(default_key_maps[i][1])
-    local keys = wrap_in_table(default_key_maps[i][2])
+  for _, default_key_map in ipairs(default_key_maps) do
+    local modes = wrap_in_table(default_key_map[1])
+    local keys = wrap_in_table(default_key_map[2])
 
-    for j=1, #modes do
-      for k=1, #keys do
-        if is_default_key_map_allowed(modes[j], keys[k]) then
-          vim.keymap.del(modes[j], keys[k])
+    for _, mode in ipairs(modes) do
+      for _, key in ipairs(keys) do
+        if is_default_key_map_allowed(mode, key) then
+          vim.keymap.del(mode, key)
         end
       end
     end
   end
 
   -- Custom key maps
-  for i=1, #custom_key_maps do
-    local custom_modes = wrap_in_table(custom_key_maps[i][1])
-    local custom_keys = wrap_in_table(custom_key_maps[i][2])
-    local func = custom_key_maps[i][3]
+  for _, custom_key_map in ipairs(custom_key_maps) do
+    local custom_modes = wrap_in_table(custom_key_map[1])
+    local custom_keys = wrap_in_table(custom_key_map[2])
+    local func = custom_key_map[3]
 
-    for j=1, #custom_modes do
-      for k=1, #custom_keys do
-        vim.keymap.del(custom_modes[j], custom_keys[k])
+    for _, custom_mode in ipairs(custom_modes) do
+      for _, custom_key in ipairs(custom_keys) do
+        vim.keymap.del(custom_mode, custom_key)
       end
     end
   end
