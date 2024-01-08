@@ -372,7 +372,7 @@ function M.add_cursors_to_word_under_cursor()
   M.init()
 
   -- Create a virtual cursor at every match
-  for _, match in matches do
+  for _, match in ipairs(matches) do
     virtual_cursors.add(match[1], match[2], match[2])
   end
 
