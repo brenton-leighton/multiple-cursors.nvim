@@ -29,7 +29,7 @@ function M.get_matches_and_move_cursor(word, use_prev_visual_area)
     local visual_area_start = vim.api.nvim_buf_get_mark(0, "<")
     visual_area_end = vim.api.nvim_buf_get_mark(0, ">")
 
-    if visual_area_start[1] == 0 or visual_area_start[2] == 0 or visual_area_end[1] == 0 or visual_area_end[2] == 0 then
+    if visual_area_start[1] == 0 or visual_area_end[1] == 0 then
       vim.print("No previous visual area")
       return
     end
@@ -94,6 +94,7 @@ function M.get_matches_and_move_cursor(word, use_prev_visual_area)
     -- Restore the cursor and return nil
     vim.fn.cursor({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
     virtual_cursors.set_ignore_cursor_movement(false)
+    vim.print("No matches found")
     return nil
   end
 

@@ -392,7 +392,6 @@ local function _add_cursors_by_search(use_prev_visual_area)
   local matches = search.get_matches_and_move_cursor(pattern, use_prev_visual_area)
 
   if matches == nil then
-    vim.print("No matches found")
     return
   end
 
