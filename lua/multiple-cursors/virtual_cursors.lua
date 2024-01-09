@@ -149,7 +149,7 @@ function M.visit_all(func)
     vim.wo.ve = "onemore"
   end
 
-  for _, vc in ipairs(virtual_cursors) do
+  for idx, vc in ipairs(virtual_cursors) do
 
     if vc.within_buffer then
       -- Set virtual cursor position from extmark in case there were any changes
