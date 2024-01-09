@@ -229,9 +229,11 @@ E.g. to disable [`cursorline`](https://neovim.io/doc/user/options.html#'cursorli
 opts = {
   pre_hook = function()
     vim.opt.cursorline = false
+    vim.cmd("NoMatchParen")
   end,
   post_hook = function()
     vim.opt.cursorline = true
+    vim.cmd("DoMatchParen")
   end,
 }
 ```
