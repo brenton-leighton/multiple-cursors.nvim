@@ -312,6 +312,18 @@ custom_key_maps = {
 
 This would map `<Leader>sa` to work like `sa`.
 
+### [gbprod/stay-in-place.nvim](https://github.com/gbprod/stay-in-place.nvim)
+
+Maintain cursor position when indenting and unindenting.
+
+```lua
+custom_key_maps = {
+  {"n", {">>", "<Tab>"}, function() require("stay-in-place").shift_right_line() end},
+  {"n", "<<", function() require("stay-in-place").shift_left_line() end},
+  {{"n", "i"}, "<S-Tab>", function() require("stay-in-place").shift_left_line() end},
+},
+```
+
 ## API
 
 ### `add_cursor(lnum, col, curswant)`
