@@ -130,25 +130,25 @@ end
 -- Function to execute a custom key map
 local function custom_function(func)
 
-  -- Save register and count1 because they may be lost
+  -- Save register and count because they may be lost
   local register = vim.v.register
-  local count1 = vim.v.count1
+  local count = vim.v.count
 
   -- Call func for the real cursor
-  func(register, count1)
+  func(register, count)
 
   -- Call func for each virtual cursor and set the virtual cursor position
   virtual_cursors.edit_with_cursor(function(vc)
-    func(register, count1)
+    func(register, count)
     vc:save_cursor_position()
   end)
 end
 
 local function custom_function_with_motion(func)
 
-  -- Save register and count1 because they may be lost
+  -- Save register and count because they may be lost
   local register = vim.v.register
-  local count1 = vim.v.count1
+  local count = vim.v.count
 
   -- Get a motion command
   local motion_cmd = input.get_motion_cmd()
@@ -158,11 +158,11 @@ local function custom_function_with_motion(func)
   end
 
   -- Call func for the real cursor
-  func(register, count1, motion_cmd)
+  func(register, count, motion_cmd)
 
   -- Call func for each virtual cursor and set the virtual cursor position
   virtual_cursors.edit_with_cursor(function(vc)
-    func(register, count1, motion_cmd)
+    func(register, count, motion_cmd)
     vc:save_cursor_position()
   end)
 
@@ -170,9 +170,9 @@ end
 
 local function custom_function_with_char(func)
 
-  -- Save register and count1 because they may be lost
+  -- Save register and count because they may be lost
   local register = vim.v.register
-  local count1 = vim.v.count1
+  local count = vim.v.count
 
   -- Get a printable character
   local char = input.get_char()
@@ -182,11 +182,11 @@ local function custom_function_with_char(func)
   end
 
   -- Call func for the real cursor
-  func(register, count1, char)
+  func(register, count, char)
 
   -- Call func for each virtual cursor and set the virtual cursor position
   virtual_cursors.edit_with_cursor(function(vc)
-    func(register, count1, char)
+    func(register, count, char)
     vc:save_cursor_position()
   end)
 
@@ -194,9 +194,9 @@ end
 
 local function custom_function_with_motion_then_char(func)
 
-  -- Save register and count1 because they may be lost
+  -- Save register and count because they may be lost
   local register = vim.v.register
-  local count1 = vim.v.count1
+  local count = vim.v.count
 
   -- Get a motion command
   local motion_cmd = input.get_motion_cmd()
@@ -213,11 +213,11 @@ local function custom_function_with_motion_then_char(func)
   end
 
   -- Call func for the real cursor
-  func(register, count1, motion_cmd, char)
+  func(register, count, motion_cmd, char)
 
   -- Call func for each virtual cursor and set the virtual cursor position
   virtual_cursors.edit_with_cursor(function(vc)
-    func(register, count1, motion_cmd, char)
+    func(register, count, motion_cmd, char)
     vc:save_cursor_position()
   end)
 
