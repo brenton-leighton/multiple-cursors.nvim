@@ -10,19 +10,7 @@ The plugin works by overriding key mappings while multiple cursors are active.
 Any user defined key mappings will need to be added to the [custom_key_maps](#custom_key_maps) table to be used with multiple cursors.
 See the [Plugin compatibility](#plugin-compatibility) section for examples of how to work with specific plugins.
 
-## Demos
-
-### Basic usage
-
 ![Basic usage](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/4ea42343-6784-458c-aedb-f16b958551e3)
-
-### Split pasting
-
-![Copying multi-line text and pasting to each cursor](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/2c063495-cf0a-4884-9c5a-9a3b86770c31)
-
-### Creating cursors from the word under the cursor
-
-![Creating cursors from the word under the cursor](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/1c4c59f6-7e15-4993-a7ca-cadfdc8e9901)
 
 ## Overview
 
