@@ -175,11 +175,11 @@ Default value: `{}`
 
 This option allows for mapping keys to custom functions for use with multiple cursors. Each element in the `custom_key_maps` table must have three or four elements:
 
-- Mode (string|table): Mode short-name string (`"n"` or `"i"`), or a table of mode short-name strings (custom key maps are not currently working in visual mode).
+- Mode (string|table): Mode short-name string (`"n"`, `"i"` or `"x"`), or a table of mode short-name strings (for visual mode it's currently only possible to move the cursor)
 - Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
-- Function: A Lua function that will be called at each cursor, which receives [`register`](https://neovim.io/doc/user/vvars.html#v%3Aregister) and [`count1`](https://neovim.io/doc/user/vvars.html#v%3Acount1) as arguments
+- Function: A Lua function that will be called at each cursor, which receives [`register`](https://neovim.io/doc/user/vvars.html#v%3Aregister) and [`count`](https://neovim.io/doc/user/vvars.html#v%3Acount) as arguments
 - Option: A optional string containing "m", "c", or "cc". These enable getting input from the user, which is then forwarded to the function:
-	- "m" indicates that a motion command is requested (i.e. operator pending mode). The motion command can can include a count in addition to the `count1` variable.
+	- "m" indicates that a motion command is requested (i.e. operator pending mode). The motion command can can include a count in addition to the `count` variable.
 	- "c" indicates that a printable character is requested (e.g. for character search)
 	- "mc" indicates that a motion command and a printable character is requested (e.g. for a surround action)
 	- If valid input isn't given by the user the function will not be called
@@ -192,23 +192,23 @@ opts = {
   custom_key_maps = {
 
     -- No option
-    {"n", "<Leader>a", function(register, count1)
-      vim.print(register .. count1)
+    {"n", "<Leader>a", function(register, count)
+      vim.print(register .. count)
     end}
 
     -- Motion command
-    {"n", "<Leader>b", function(register, count1, motion_cmd)
-      vim.print(register .. count1 .. motion_cmd)
+    {"n", "<Leader>b", function(register, count, motion_cmd)
+      vim.print(register .. count .. motion_cmd)
     end, "m"}
 
     -- Character
-    {"n", "<Leader>c", function(register, count1, char)
-      vim.print(register .. count1 .. char)
+    {"n", "<Leader>c", function(register, count, char)
+      vim.print(register .. count .. char)
     end, "c"}
 
     -- Motion command then character
-    {"n", "<Leader>b", function(register, count1, motion_cmd, char)
-      vim.print(register .. count1 .. motion_cmd .. char)
+    {"n", "<Leader>b", function(register, count, motion_cmd, char)
+      vim.print(register .. count .. motion_cmd .. char)
     end, "mc"}
 
   }
@@ -263,26 +263,32 @@ opts = {
 
 ### [chrisgrieser/nvim-spider](https://github.com/chrisgrieser/nvim-spider)
 
-Improves `w`, `e`, and `b` motions. `count` must be set before the motion function is called.
+Improves `w`, `e`, and `b` motions. In normal mode `count` must be set before the motion function is called.
 
 ```lua
 opts = {
   custom_key_maps = {
     -- w
-    {"n", "w", function(_, count1)
-      vim.cmd("normal! " .. count1)
+    {{"n", "x"}, "w", function(_, count)
+      if  count ~=0 and vim.api.nvim_get_mode().mode == "n" then
+        vim.cmd("normal! " .. count)
+      end
       require('spider').motion('w')
     end},
 
     -- e
-    {"n", "e", function(_, count1)
-      vim.cmd("normal! " .. count1)
+    {{"n", "x"}, "e", function(_, count)
+      if  count ~=0 and vim.api.nvim_get_mode().mode == "n" then
+        vim.cmd("normal! " .. count)
+      end
       require('spider').motion('e')
     end},
 
     -- b
-    {"n", "b", function(_, count1)
-      vim.cmd("normal! " .. count1)
+    {{"n", "x"}, "b", function(_, count)
+      if  count ~=0 and vim.api.nvim_get_mode().mode == "n" then
+        vim.cmd("normal! " .. count)
+      end
       require('spider').motion('b')
     end},
   }
@@ -298,8 +304,8 @@ One workaround would be to use a different key sequence to execute the command w
 
 ```lua
 custom_key_maps = {
-  {"n", "<Leader>sa", function(_, count1, motion_cmd, char)
-    vim.cmd("normal " .. count1 .. "sa" .. motion_cmd .. char)
+  {"n", "<Leader>sa", function(_, count, motion_cmd, char)
+    vim.cmd("normal " .. count .. "sa" .. motion_cmd .. char)
   end, "mc"},
 },
 ```
