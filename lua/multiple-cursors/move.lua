@@ -4,6 +4,43 @@ local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
 local input = require("multiple-cursors.input")
 
+-- Up/down motion in normal/visual modes
+function M.normal_j()
+  common.feedkeys(nil, vim.v.count, "j", nil)
+  virtual_cursors.move_with_normal_command(vim.v.count, "j")
+end
+
+function M.normal_k()
+  common.feedkeys(nil, vim.v.count, "k", nil)
+  virtual_cursors.move_with_normal_command(vim.v.count, "k")
+end
+
+function M.normal_minus()
+  common.feedkeys(nil, vim.v.count, "-", nil)
+  virtual_cursors.move_with_normal_command(vim.v.count, "-")
+end
+
+function M.normal_plus()
+  common.feedkeys(nil, vim.v.count, "+", nil)
+  virtual_cursors.move_with_normal_command(vim.v.count, "+")
+end
+
+function M.normal_underscore()
+  common.feedkeys(nil, vim.v.count, "_", nil)
+  virtual_cursors.move_with_normal_command(vim.v.count, "_")
+end
+
+-- Up/down motion in insert/replace modes
+function M.insert_up()
+  common.feedkeys(nil, 0, "<Up>", nil)
+  virtual_cursors.move_with_normal_command(0, "k")
+end
+
+function M.insert_down()
+  common.feedkeys(nil, 0, "<Down>", nil)
+  virtual_cursors.move_with_normal_command(0, "j")
+end
+
 -- Left/right motion in normal/visual modes
 function M.normal_h()
   common.feedkeys(nil, vim.v.count, "h", nil)

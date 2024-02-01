@@ -23,6 +23,17 @@ local post_hook = nil
 local bufnr = nil
 
 default_key_maps = {
+  -- Up/down motion in normal/visual modes
+  {{"n", "x"}, {"j", "<Down>"}, move.normal_j},
+  {{"n", "x"}, {"k", "<Up>"}, move.normal_k},
+  {{"n", "x"}, "-", move.normal_minus},
+  {{"n", "x"}, {"+", "<CR>", "<kEnter>"}, move.normal_plus},
+  {{"n", "x"}, "_", move.normal_underscore},
+
+  -- Up/down motion in insert/replace modes
+  {"i", "<Up>", move.insert_up},
+  {"i", "<Down>", move.insert_down},
+
   -- Left/right motion in normal/visual modes
   {{"n", "x"}, {"h", "<Left>"}, move.normal_h},
   {{"n", "x"}, "<BS>", move_special.normal_bs},
@@ -43,17 +54,6 @@ default_key_maps = {
   -- Left/right motion in all modes
   {{"n", "i", "x"}, "<Home>", move.home},
   {{"n", "i", "x"}, "<End>", move.eol},
-
-  -- Up/down motion in normal/visual modes
-  {{"n", "x"}, {"j", "<Down>"}, move_special.normal_j},
-  {{"n", "x"}, {"k", "<Up>"}, move_special.normal_k},
-  {{"n", "x"}, "-", move_special.normal_minus},
-  {{"n", "x"}, {"+", "<CR>", "<kEnter>"}, move_special.normal_plus},
-  {{"n", "x"}, "_", move_special.normal_underscore},
-
-  -- Up/down motion in insert/replace modes
-  {"i", "<Up>", move_special.insert_up},
-  {"i", "<Down>", move_special.insert_down},
 
   -- Text object motion in normal/visual modes
   {{"n", "x"}, {"w", "<S-Right>", "<C-Right>"}, move.normal_w},
