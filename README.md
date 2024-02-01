@@ -166,7 +166,7 @@ This option allows for mapping keys to custom functions for use with multiple cu
 - Mode (string|table): Mode short-name string (`"n"`, `"i"` or `"x"`), or a table of mode short-name strings (for visual mode it's currently only possible to move the cursor)
 - Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
 - Function: A Lua function that will be called at each cursor, which receives [`register`](https://neovim.io/doc/user/vvars.html#v%3Aregister) and [`count`](https://neovim.io/doc/user/vvars.html#v%3Acount) as arguments
-- Option: A optional string containing "m", "c", or "cc". These enable getting input from the user, which is then forwarded to the function:
+- Option: A optional string containing "m", "c", or "mc". These enable getting input from the user, which is then forwarded to the function:
 	- "m" indicates that a motion command is requested (i.e. operator pending mode). The motion command can can include a count in addition to the `count` variable.
 	- "c" indicates that a printable character is requested (e.g. for character search)
 	- "mc" indicates that a motion command and a printable character is requested (e.g. for a surround action)
@@ -211,7 +211,7 @@ Default values: `nil`
 
 These options are to provide functions that are called a the start of initialisation and at the end of de-initialisation respectively.
 
-E.g. to disable [`cursorline`](https://neovim.io/doc/user/options.html#'cursorline') while multiple cursors are active:
+E.g. to disable [`cursorline`](https://neovim.io/doc/user/options.html#'cursorline') and [highlighting matching parentheses](https://neovim.io/doc/user/pi_paren.html) while multiple cursors are active:
 
 ```lua
 opts = {
@@ -304,7 +304,8 @@ This would map `<Leader>sa` to work like `sa`.
 
 ### [gbprod/stay-in-place.nvim](https://github.com/gbprod/stay-in-place.nvim)
 
-Maintain cursor position when indenting and unindenting.
+Maintains cursor position when indenting and unindenting.
+This plugin can be used with multiple cursors by adding key maps, e.g.
 
 ```lua
 custom_key_maps = {
@@ -319,7 +320,7 @@ custom_key_maps = {
 ### `add_cursor(lnum, col, curswant)`
 In addition to the provided commands there is a function to add a cursor to a given position, which can be called like so:
 
-```
+```lua
 require("multiple-cursors").add_cursor(lnum, col, curswant)
 ```
 
