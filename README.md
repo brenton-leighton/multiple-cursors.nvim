@@ -103,7 +103,6 @@ Notable missing functionality:
 - Scrolling
 - `.` (repeat) command
 - Marks
-- Support for extended characters
 
 ## Options
 
@@ -349,5 +348,6 @@ where `lnum` is the line number of the new cursor, `col` is the column, and `cur
 - This plugin hasn't been tested with completion and it will probably not behave correctly
 - In insert or replace mode, if a line has been auto-indented after a carriage return and nothing has been added to the line, the indentation will not be removed when exiting back to normal mode
 - In insert or replace mode, anything to do with tabs may not behave correctly, in particular if you are using less common options
+- Cursors may not be positioned correctly when moving up or down over extended characters
 - When using the mouse to add a cursor to an extended character, the cursor may be added to the next character
 - Please use the [Issues](https://github.com/brenton-leighton/multiple-cursors.nvim/issues) page to report issues, and please include any relevant Neovim options
