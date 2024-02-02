@@ -103,7 +103,6 @@ Notable missing functionality:
 - Scrolling
 - `.` (repeat) command
 - Marks
-- Support for extended characters
 
 ## Options
 
@@ -113,18 +112,31 @@ Options can be configured by providing an options table to the setup function, e
 "brenton-leighton/multiple-cursors.nvim",
 version = "*",
 opts = {
-  enable_split_paste = false,
-  disabled_default_key_maps = {
-    {{"n", "x"}, {"<S-Left>", "<S-Right>"}},
-  },
+  enable_split_paste = true,
   custom_key_maps = {
-    {{"n", "i"}, "<C-/>", function() vim.cmd("ExampleCommand") end},
+    -- j and k: use gj/gk when count is 0
+    {{"n", "x"}, {"j", "<Down>"}, function(_, count)
+      if count == 0 then
+        vim.cmd("normal! gj")
+      else
+        vim.cmd("normal! " .. count .. "j")
+      end
+    end},
+    {{"n", "x"}, {"k", "<Up>"}, function(_, count)
+      if count == 0 then
+        vim.cmd("normal! gk")
+      else
+        vim.cmd("normal! " .. count .. "k")
+      end
+    end},
   },
   pre_hook = function()
     vim.opt.cursorline = false
+    vim.cmd("NoMatchParen")
   end,
   post_hook = function()
     vim.opt.cursorline = true
+    vim.cmd("DoMatchParen")
   end,
 },
 keys = {
@@ -152,7 +164,10 @@ When adding cursors to the word under the cursor (i.e. using the `MultipleCursor
 
 Default value: `{}`
 
-This option can be used to disabled any of the default key maps. Each element in the `disabled_default_key_maps` table must have two elements:
+This option can be used to disabled any of the default key maps.
+Note that this is not required if replacing the function with [custom_key_maps](#custom_key_maps).
+
+Each element in the `disabled_default_key_maps` table must have two elements:
 
 - Mode (string|table): Mode short-name string (`"n"`, `"i"`, or `"v"`), or a table of mode short-name strings
 - Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
@@ -165,7 +180,7 @@ This option allows for mapping keys to custom functions for use with multiple cu
 
 - Mode (string|table): Mode short-name string (`"n"`, `"i"` or `"x"`), or a table of mode short-name strings (for visual mode it's currently only possible to move the cursor)
 - Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
-- Function: A Lua function that will be called at each cursor, which receives [`register`](https://neovim.io/doc/user/vvars.html#v%3Aregister) and [`count`](https://neovim.io/doc/user/vvars.html#v%3Acount) as arguments
+- Function: A Lua function that will be called at each cursor, which receives [`register`](https://neovim.io/doc/user/vvars.html#v%3Aregister) and [`count`](https://neovim.io/doc/user/vvars.html#v%3Acount) (and optionally more) as arguments
 - Option: A optional string containing "m", "c", or "mc". These enable getting input from the user, which is then forwarded to the function:
 	- "m" indicates that a motion command is requested (i.e. operator pending mode). The motion command can can include a count in addition to the `count` variable.
 	- "c" indicates that a printable character is requested (e.g. for character search)
@@ -195,7 +210,7 @@ opts = {
     end, "c"}
 
     -- Motion command then character
-    {"n", "<Leader>b", function(register, count, motion_cmd, char)
+    {"n", "<Leader>d", function(register, count, motion_cmd, char)
       vim.print(register .. count .. motion_cmd .. char)
     end, "mc"}
 
@@ -333,4 +348,6 @@ where `lnum` is the line number of the new cursor, `col` is the column, and `cur
 - This plugin hasn't been tested with completion and it will probably not behave correctly
 - In insert or replace mode, if a line has been auto-indented after a carriage return and nothing has been added to the line, the indentation will not be removed when exiting back to normal mode
 - In insert or replace mode, anything to do with tabs may not behave correctly, in particular if you are using less common options
+- Cursors may not be positioned correctly when moving up or down over extended characters
+- When using the mouse to add a cursor to an extended character, the cursor may be added to the next character
 - Please use the [Issues](https://github.com/brenton-leighton/multiple-cursors.nvim/issues) page to report issues, and please include any relevant Neovim options

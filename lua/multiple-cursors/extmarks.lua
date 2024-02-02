@@ -10,6 +10,7 @@ local highlight_namespace_id = nil
 -- For saving and restoring the cursor position to an extmark
 local cursor_mark_id = 0
 local cursor_lnum = nil
+local cursor_curswant = nil
 
 local visual_area_start_mark_id = nil
 local visual_area_end_mark_id = nil
@@ -41,7 +42,14 @@ local function set_extmark(lnum, col, mark_id, hl_group, priority)
     opts.virt_text_pos = "overlay"
   else
     -- Otherwise highlight the character
-    opts.end_col = col
+
+    -- Convert col to char index
+    local line = vim.fn.getline(lnum)
+    local col_char = vim.fn.charidx(line, col - 1)
+
+    -- end_col is the byte index of the next character
+    opts.end_col = vim.fn.byteidx(line, col_char + 1)
+
     opts.hl_group = hl_group
   end
 
@@ -60,9 +68,9 @@ function M.save_cursor()
 
   local pos = vim.fn.getcurpos()
 
-  -- Save lnum in case the cursor is lost
-  cursor_lnum = pos[2]
+  cursor_lnum = pos[2]  -- Save lnum in case the cursor is lost
   local col = pos[3]
+  cursor_curswant = pos[5]  -- Save curswant
 
   -- Create an invisible extmark
   cursor_mark_id = set_extmark(cursor_lnum, col, cursor_mark_id, "", 0)
@@ -83,8 +91,16 @@ function M.restore_cursor()
 
     -- If the extmark position is valid
     if next(extmark_pos) ~= nil then
-        -- TODO curswant?
-      vim.fn.cursor({extmark_pos[1] + 1, extmark_pos[2] + 1, 0, extmark_pos[2] + 1})
+      local lnum = extmark_pos[1] + 1
+      local col = extmark_pos[2] + 1
+      local curswant = cursor_curswant
+
+      -- Maintain curswant = vim.v.maxcol if the cursor is still at the end of the line
+      if curswant < vim.v.maxcol and col < common.get_max_col(lnum) then
+        curswant = col
+      end
+
+      vim.fn.cursor({lnum, col, 0, curswant})
     else
       -- extmark gone, restore from lnum
       vim.fn.cursor({cursor_lnum, 1, 0, 1})
@@ -92,6 +108,7 @@ function M.restore_cursor()
 
     cursor_mark_id = nil
     cursor_lnum = nil
+    cursor_curswant = nil
   end
 end
 

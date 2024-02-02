@@ -72,6 +72,8 @@ end
 -- Backspace -------------------------------------------------------------------
 
 -- Get the character at lnum, col
+-- This is only used to check for a space or tab characters, and doesn't get an
+-- extended character properly
 local function get_char(lnum, col)
   local l = vim.fn.getline(lnum)
   local c = string.sub(l, col - 1, col - 1)
