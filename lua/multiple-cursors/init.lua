@@ -419,6 +419,67 @@ function M.add_cursors_by_search() _add_cursors_by_search(false) end
 -- previous visual area
 function M.add_cursors_by_search_v() _add_cursors_by_search(true) end
 
+-- Add cursors by searching for the word under the cursor or visual area
+function M.add_cursor_by_search()
+
+  local pattern = nil
+
+  if common.is_mode("v") then
+    pattern = get_visual_area_text()
+  else
+    -- Use the word under the cursor
+    pattern = vim.fn.expand("<cword>")
+  end
+
+  -- No pattern
+  if not pattern or pattern == "" then
+    return
+  end
+
+  -- Find matches (without the one for the cursor) and move the cursor to its match
+  local matches = search.get_matches_and_move_cursor(pattern, false)
+
+  if matches == nil then
+    return
+  end
+
+  -- Exit visual mode
+  -- Need to keep visual mode to keep searching for highlighted pattern
+  -- Otherwise word under cursor gets searched
+  
+  -- if common.is_mode("v") then
+  --   vim.cmd("normal!:")
+  -- end
+
+  -- Initialise if not already initialised
+  M.init()
+
+  -- Create a virtual cursor at every match
+  local cursor_pos = vim.fn.getcurpos()
+  local virtual_cursor_count = virtual_cursors.get_num_virtual_cursors()
+
+  local next_index = nil
+  for index, match in ipairs(matches) do
+  end
+  for index, match in ipairs(matches) do
+	-- Find the first instance of match after current cursor
+	if (match[1] == cursor_pos[2] and match[2] > cursor_pos[3]) or (match[1] > cursor_pos[2]) then
+	  next_index = index
+	  break
+	end
+  end
+  -- Loop around if current cursor is at last occurrence
+  if next_index == nil then
+    next_index = 1
+  end
+  next_index = next_index + virtual_cursor_count
+  -- Loop around if index is longer than number of matches
+  if next_index > #matches then
+    next_index = next_index - #matches
+  end
+  virtual_cursors.add(matches[next_index][1], matches[next_index][2], matches[next_index][2])
+end
+
 -- Add a new cursor at given position
 function M.add_cursor(lnum, col, curswant)
 
@@ -465,6 +526,7 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("MultipleCursorsMouseAddDelete", M.mouse_add_delete_cursor, {})
   vim.api.nvim_create_user_command("MultipleCursorsAddBySearch", M.add_cursors_by_search, {})
   vim.api.nvim_create_user_command("MultipleCursorsAddBySearchV", M.add_cursors_by_search_v, {})
+  vim.api.nvim_create_user_command("MultipleCursorsAddBySearchOne", M.add_cursor_by_search, {})
 
 end
 
