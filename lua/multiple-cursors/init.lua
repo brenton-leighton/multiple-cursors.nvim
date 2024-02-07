@@ -420,7 +420,7 @@ function M.add_cursors_by_search() _add_cursors_by_search(false) end
 function M.add_cursors_by_search_v() _add_cursors_by_search(true) end
 
 -- Add cursors by searching for the word under the cursor or visual area
-function M.add_cursor_by_search()
+function M.add_cursor_to_next_match()
 
   local pattern = nil
 
@@ -526,7 +526,7 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("MultipleCursorsMouseAddDelete", M.mouse_add_delete_cursor, {})
   vim.api.nvim_create_user_command("MultipleCursorsAddBySearch", M.add_cursors_by_search, {})
   vim.api.nvim_create_user_command("MultipleCursorsAddBySearchV", M.add_cursors_by_search_v, {})
-  vim.api.nvim_create_user_command("MultipleCursorsAddBySearchOne", M.add_cursor_by_search, {})
+  vim.api.nvim_create_user_command("MultipleCursorsAddToNextMatch", M.add_cursor_to_next_match, {})
 
 end
 
