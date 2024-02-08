@@ -22,6 +22,9 @@ local post_hook = nil
 
 local bufnr = nil
 
+local match_visiable_only = nil
+local _matches = nil  -- Matches used by add_cursor_to_next_match
+
 default_key_maps = {
   -- Up/down motion in normal/visual modes
   {{"n", "x"}, {"j", "<Down>"}, move.normal_j},
@@ -252,6 +255,7 @@ function M.deinit(clear_virtual_cursors)
     if clear_virtual_cursors then
       virtual_cursors.clear()
       bufnr = nil
+      _matches = nil
       vim.api.nvim_del_autocmd(buf_enter_autocmd_id)
       buf_enter_autocmd_id = nil
     end
@@ -371,8 +375,7 @@ local function get_visual_area_text()
 
 end
 
--- Add cursors by searching for the word under the cursor or visual area
-local function _add_cursors_by_search(use_prev_visual_area)
+local function get_search_pattern()
 
   local pattern = nil
 
@@ -383,13 +386,27 @@ local function _add_cursors_by_search(use_prev_visual_area)
     pattern = vim.fn.expand("<cword>")
   end
 
-  -- No pattern
-  if not pattern or pattern == "" then
+  if pattern == "" then
+    return nil
+  else
+    return pattern
+  end
+
+end
+
+-- Add cursors by searching for the word under the cursor or visual area
+local function _add_cursors_by_search(use_prev_visual_area)
+
+  -- Get the search pattern: either the cursor under the word in normal mode or the visual area in
+  -- visual mode
+  local pattern = get_search_pattern()
+
+  if pattern == nil then
     return
   end
 
   -- Find matches (without the one for the cursor) and move the cursor to its match
-  local matches = search.get_matches_and_move_cursor(pattern, use_prev_visual_area)
+  local matches = search.get_matches_and_move_cursor(pattern, match_visible_only, use_prev_visual_area)
 
   if matches == nil then
     return
@@ -422,62 +439,42 @@ function M.add_cursors_by_search_v() _add_cursors_by_search(true) end
 -- Add cursors by searching for the word under the cursor or visual area
 function M.add_cursor_to_next_match()
 
-  local pattern = nil
+  if _matches == nil then
+    -- Get the search pattern: either the cursor under the word in normal mode or the visual area in
+    -- visual mode
+    local pattern = get_search_pattern()
 
-  if common.is_mode("v") then
-    pattern = get_visual_area_text()
-  else
-    -- Use the word under the cursor
-    pattern = vim.fn.expand("<cword>")
+    if pattern == nil then
+      return
+    end
+
+    -- Find matches (without the one for the cursor) and move the cursor to its match
+    _matches = search.get_matches_and_move_cursor(pattern, match_visible_only, false)
+
+    if _matches == nil then
+      return
+    end
   end
 
-  -- No pattern
-  if not pattern or pattern == "" then
-    return
-  end
-
-  -- Find matches (without the one for the cursor) and move the cursor to its match
-  local matches = search.get_matches_and_move_cursor(pattern, false)
-
-  if matches == nil then
+  if #_matches == 0 then
     return
   end
 
   -- Exit visual mode
-  -- Need to keep visual mode to keep searching for highlighted pattern
-  -- Otherwise word under cursor gets searched
-  
-  -- if common.is_mode("v") then
-  --   vim.cmd("normal!:")
-  -- end
+   if common.is_mode("v") then
+     vim.cmd("normal!:")
+   end
 
   -- Initialise if not already initialised
   M.init()
 
-  -- Create a virtual cursor at every match
-  local cursor_pos = vim.fn.getcurpos()
-  local virtual_cursor_count = virtual_cursors.get_num_virtual_cursors()
+  -- Add to next match
+  local match = _matches[1]
+  virtual_cursors.add(match[1], match[2], match[2])
 
-  local next_index = nil
-  for index, match in ipairs(matches) do
-  end
-  for index, match in ipairs(matches) do
-	-- Find the first instance of match after current cursor
-	if (match[1] == cursor_pos[2] and match[2] > cursor_pos[3]) or (match[1] > cursor_pos[2]) then
-	  next_index = index
-	  break
-	end
-  end
-  -- Loop around if current cursor is at last occurrence
-  if next_index == nil then
-    next_index = 1
-  end
-  next_index = next_index + virtual_cursor_count
-  -- Loop around if index is longer than number of matches
-  if next_index > #matches then
-    next_index = next_index - #matches
-  end
-  virtual_cursors.add(matches[next_index][1], matches[next_index][2], matches[next_index][2])
+  -- Remove match
+  table.remove(_matches, 1)
+
 end
 
 -- Add a new cursor at given position
@@ -501,7 +498,7 @@ function M.setup(opts)
 
   local enable_split_paste = opts.enable_split_paste or true
 
-  local match_visible_only = opts.match_visible_only or true
+  match_visible_only = opts.match_visible_only or true
 
   pre_hook = opts.pre_hook or nil
   post_hook = opts.post_hook or nil
@@ -514,9 +511,6 @@ function M.setup(opts)
 
   -- Set up paste
   paste.setup(enable_split_paste)
-
-  -- Set up search
-  search.setup(match_visible_only)
 
   -- Autocmds
   autocmd_group_id = vim.api.nvim_create_augroup("MultipleCursors", {})
