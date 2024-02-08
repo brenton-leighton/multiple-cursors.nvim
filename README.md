@@ -18,8 +18,8 @@ The plugin doesn't initially bind any keys, but creates three commands:
 
 | Command | Description |
 | --- | --- |
-| `MultipleCursorsAddDown` | Add a new virtual cursor, then move the real cursor down |
-| `MultipleCursorsAddUp` | Add a new virtual cursor, then move the real cursor up |
+| `MultipleCursorsAddDown` | Add a new virtual cursor, then move the real cursor down. In normal mode multiple virtual cursors can be added with a `count`. |
+| `MultipleCursorsAddUp` | Add a new virtual cursor, then move the real cursor up. In normal mode multiple virtual cursors can be added with a `count`. |
 | `MultipleCursorsMouseAddDelete` | Add a new virtual cursor to the mouse click position, unless there is already a virtual cursor at the mouse click position, in which case it is removed |
 | `MultipleCursorsAddBySearch` | Search for the word under the cursor (in normal mode) or the visual area (in visual mode) and add cursors to each match |
 | `MultipleCursorsAddBySearchV` | As above, but limit matches to the previous visual area |

@@ -295,15 +295,38 @@ local function add_virtual_cursor_at_real_cursor(down)
   -- Initialise if this is the first cursor
   M.init()
 
-  -- Add virtual cursor at the real cursor position
-  local pos = vim.fn.getcurpos()
-  virtual_cursors.add(pos[2], pos[3], pos[5])
+  -- If normal mode
+  if common.is_mode("n") then
 
-  -- Move the real cursor
-  if down then
-    common.feedkeys(nil, vim.v.count, "<Down>", nil)
-  else
-    common.feedkeys(nil, vim.v.count, "<Up>", nil)
+    -- Add count1 virtual cursors
+    local count1 = vim.v.count1
+
+    for i = 1, count1 do
+      -- Add virtual cursor at the real cursor position
+      local pos = vim.fn.getcurpos()
+      virtual_cursors.add(pos[2], pos[3], pos[5])
+
+      -- Move the real cursor
+      if down then
+        vim.cmd("normal! j")
+      else
+        vim.cmd("normal! k")
+      end
+    end
+
+  else -- Insert or replace mode
+
+    -- Add one virtual cursor at the real cursor position
+    local pos = vim.fn.getcurpos()
+    virtual_cursors.add(pos[2], pos[3], pos[5])
+
+    -- Move the real cursor
+    if down then
+      common.feedkeys(nil, 0, "<Down>", nil)
+    else
+      common.feedkeys(nil, 0, "<Up>", nil)
+    end
+
   end
 
 end
