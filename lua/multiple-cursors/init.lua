@@ -520,7 +520,7 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("MultipleCursorsMouseAddDelete", M.mouse_add_delete_cursor, {})
   vim.api.nvim_create_user_command("MultipleCursorsAddBySearch", M.add_cursors_by_search, {})
   vim.api.nvim_create_user_command("MultipleCursorsAddBySearchV", M.add_cursors_by_search_v, {})
-  vim.api.nvim_create_user_command("MultipleCursorsAddToNextMatch", M.add_cursor_to_next_match, {})
+  vim.api.nvim_create_user_command("MultipleCursorsAddNextMatch", M.add_cursor_to_next_match, {})
 
 end
 
