@@ -23,7 +23,7 @@ local post_hook = nil
 local bufnr = nil
 
 local match_visiable_only = nil
-local _matches = nil  -- Matches used by add_cursor_to_next_match
+local saved_pattern = nil
 
 default_key_maps = {
   -- Up/down motion in normal/visual modes
@@ -255,7 +255,7 @@ function M.deinit(clear_virtual_cursors)
     if clear_virtual_cursors then
       virtual_cursors.clear()
       bufnr = nil
-      _matches = nil
+      saved_pattern = nil
       vim.api.nvim_del_autocmd(buf_enter_autocmd_id)
       buf_enter_autocmd_id = nil
     end
@@ -375,15 +375,27 @@ local function get_visual_area_text()
 
 end
 
-local function get_search_pattern()
+-- Get a search pattern
+-- In normal mode, returns cword or saved_pattern if use_saved_pattern is true and saved_pattern is
+-- valid
+-- In visual mode, returns the visual area and also saves it to saved_pattern if use_saved_pattern
+-- is true
+local function get_search_pattern(use_saved_pattern)
 
   local pattern = nil
 
   if common.is_mode("v") then
     pattern = get_visual_area_text()
-  else
-    -- Use the word under the cursor
-    pattern = vim.fn.expand("<cword>")
+    if use_saved_pattern then
+      saved_pattern = pattern
+    end
+  else -- Normal mode
+    if use_saved_pattern and saved_pattern then
+      pattern = saved_pattern
+    else
+      -- Use the word under the cursor
+      pattern = vim.fn.expand("<cword>")
+    end
   end
 
   if pattern == "" then
@@ -399,7 +411,7 @@ local function _add_cursors_by_search(use_prev_visual_area)
 
   -- Get the search pattern: either the cursor under the word in normal mode or the visual area in
   -- visual mode
-  local pattern = get_search_pattern()
+  local pattern = get_search_pattern(false)
 
   if pattern == nil then
     return
