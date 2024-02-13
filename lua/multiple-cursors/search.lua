@@ -109,6 +109,9 @@ function M.get_matches_and_move_cursor(word, limit_to_visible, limit_to_prev_vis
   local first = true
   local visible_end_lnum = vim.fn.line("w$")
 
+  local ignorecase = vim.o.ignorecase
+  vim.o.ignorecase = false
+
   while true do
     local match  = {0, 0}
 
@@ -131,6 +134,8 @@ function M.get_matches_and_move_cursor(word, limit_to_visible, limit_to_prev_vis
     -- Add the match
     table.insert(matches, match)
   end
+
+  vim.o.ignorecase = ignorecase
 
   -- If there is one or no matches
   if #matches <= 1 then
