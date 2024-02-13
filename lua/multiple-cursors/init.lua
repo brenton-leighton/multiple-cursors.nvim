@@ -407,7 +407,7 @@ local function get_search_pattern(use_saved_pattern)
 end
 
 -- Add cursors by searching for the word under the cursor or visual area
-local function _add_cursors_by_search(use_prev_visual_area)
+local function _add_cursors_to_matches(use_prev_visual_area)
 
   -- Get the search pattern: either the cursor under the word in normal mode or the visual area in
   -- visual mode
@@ -441,12 +441,11 @@ local function _add_cursors_by_search(use_prev_visual_area)
 
 end
 
--- Add cursors to each match of the word under the real cursor
-function M.add_cursors_by_search() _add_cursors_by_search(false) end
+-- Add cursors to each match of cword or visual area
+function M.add_cursors_to_matches() _add_cursors_to_matches(false) end
 
--- Add cursors to each match of the word under the real cursor, only within the
--- previous visual area
-function M.add_cursors_by_search_v() _add_cursors_by_search(true) end
+-- Add cursors to each match of cword or visual area, but only within the previous visual area
+function M.add_cursors_to_matches_v() _add_cursors_to_matches(true) end
 
 -- Add cursors by searching for the word under the cursor or visual area
 function M.add_cursor_to_next_match()
@@ -529,10 +528,11 @@ function M.setup(opts)
 
   vim.api.nvim_create_user_command("MultipleCursorsAddDown", M.add_cursor_down, {})
   vim.api.nvim_create_user_command("MultipleCursorsAddUp", M.add_cursor_up, {})
+
   vim.api.nvim_create_user_command("MultipleCursorsMouseAddDelete", M.mouse_add_delete_cursor, {})
-  vim.api.nvim_create_user_command("MultipleCursorsAddBySearch", M.add_cursors_by_search, {})
-  vim.api.nvim_create_user_command("MultipleCursorsAddBySearchV", M.add_cursors_by_search_v, {})
-  vim.api.nvim_create_user_command("MultipleCursorsAddNextMatch", M.add_cursor_to_next_match, {})
+
+  vim.api.nvim_create_user_command("MultipleCursorsAddMatches", M.add_cursors_to_matches, {})
+  vim.api.nvim_create_user_command("MultipleCursorsAddMatchesV", M.add_cursors_to_matches_v, {})
 
 end
 
