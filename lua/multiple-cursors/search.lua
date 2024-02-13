@@ -174,4 +174,31 @@ function M.get_matches_and_move_cursor(word, limit_to_visible, limit_to_prev_vis
 
 end
 
+-- Get a single match after the cursor, optionally moving the cursor to the match before the cursor
+function M.get_next_match(word, move_cursor)
+
+  local ignorecase = vim.o.ignorecase
+  vim.o.ignorecase = false
+
+  -- Get the next match without moving the cursor
+  local match = vim.fn.searchpos(word, "nw")
+
+  if match[1] == 0 or match[2] == 0 then
+    vim.o.ignorecase = ignorecase
+    return nil
+  end
+
+  if move_cursor then
+    -- Move cursor to the previous match
+    vim.fn.searchpos(word, "bc")
+  end
+
+  vim.o.ignorecase = ignorecase
+
+  virtual_cursors.set_ignore_cursor_movement(false)
+
+  return match
+
+end
+
 return M
