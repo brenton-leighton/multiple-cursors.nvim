@@ -88,7 +88,7 @@ function M.get_matches_and_move_cursor(word, limit_to_visible, limit_to_prev_vis
 
   local limit = 0 -- whole buffer
 
-  if limit_to_prev_visible_area then
+  if limit_to_prev_visual_area then
     limit = 2
   elseif limit_to_visible then
     limit = 1
