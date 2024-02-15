@@ -21,8 +21,10 @@ The plugin doesn't initially bind any keys, but creates three commands:
 | `MultipleCursorsAddDown` | Add a new virtual cursor, then move the real cursor down. In normal mode multiple virtual cursors can be added with a `count`. |
 | `MultipleCursorsAddUp` | Add a new virtual cursor, then move the real cursor up. In normal mode multiple virtual cursors can be added with a `count`. |
 | `MultipleCursorsMouseAddDelete` | Add a new virtual cursor to the mouse click position, unless there is already a virtual cursor at the mouse click position, in which case it is removed |
-| `MultipleCursorsAddBySearch` | Search for the word under the cursor (in normal mode) or the visual area (in visual mode) and add cursors to each match |
-| `MultipleCursorsAddBySearchV` | As above, but limit matches to the previous visual area |
+| `MultipleCursorsAddMatches` | Search for the word under the cursor (in normal mode) or the visual area (in visual mode) and add cursors to each match (by default this is limited to the visible buffer) |
+| `MultipleCursorsAddMatchesV` | As above, but limit matches to the previous visual area |
+| `MultipleCursorsAddJumpNextMatch` | Add a virtual cursor to the word under the cursor (in normal mode) or the visual area (in visual mode), then move the real cursor to the next match |
+| `MultipleCursorsJumpNextMatch` | Move the real cursor to the next match of the word under the cursor, or if `MultipleCursorsAddJumpNextMatch` was previously called in visual mode, the previously used visual area |
 
 These commands can be bound to keys, e.g.:
 ```lua
@@ -45,8 +47,10 @@ keys = {
   {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i"}},
   {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>"},
   {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}},
-  {"<Leader>a", "<Cmd>MultipleCursorsAddBySearch<CR>", mode = {"n", "x"}},
-  {"<Leader>A", "<Cmd>MultipleCursorsAddBySearchV<CR>", mode = {"n", "x"}},
+  {"<Leader>a", "<Cmd>MultipleCursorsAddMatches<CR>", mode = {"n", "x"}},
+  {"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}},
+  {"<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}},
+  {"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>"},
 },
 ```
 
@@ -57,8 +61,10 @@ This configures the plugin with the default options, and sets the following key 
 - `Ctrl+Up` in normal and insert modes: `MultipleCursorsAddUp`
 - `Ctrl+k` in normal mode: `MultipleCursorsAddUp`
 - `Ctrl+LeftClick` in normal and insert modes: `MultipleCursorsMouseAddDelete`
-- `Leader+a` in normal and visual modes: `MultipleCursorsAddBySearch` (note: `<Leader>` must have been set previously)
-- `Leader+A` in normal and visual modes: `MultipleCursorsAddBySearchV`
+- `Leader+a` in normal and visual modes: `MultipleCursorsAddMatches` (note: `<Leader>` must have been set previously)
+- `Leader+A` in normal and visual modes: `MultipleCursorsAddMatchesV`
+- `Leader+d` in normal and visual modes: `MultipleCursorsAddJumpNextMatch`
+- `Leader+D` in normal mode: `MultipleCursorsJumpNextMatch`
 
 ## Usage
 
