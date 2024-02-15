@@ -52,7 +52,9 @@ function M.sort()
 end
 
 -- Add a new virtual cursor
-function M.add(lnum, col, curswant)
+-- set_first indicates that the first field should be set to true if this is the first virtual cursor
+-- On exit the cursor position will be set to the virtual cursor which has first = true
+function M.add(lnum, col, curswant, set_first)
 
   -- Check for existing virtual cursor
   for _, vc in ipairs(virtual_cursors) do
@@ -61,7 +63,9 @@ function M.add(lnum, col, curswant)
     end
   end
 
-  table.insert(virtual_cursors, VirtualCursor.new(lnum, col, curswant))
+  local first = set_first and #virtual_cursors == 0
+
+  table.insert(virtual_cursors, VirtualCursor.new(lnum, col, curswant, first))
 
   -- Create an extmark
   extmarks.update_virtual_cursor_extmarks(virtual_cursors[#virtual_cursors])
@@ -85,6 +89,19 @@ function M.add_or_delete(lnum, col)
   else
     M.add(lnum, col, col)
   end
+end
+
+-- Get the position of the virtual cursor with first = true
+function M.get_first_pos()
+
+  for _, vc in ipairs(virtual_cursors) do
+    if vc.first == true then
+      return {vc.lnum, vc.col, vc.curswant}
+    end
+  end
+
+  return nil
+
 end
 
 -- Clear all virtual cursors

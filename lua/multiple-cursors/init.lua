@@ -253,6 +253,14 @@ function M.deinit(clear_virtual_cursors)
   if initialised then
 
     if clear_virtual_cursors then
+
+      -- Restore cursor to the position of the first virtual cursor
+      local pos = virtual_cursors.get_first_pos()
+
+      if pos then
+        vim.fn.cursor({pos[1], pos[2], 0, pos[3]})
+      end
+
       virtual_cursors.clear()
       bufnr = nil
       saved_pattern = nil
@@ -308,7 +316,7 @@ local function add_virtual_cursor_at_real_cursor(down)
     for i = 1, count1 do
       -- Add virtual cursor at the real cursor position
       local pos = vim.fn.getcurpos()
-      virtual_cursors.add(pos[2], pos[3], pos[5])
+      virtual_cursors.add(pos[2], pos[3], pos[5], true)
 
       -- Move the real cursor
       if down then
@@ -322,7 +330,7 @@ local function add_virtual_cursor_at_real_cursor(down)
 
     -- Add one virtual cursor at the real cursor position
     local pos = vim.fn.getcurpos()
-    virtual_cursors.add(pos[2], pos[3], pos[5])
+    virtual_cursors.add(pos[2], pos[3], pos[5], true)
 
     -- Move the real cursor
     if down then
@@ -352,7 +360,7 @@ function M.mouse_add_delete_cursor()
   local mouse_pos = vim.fn.getmousepos()
 
   -- Add a virtual cursor to the mouse click position, or delete an existing one
-  virtual_cursors.add_or_delete(mouse_pos.line, mouse_pos.column)
+  virtual_cursors.add_or_delete(mouse_pos.line, mouse_pos.column, false)
 
   if virtual_cursors.get_num_virtual_cursors() == 0 then
     M.deinit(true) -- Deinitialise if there are no more cursors
@@ -457,7 +465,7 @@ local function _add_cursors_to_matches(use_prev_visual_area)
 
   -- Create a virtual cursor at every match
   for _, match in ipairs(matches) do
-    virtual_cursors.add(match[1], match[2], match[2])
+    virtual_cursors.add(match[1], match[2], match[2], false)
   end
 
   vim.print(#matches .. " cursors added")
@@ -494,7 +502,7 @@ function M.add_cursor_and_jump_to_next_match()
 
   -- Add virtual cursor to cursor position
   local pos = vim.fn.getcurpos()
-  virtual_cursors.add(pos[2], pos[3], pos[5])
+  virtual_cursors.add(pos[2], pos[3], pos[5], true)
 
   -- Move cursor to match
   vim.fn.cursor({match[1], match[2], 0, match[2]})
@@ -526,7 +534,7 @@ function M.add_cursor(lnum, col, curswant)
   M.init()
 
   -- Add a virtual cursor
-  virtual_cursors.add(lnum, col, curswant)
+  virtual_cursors.add(lnum, col, curswant, false)
 
 end
 
