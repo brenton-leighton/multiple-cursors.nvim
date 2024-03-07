@@ -343,6 +343,61 @@ local function add_virtual_cursor_at_real_cursor(down)
 
 end
 
+-- Move the real cursor while leaving the virtual ones where they are
+local function move_real_cursor(direction)
+
+  -- If normal mode
+  if common.is_mode("n") then
+
+    -- Move the real cursor
+    if direction == "down" then
+      vim.cmd("normal! j")
+    elseif direction == "up" then
+      vim.cmd("normal! k")
+    elseif direction == "right" then
+      vim.cmd("normal! l")
+    elseif direction == "left" then
+      vim.cmd("normal! h")
+    end
+
+  else -- Insert or replace mode
+
+    -- Move the real cursor
+    if direction == "down" then
+      common.feedkeys(nil, 0, "<Down>", nil)
+    elseif direction == "up" then
+      common.feedkeys(nil, 0, "<Up>", nil)
+    elseif direction == "right" then
+      common.feedkeys(nil, 0, "<Right>", nil)
+    elseif direction == "left" then
+      common.feedkeys(nil, 0, "<Left>", nil)
+    end
+
+  end
+
+end
+
+-- Move the real cursor up, while leaving the virtual cursors where they are
+function M.move_cursor_up()
+  return move_real_cursor("up")
+end
+
+-- Move the real cursor down, while leaving the virtual cursors where they are
+function M.move_cursor_down()
+  return move_real_cursor("down")
+end
+
+-- Move the real cursor right, while leaving the virtual cursors where they are
+function M.move_cursor_right()
+  return move_real_cursor("right")
+end
+
+-- Move the real cursor left, while leaving the virtual cursors where they are
+function M.move_cursor_left()
+  return move_real_cursor("left")
+end
+
+
 -- Add a virtual cursor at the real cursor position, then move the real cursor up
 function M.add_cursor_up()
   return add_virtual_cursor_at_real_cursor(false)
@@ -564,6 +619,11 @@ function M.setup(opts)
 
   -- Autocmds
   autocmd_group_id = vim.api.nvim_create_augroup("MultipleCursors", {})
+
+  vim.api.nvim_create_user_command("MultipleCursorsMoveDown", M.move_cursor_down, {})
+  vim.api.nvim_create_user_command("MultipleCursorsMoveUp", M.move_cursor_up, {})
+  vim.api.nvim_create_user_command("MultipleCursorsMoveRight", M.move_cursor_right, {})
+  vim.api.nvim_create_user_command("MultipleCursorsMoveLeft", M.move_cursor_left, {})
 
   vim.api.nvim_create_user_command("MultipleCursorsAddDown", M.add_cursor_down, {})
   vim.api.nvim_create_user_command("MultipleCursorsAddUp", M.add_cursor_up, {})

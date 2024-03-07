@@ -25,6 +25,10 @@ The plugin doesn't initially bind any keys, but creates three commands:
 | `MultipleCursorsAddMatchesV` | As above, but limit matches to the previous visual area |
 | `MultipleCursorsAddJumpNextMatch` | Add a virtual cursor to the word under the cursor (in normal mode) or the visual area (in visual mode), then move the real cursor to the next match |
 | `MultipleCursorsJumpNextMatch` | Move the real cursor to the next match of the word under the cursor, or if `MultipleCursorsAddJumpNextMatch` was previously called in visual mode, the previously used visual area |
+| `MultipleCursorsMoveDown` | Move the real cursor down while leaving the virtual cursors where they are. |
+| `MultipleCursorsMoveUp` | Move the real cursor up while leaving the virtual cursors where they are. |
+| `MultipleCursorsMoveRight` | Move the real cursor right while leaving the virtual cursors where they are. |
+| `MultipleCursorsMoveLeft` | Move the real cursor left while leaving the virtual cursors where they are. |
 
 These commands can be bound to keys, e.g.:
 ```lua
@@ -51,6 +55,10 @@ keys = {
   {"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}},
   {"<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}},
   {"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>"},
+  {"<C-S-Down>", "<Cmd>MultipleCursorsMoveDown<CR>", mode = {"n", "i"}},
+  {"<C-S-Up>", "<Cmd>MultipleCursorsMoveUp<CR>", mode = {"n", "i"}},
+  {"<C-S-Right>", "<Cmd>MultipleCursorsMoveRight<CR>", mode = {"n", "i"}},
+  {"<C-S-Left>", "<Cmd>MultipleCursorsMoveLeft<CR>", mode = {"n", "i"}},
 },
 ```
 
@@ -65,6 +73,10 @@ This configures the plugin with the default options, and sets the following key 
 - `Leader+A` in normal and visual modes: `MultipleCursorsAddMatchesV`
 - `Leader+d` in normal and visual modes: `MultipleCursorsAddJumpNextMatch`
 - `Leader+D` in normal mode: `MultipleCursorsJumpNextMatch`
+- `Ctrl+Shift+Down` in normal and insert modes: `MultipleCursorsMoveDown`
+- `Ctrl+Shift+Up` in normal and insert modes: `MultipleCursorsMoveUp`
+- `Ctrl+Shift+Right` in normal and insert modes: `MultipleCursorsMoveRight`
+- `Ctrl+Shift+Left` in normal and insert modes: `MultipleCursorsMoveLeft`
 
 ## Usage
 
@@ -151,6 +163,10 @@ keys = {
   {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i"}},
   {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>"},
   {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}},
+  {"<C-S-Down>", "<Cmd>MultipleCursorsMoveDown<CR>", mode = {"n", "i"}},
+  {"<C-S-Up>", "<Cmd>MultipleCursorsMoveUp<CR>", mode = {"n", "i"}},
+  {"<C-S-Right>", "<Cmd>MultipleCursorsMoveRight<CR>", mode = {"n", "i"}},
+  {"<C-S-Left>", "<Cmd>MultipleCursorsMoveLeft<CR>", mode = {"n", "i"}},
 },
 ```
 
