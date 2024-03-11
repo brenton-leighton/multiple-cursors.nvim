@@ -25,6 +25,7 @@ The plugin doesn't initially bind any keys, but creates three commands:
 | `MultipleCursorsAddMatchesV` | As above, but limit matches to the previous visual area |
 | `MultipleCursorsAddJumpNextMatch` | Add a virtual cursor to the word under the cursor (in normal mode) or the visual area (in visual mode), then move the real cursor to the next match |
 | `MultipleCursorsJumpNextMatch` | Move the real cursor to the next match of the word under the cursor, or if `MultipleCursorsAddJumpNextMatch` was previously called in visual mode, the previously used visual area |
+| `MultipleCursorsLockToggle` | Lock/Unlock virtual cursors while allowing the real cursor to move freely. |
 
 These commands can be bound to keys, e.g.:
 ```lua
@@ -51,6 +52,7 @@ keys = {
   {"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}},
   {"<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}},
   {"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>"},
+  {"<C-l>", "<Cmd>MultipleCursorsLockToggle<CR>", mode = {"n", "i", "x"}},
 },
 ```
 
@@ -65,6 +67,7 @@ This configures the plugin with the default options, and sets the following key 
 - `Leader+A` in normal and visual modes: `MultipleCursorsAddMatchesV`
 - `Leader+d` in normal and visual modes: `MultipleCursorsAddJumpNextMatch`
 - `Leader+D` in normal mode: `MultipleCursorsJumpNextMatch`
+- `Ctrl+l` in normal, visual, and insert modes: `MultipleCursorsLockToggle`
 
 ## Usage
 
@@ -151,6 +154,7 @@ keys = {
   {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i"}},
   {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>"},
   {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}},
+  {"<C-l>", "<Cmd>MultipleCursorsLockToggle<CR>", mode = {"n", "i", "x"}},
 },
 ```
 
@@ -357,3 +361,4 @@ where `lnum` is the line number of the new cursor, `col` is the column, and `cur
 - Cursors may not be positioned correctly when moving up or down over extended characters
 - When using the mouse to add a cursor to an extended character, the cursor may be added to the next character
 - Please use the [Issues](https://github.com/brenton-leighton/multiple-cursors.nvim/issues) page to report issues, and please include any relevant Neovim options
+

@@ -221,8 +221,16 @@ function M.visit_with_cursor(func)
 
 end
 
+function M.lock_toggle()
+  ignore_cursor_movement = not ignore_cursor_movement
+end
+
 -- Visit virtual cursors and execute a normal command to move them
 function M.move_with_normal_command(count, cmd)
+
+  if ignore_cursor_movement == true then
+    return
+  end
 
   M.visit_with_cursor(function(vc)
     common.normal_bang(nil, count, cmd, nil)
