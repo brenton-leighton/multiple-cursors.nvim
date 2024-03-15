@@ -11,6 +11,9 @@ local virtual_cursors = {}
 -- Set to true when the cursor is being moved to suppress M.cursor_moved()
 local ignore_cursor_movement = false
 
+-- For locking the virtual cursors
+local locked = false
+
 -- Remove any virtual cursors marked for deletion
 local function clean_up()
   for idx = #virtual_cursors, 1, -1 do
@@ -107,6 +110,7 @@ end
 -- Clear all virtual cursors
 function M.clear()
   virtual_cursors = {}
+  locked = false
 end
 
 function M.update_extmarks()
@@ -146,11 +150,19 @@ function M.cursor_moved()
   end
 end
 
+function M.toggle_lock()
+  locked = not locked
+end
+
 
 -- Visitors --------------------------------------------------------------------
 
 -- Visit all virtual cursors
 function M.visit_all(func)
+
+  if locked then
+    return
+  end
 
   -- Save cursor position
   -- This is because changing virtualedit causes curswant to be reset
@@ -206,16 +218,8 @@ function M.visit_with_cursor(func)
 
 end
 
-function M.lock_toggle()
-  ignore_cursor_movement = not ignore_cursor_movement
-end
-
 -- Visit virtual cursors and execute a normal command to move them
 function M.move_with_normal_command(count, cmd)
-
-  if ignore_cursor_movement == true then
-    return
-  end
 
   M.visit_with_cursor(function(vc)
     common.normal_bang(nil, count, cmd, nil)

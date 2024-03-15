@@ -343,10 +343,6 @@ local function add_virtual_cursor_at_real_cursor(down)
 
 end
 
-function M.virtual_cursors_lock_toggle()
-  virtual_cursors.lock_toggle()
-end
-
 -- Add a virtual cursor at the real cursor position, then move the real cursor up
 function M.add_cursor_up()
   return add_virtual_cursor_at_real_cursor(false)
@@ -542,6 +538,13 @@ function M.add_cursor(lnum, col, curswant)
 
 end
 
+-- Toggle locking the virtual cursors if initialised
+function M.lock()
+  if initialised then
+    virtual_cursors.toggle_lock()
+  end
+end
+
 function M.setup(opts)
 
   -- Options
@@ -569,7 +572,6 @@ function M.setup(opts)
   -- Autocmds
   autocmd_group_id = vim.api.nvim_create_augroup("MultipleCursors", {})
 
-  vim.api.nvim_create_user_command("MultipleCursorsLockToggle", M.virtual_cursors_lock_toggle, {})
   vim.api.nvim_create_user_command("MultipleCursorsAddDown", M.add_cursor_down, {})
   vim.api.nvim_create_user_command("MultipleCursorsAddUp", M.add_cursor_up, {})
 
@@ -581,6 +583,7 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("MultipleCursorsAddJumpNextMatch", M.add_cursor_and_jump_to_next_match, {})
   vim.api.nvim_create_user_command("MultipleCursorsJumpNextMatch", M.jump_to_next_match, {})
 
+  vim.api.nvim_create_user_command("MultipleCursorsLock", M.lock, {})
 end
 
 return M
