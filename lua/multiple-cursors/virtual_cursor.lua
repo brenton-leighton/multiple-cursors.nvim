@@ -17,7 +17,6 @@ function VirtualCursor.new(lnum, col, curswant, first)
   self.visual_multiline_mark_id = 0     -- ID of the visual area extmark then spans multiple lines
   self.visual_empty_line_mark_ids = {}  -- IDs of the visual area extmarks for empty lines
 
-  self.within_buffer = true             -- lnum is within the buffer
   self.editable = true                  -- To disable editing the virtual cursor when
                                         -- in collision with the real cursor
   self.delete = false                   -- To mark the virtual cursor for deletion

@@ -134,17 +134,15 @@ function M.cursor_moved()
   for idx = #virtual_cursors, 1, -1 do
     local vc = virtual_cursors[idx]
 
-    if vc.within_buffer then
-      -- First update the virtual cursor position from the extmark in case there
-      -- was a change due to editing
-      extmarks.update_virtual_cursor_position(vc)
+    -- First update the virtual cursor position from the extmark in case there
+    -- was a change due to editing
+    extmarks.update_virtual_cursor_position(vc)
 
-      -- Mark editable to false if coincident with the real cursor
-      vc.editable = not (vc.lnum == pos[2] and vc.col == pos[3])
+    -- Mark editable to false if coincident with the real cursor
+    vc.editable = not (vc.lnum == pos[2] and vc.col == pos[3])
 
-      -- Update the extmark (extmark is invisible if editable == false)
-      extmarks.update_virtual_cursor_extmarks(vc)
-    end
+    -- Update the extmark (extmark is invisible if editable == false)
+    extmarks.update_virtual_cursor_extmarks(vc)
   end
 end
 
@@ -168,10 +166,8 @@ function M.visit_all(func)
 
   for idx, vc in ipairs(virtual_cursors) do
 
-    if vc.within_buffer then
-      -- Set virtual cursor position from extmark in case there were any changes
-      extmarks.update_virtual_cursor_position(vc)
-    end
+    -- Set virtual cursor position from extmark in case there were any changes
+    extmarks.update_virtual_cursor_position(vc)
 
     if not vc.delete then
       -- Call the function
@@ -196,23 +192,12 @@ function M.visit_all(func)
 
 end
 
--- Visit virtual cursors within buffer
-function M.visit_in_buffer(func)
-
-  M.visit_all(function(vc, idx)
-    if vc.within_buffer then
-      func(vc, idx)
-    end
-  end)
-
-end
-
 -- Visit virtual cursors within the buffer with the real cursor
 function M.visit_with_cursor(func)
 
   ignore_cursor_movement = true
 
-  M.visit_in_buffer(function(vc, idx)
+  M.visit_all(function(vc, idx)
     vc:set_cursor_position()
     func(vc, idx)
   end)
@@ -254,7 +239,7 @@ function M.edit(func)
   ignore_cursor_movement = true
   extmarks.save_cursor()
 
-  M.visit_in_buffer(function(vc, idx)
+  M.visit_all(function(vc, idx)
     if vc.editable then
       func(vc, idx)
     end
@@ -361,7 +346,7 @@ function M.visual_mode(func)
   -- Save the visual area to extmarks
   extmarks.save_visual_area()
 
-  M.visit_in_buffer(function(vc, idx)
+  M.visit_all(function(vc, idx)
     -- Set visual area
     vc:set_visual_area()
 
@@ -408,7 +393,7 @@ function M.can_split_paste(num_lines)
   local count = 0
 
   for _, vc in ipairs(virtual_cursors) do
-    if vc.within_buffer and vc.editable then
+    if vc.editable then
       count = count + 1
     end
   end
