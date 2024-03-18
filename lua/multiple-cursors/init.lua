@@ -538,6 +538,13 @@ function M.add_cursor(lnum, col, curswant)
 
 end
 
+-- Toggle locking the virtual cursors if initialised
+function M.lock()
+  if initialised then
+    virtual_cursors.toggle_lock()
+  end
+end
+
 function M.setup(opts)
 
   -- Options
@@ -576,6 +583,7 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("MultipleCursorsAddJumpNextMatch", M.add_cursor_and_jump_to_next_match, {})
   vim.api.nvim_create_user_command("MultipleCursorsJumpNextMatch", M.jump_to_next_match, {})
 
+  vim.api.nvim_create_user_command("MultipleCursorsLock", M.lock, {})
 end
 
 return M

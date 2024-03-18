@@ -34,7 +34,7 @@ end
 -- Normal mode backspace command for all virtual cursors
 local function all_virtual_cursors_normal_backspace(count)
   count = vim.fn.max({count, 1})
-  virtual_cursors.visit_in_buffer(function(vc) virtual_cursor_normal_backspace(vc, count) end)
+  virtual_cursors.visit_all(function(vc) virtual_cursor_normal_backspace(vc, count) end)
 end
 
 -- Normal mode backspace command

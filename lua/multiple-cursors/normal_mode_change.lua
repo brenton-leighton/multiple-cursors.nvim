@@ -26,7 +26,7 @@ end
 
 local function _i()
   -- curswant is lost
-  virtual_cursors.visit_in_buffer(function(vc)
+  virtual_cursors.visit_all(function(vc)
     vc.curswant = vc.col
   end)
 end
@@ -45,7 +45,7 @@ end
 local function _O()
 
   -- New line before current line
-  virtual_cursors.visit_in_buffer(function(vc)
+  virtual_cursors.visit_all(function(vc)
     if vc.lnum == 1 then -- First line, move to start of line
       vc.col = 1
       vc.curswant = 1
@@ -71,7 +71,7 @@ end
 
 local function _v()
 
-  virtual_cursors.visit_in_buffer(function(vc)
+  virtual_cursors.visit_all(function(vc)
 
     -- Save cursor position as visual area start
     vc.visual_start_lnum = vc.lnum

@@ -311,12 +311,8 @@ end
 
 -- Update all extmarks for a virtual cursor
 function M.update_virtual_cursor_extmarks(vc)
-  if vc.within_buffer then
-    update_virtual_cursor_extmark(vc)
-    update_virtual_cursor_visual_extmarks(vc)
-  else -- Cursor not within buffer
-    M.delete_virtual_cursor_extmarks(vc)
-  end
+  update_virtual_cursor_extmark(vc)
+  update_virtual_cursor_visual_extmarks(vc)
 end
 
 -- Set virtual cursor position from its extmark
