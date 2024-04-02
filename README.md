@@ -250,6 +250,13 @@ opts = {
 }
 ```
 
+## Appearance
+
+This plugin uses the following highlight groups:
+
+- `MultipleCursorsReal` (default: links to `Cursor`): The real cursor
+- `MultipleCursorsVirtual` (default: links to `Visual`): The virtual cursors
+
 ## Plugin compatibility
 
 ### [windwp/nvim-autopairs](https://github.com/windwp/nvim-autopairs)
