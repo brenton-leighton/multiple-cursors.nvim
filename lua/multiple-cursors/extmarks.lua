@@ -1,7 +1,7 @@
 local M = {}
 
-local cursor_hl_group = "Cursor"
-local visual_hl_group = "Visual"
+local cursor_hl_group = "MultipleCursorsCursor"
+local visual_hl_group = "MultipleCursorsVisual"
 
 local common = require("multiple-cursors.common")
 
@@ -16,7 +16,30 @@ local visual_area_start_mark_id = nil
 local visual_area_end_mark_id = nil
 
 function M.setup()
+
+  -- Global highlight groups which can be overridden by the user
+  -- Check if the Cursor highlight group is defined
+  if next(vim.api.nvim_get_hl(0, {name="Cursor"})) then
+    vim.api.nvim_set_hl(0, cursor_hl_group, {
+      link = "Cursor",
+      default = true,
+    })
+  else
+    -- Use TermCursor if Cursor isn't defined
+    vim.api.nvim_set_hl(0, cursor_hl_group, {
+      link = "TermCursor",
+      default = true,
+    })
+  end
+
+  vim.api.nvim_set_hl(0, visual_hl_group, {
+    link = "Visual",
+    default = true,
+  })
+
+  -- Create a namespace for the extmarks
   highlight_namespace_id = vim.api.nvim_create_namespace("multiple-cursors")
+
 end
 
 -- Clear all extmarks

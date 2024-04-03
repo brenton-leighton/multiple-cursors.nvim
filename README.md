@@ -4,11 +4,11 @@ A multiple cursors plugin for Neovim that works the way multiple cursors work in
 I.e. create extra cursors and then use Neovim as you normally would.
 Cursors can be added with an up/down movement, with a mouse click, or by searching for a pattern.
 
-This plugin also has the ability to do "split pasting": if the number of lines of paste text matches the number of cursors, each line will be inserted at each cursor (this is only implemented for pasting, and not the put commands).
-
 The plugin works by overriding key mappings while multiple cursors are active.
 Any user defined key mappings will need to be added to the [custom_key_maps](#custom_key_maps) table to be used with multiple cursors.
 See the [Plugin compatibility](#plugin-compatibility) section for examples of how to work with specific plugins.
+
+This plugin also has the ability to do "split pasting": if the number of lines of paste text matches the number of cursors, each line will be inserted at each cursor (this is only implemented for pasting, and not the put commands).
 
 ![Basic usage](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/4ea42343-6784-458c-aedb-f16b958551e3)
 
@@ -223,8 +223,8 @@ opts = {
       vim.print(register .. count .. motion_cmd .. char)
     end, "mc"}
 
-  }
-}
+  },
+},
 ```
 
 See the [Plugin compatibility](#plugin-compatibility) section for more examples.
@@ -243,9 +243,47 @@ opts = {
     vim.opt.cursorline = false
     vim.cmd("NoMatchParen")
   end,
+
   post_hook = function()
     vim.opt.cursorline = true
     vim.cmd("DoMatchParen")
+  end,
+},
+```
+
+## Appearance
+
+This plugin uses the following highlight groups:
+
+- `MultipleCursorsCursor`: The cursor part of a virtual cursor (links to `Cursor` by default)
+- `MultipleCursorsVisual`: The visual area part of a virtual cursor (links to `Visual` by default)
+
+For example, colours can be defined in the `config` function of the [Plugin Spec](https://github.com/folke/lazy.nvim#-plugin-spec):
+
+```lua
+config = function(opts)
+  vim.api.nvim_set_hl(0, "MultipleCursorsCursor", {bg="#FFFFFF", fg="#000000"})
+  vim.api.nvim_set_hl(0, "MultipleCursorsVisual", {bg="#CCCCCC", fg="#000000"})
+
+  require("multiple-cursors").setup(opts)
+end,
+```
+
+Alternatively, colours could be defined in the `pre_hook` function (which runs every time multiple cursors mode is entered):
+
+```lua
+opts = {
+  pre_hook = function()
+    -- Set MultipleCursorsCursor and MultipleCursorsVisual to be slightly darker
+    -- than Cursor and Visual
+
+    local cursor = vim.api.nvim_get_hl(0, {name="Cursor"})
+    cursor.bg = cursor.bg - 3355443  -- -#333333
+    vim.api.nvim_set_hl(0, "MultipleCursorsCursor", cursor)
+
+    local visual = vim.api.nvim_get_hl(0, {name="Visual"})
+    visual.bg = visual.bg - 1118481  -- -#111111
+    vim.api.nvim_set_hl(0, "MultipleCursorsVisual", visual)
   end,
 }
 ```
@@ -269,10 +307,11 @@ opts = {
   pre_hook = function()
     vim.g.minipairs_disable = true
   end,
+
   post_hook = function()
     vim.g.minipairs_disable = false
   end,
-}
+},
 ```
 
 ### [chrisgrieser/nvim-spider](https://github.com/chrisgrieser/nvim-spider)
@@ -305,8 +344,8 @@ opts = {
       end
       require('spider').motion('b')
     end},
-  }
-}
+  },
+},
 ```
 
 ### [mini.surround](https://github.com/echasnovski/mini.surround) and [kylechui/nvim-surround](https://github.com/kylechui/nvim-surround)
@@ -317,10 +356,12 @@ The issue with both of these plugins is that they don't have functions that can 
 One workaround would be to use a different key sequence to execute the command while using multiple cursors, e.g. for mini.pairs `sa` command:
 
 ```lua
-custom_key_maps = {
-  {"n", "<Leader>sa", function(_, count, motion_cmd, char)
-    vim.cmd("normal " .. count .. "sa" .. motion_cmd .. char)
-  end, "mc"},
+opts = {
+  custom_key_maps = {
+    {"n", "<Leader>sa", function(_, count, motion_cmd, char)
+      vim.cmd("normal " .. count .. "sa" .. motion_cmd .. char)
+    end, "mc"},
+  },
 },
 ```
 
@@ -332,10 +373,12 @@ Maintains cursor position when indenting and unindenting.
 This plugin can be used with multiple cursors by adding key maps, e.g.
 
 ```lua
-custom_key_maps = {
-  {"n", {">>", "<Tab>"}, function() require("stay-in-place").shift_right_line() end},
-  {"n", "<<", function() require("stay-in-place").shift_left_line() end},
-  {{"n", "i"}, "<S-Tab>", function() require("stay-in-place").shift_left_line() end},
+opts = {
+  custom_key_maps = {
+    {"n", {">>", "<Tab>"}, function() require("stay-in-place").shift_right_line() end},
+    {"n", "<<", function() require("stay-in-place").shift_left_line() end},
+    {{"n", "i"}, "<S-Tab>", function() require("stay-in-place").shift_left_line() end},
+  },
 },
 ```
 
