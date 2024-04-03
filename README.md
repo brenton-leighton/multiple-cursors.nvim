@@ -254,8 +254,8 @@ opts = {
 
 This plugin uses the following highlight groups:
 
-- `MultipleCursorsReal` (default: links to `Cursor`): The real cursor
-- `MultipleCursorsVirtual` (default: links to `Visual`): The virtual cursors
+- `MultipleCursorsCursor`: The cursor part of a virtual cursor (links to `Cursor` by default)
+- `MultipleCursorsVisual`: The visual area part of a virtual cursor (links to `Visual` by default)
 
 ## Plugin compatibility
 

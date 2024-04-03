@@ -1,7 +1,7 @@
 local M = {}
 
-local real_hl_group = "MultipleCursorsReal"
-local virtual_hl_group = "MultipleCursorsVirtual"
+local cursor_hl_group = "MultipleCursorsCursor"
+local visual_hl_group = "MultipleCursorsVisual"
 
 local common = require("multiple-cursors.common")
 
@@ -16,17 +16,21 @@ local visual_area_start_mark_id = nil
 local visual_area_end_mark_id = nil
 
 function M.setup()
+
   -- Global highlight groups which can be overridden by the user
-  vim.api.nvim_set_hl(0, real_hl_group, {
+  vim.api.nvim_set_hl(0, cursor_hl_group, {
     link = "Cursor",
-    default = true
+    default = true,
   })
-  vim.api.nvim_set_hl(0, virtual_hl_group, {
+
+  vim.api.nvim_set_hl(0, visual_hl_group, {
     link = "Visual",
-    default = true
+    default = true,
   })
+
   -- Create a namespace for the extmarks
   highlight_namespace_id = vim.api.nvim_create_namespace("multiple-cursors")
+
 end
 
 -- Clear all extmarks
@@ -128,7 +132,7 @@ end
 local function update_virtual_cursor_extmark(vc)
 
   if vc.editable then
-    vc.mark_id = set_extmark(vc.lnum, vc.col, vc.mark_id, real_hl_group, 9999)
+    vc.mark_id = set_extmark(vc.lnum, vc.col, vc.mark_id, cursor_hl_group, 9999)
   else
     -- Invisible mark when the virtual cursor isn't editable (in collision with the real cursor)
     vc.mark_id = set_extmark(vc.lnum, vc.col, vc.mark_id, "", 9999)
@@ -162,7 +166,7 @@ local function update_visual_multi_line_extmark(mark_id, lnum1, col1, lnum2, col
     end
 
     opts.end_col = col2 - 1
-    opts.hl_group = virtual_hl_group
+    opts.hl_group = visual_hl_group
     opts.priority = 9998
 
     return vim.api.nvim_buf_set_extmark(0, highlight_namespace_id, lnum1 - 1, col1 - 1, opts)
@@ -178,7 +182,7 @@ local function update_visual_empty_line_extmarks(mark_ids, empty_lines)
   for idx = 1, #empty_lines do
     local opts = {}
 
-    opts.virt_text = {{" ", virtual_hl_group}}
+    opts.virt_text = {{" ", visual_hl_group}}
     opts.virt_text_pos = "overlay"
     opts.priority = 9998
 
