@@ -327,7 +327,8 @@ opts = {
 
 ### [chrisgrieser/nvim-spider](https://github.com/chrisgrieser/nvim-spider)
 
-Improves `w`, `e`, and `b` motions. In normal mode `count` must be set before the motion function is called.
+Improves `w`, `e`, and `b` motions.
+For normal mode `count` must be set before nvim-spider's motion function is called:
 
 ```lua
 opts = {
