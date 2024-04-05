@@ -158,6 +158,9 @@ default_key_maps = {
 
   -- Escape in all modes
   {{"n", "i", "x"}, "<Esc>", function() M.escape() end},
+
+  -- v in visual mode is also escape
+  {"x", "v", function() M.escape() end},
 }
 
 local function buf_delete()

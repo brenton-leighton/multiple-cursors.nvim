@@ -1,7 +1,6 @@
 # multiple-cursors.nvim
 
-A multiple cursors plugin for Neovim that works the way multiple cursors work in other editors (such as Visual Studio Code or JetBrains IDEs).
-I.e. create extra cursors and then use Neovim as you normally would.
+A multi-cursor plugin for Neovim that works the way multiple cursors work in other editors (such as Visual Studio Code or JetBrains IDEs): create extra cursors and use Neovim as you normally would.
 Cursors can be added with an up/down movement, with a mouse click, or by searching for a pattern.
 
 The plugin works by overriding key mappings while multiple cursors are active.
@@ -115,7 +114,7 @@ Notable missing functionality:
 
 ## Options
 
-Options can be configured by providing an options table to the setup function, e.g. with Lazy:
+Options can be configured by providing an options table to the setup function, e.g. with lazy.nvim:
 
 ```lua
 "brenton-leighton/multiple-cursors.nvim",
@@ -258,7 +257,7 @@ This plugin uses the following highlight groups:
 - `MultipleCursorsCursor`: The cursor part of a virtual cursor (links to `Cursor` by default)
 - `MultipleCursorsVisual`: The visual area part of a virtual cursor (links to `Visual` by default)
 
-For example, colours can be defined in the `config` function of the [Plugin Spec](https://github.com/folke/lazy.nvim#-plugin-spec):
+For example, colours can be defined in the `config` function of the [plugin spec](https://github.com/folke/lazy.nvim#-plugin-spec):
 
 ```lua
 config = function(opts)
@@ -293,14 +292,26 @@ opts = {
 ### [windwp/nvim-autopairs](https://github.com/windwp/nvim-autopairs)
 
 Automatically inserts and deletes paired characters.
-There are a couple of issues with this plugin that mean it can't be installed along with multiple-cursors.nvim (the issues are that it creates mappings on the `InsertEnter` event, and that the mappings can't be overridden).
-An alternative is the [mini.pairs](#mini.pairs) plugin.
+The plugin needs to be disabled while using multiple cursors:
+
+```lua
+opts = {
+  pre_hook = function()
+    require('nvim-autopairs').disable()
+  end,
+
+  post_hook = function()
+    require('nvim-autopairs').enable()
+  end,
+},
+```
+
+Additionally, nvim-autopairs needs to be loaded before using multiple cursors (because it creates mappings when loaded), so the `event = "InsertEnter",` line must not be used in the [lazy.nvim plugin spec](https://github.com/windwp/nvim-autopairs/tree/master#lazynvim).
 
 ### [mini.pairs](https://github.com/echasnovski/mini.nvim/blob/main/readmes/mini-pairs.md)
 
 Automatically inserts and deletes paired characters.
-If it were possible to call the plugin functions directly they could be mapped in `custom_key_maps`, but that doesn't seem to work.
-Therefore the plugin needs to be disabled while using multiple cursors:
+The plugin needs to be disabled while using multiple cursors:
 
 ```lua
 opts = {
@@ -316,7 +327,8 @@ opts = {
 
 ### [chrisgrieser/nvim-spider](https://github.com/chrisgrieser/nvim-spider)
 
-Improves `w`, `e`, and `b` motions. In normal mode `count` must be set before the motion function is called.
+Improves `w`, `e`, and `b` motions.
+For normal mode `count` must be set before nvim-spider's motion function is called:
 
 ```lua
 opts = {

@@ -74,8 +74,8 @@ local function save_existing_key_map(mode, key)
 
   local dict = vim.fn.maparg(key, mode, false, true)
 
-  -- If the there's a key map
-  if dict["buffer"] ~= nil then
+  -- If the there's a key map for the local buffer
+  if dict["buffer"] == 1 then
     -- Add to existing_key_maps
     table.insert(existing_key_maps, {mode, dict})
   end
@@ -250,7 +250,7 @@ function M.set_custom()
 
     for j=1, #custom_modes do
       for k=1, #custom_keys do
-        vim.keymap.set(custom_modes[j], custom_keys[k], wrapped_func)
+        vim.keymap.set(custom_modes[j], custom_keys[k], wrapped_func, {buffer=0})
       end
     end
 
@@ -270,7 +270,7 @@ function M.set()
     for _, mode in ipairs(modes) do
       for _, key in ipairs(keys) do
         if is_default_key_map_allowed(mode, key) then
-          vim.keymap.set(mode, key, func)
+          vim.keymap.set(mode, key, func, {buffer=0})
         end
       end
     end
@@ -292,7 +292,7 @@ function M.delete()
     for _, mode in ipairs(modes) do
       for _, key in ipairs(keys) do
         if is_default_key_map_allowed(mode, key) then
-          vim.keymap.del(mode, key)
+          vim.keymap.del(mode, key, {buffer=0})
         end
       end
     end
@@ -306,7 +306,7 @@ function M.delete()
 
     for _, custom_mode in ipairs(custom_modes) do
       for _, custom_key in ipairs(custom_keys) do
-        vim.keymap.del(custom_mode, custom_key)
+        vim.keymap.del(custom_mode, custom_key, {buffer=0})
       end
     end
   end
