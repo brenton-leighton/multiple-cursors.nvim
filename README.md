@@ -289,6 +289,24 @@ opts = {
 
 ## Plugin compatibility
 
+### [which-key.nvim](https://github.com/folke/which-key.nvim)
+
+Shows a pop up of possible key bindings for a given command.
+There's an issue with the normal `v` command that, if a movement command is used before `timeoutlen`, the position of the start of the visual area will be incorrect.
+
+The best solution seems to be [disabling the command](https://github.com/folke/which-key.nvim/blob/4433e5ec9a507e5097571ed55c02ea9658fb268a/doc/which-key.nvim.txt#L321-L328), e.g. by using a plugin spec like this:
+
+```lua
+{
+  "folke/which-key.nvim",
+  opts = {},
+  config = function(opts)
+    require("which-key.plugins.presets").operators["v"] = nil
+    require("which-key").setup(opts)
+  end,
+},
+```
+
 ### [windwp/nvim-autopairs](https://github.com/windwp/nvim-autopairs)
 
 Automatically inserts and deletes paired characters.
