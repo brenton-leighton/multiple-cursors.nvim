@@ -127,6 +127,31 @@ function M.restore_existing()
 
 end
 
+-- Call func with virtualedit = onemore if mode is insert or replace
+-- The cursor position is saved and restored to prevent curswant being lost
+local function with_onemore(func)
+
+  if not common.is_mode_insert_replace() then
+    func()
+    return
+  end
+
+  local ve = vim.wo.ve
+
+  -- Enable one more while saving/restoring cursor
+  local cursor_pos = vim.fn.getcurpos()
+  vim.wo.ve = "onemore"
+  vim.fn.cursor({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
+
+  func()
+
+  -- Disable one more while saving/restoring cursor
+  local cursor_pos = vim.fn.getcurpos()
+  vim.wo.ve = ve
+  vim.fn.cursor({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
+
+end
+
 -- Function to execute a custom key map
 local function custom_function(func)
 
@@ -135,13 +160,14 @@ local function custom_function(func)
   local count = vim.v.count
 
   -- Call func for the real cursor
-  func(register, count)
+  with_onemore(function() func(register, count) end)
 
   -- Call func for each virtual cursor and set the virtual cursor position
   virtual_cursors.edit_with_cursor(function(vc)
     func(register, count)
     vc:save_cursor_position()
   end)
+
 end
 
 local function custom_function_with_motion(func)
@@ -158,7 +184,7 @@ local function custom_function_with_motion(func)
   end
 
   -- Call func for the real cursor
-  func(register, count, motion_cmd)
+  with_onemore(function() func(register, count, motion_cmd) end)
 
   -- Call func for each virtual cursor and set the virtual cursor position
   virtual_cursors.edit_with_cursor(function(vc)
@@ -182,7 +208,7 @@ local function custom_function_with_char(func)
   end
 
   -- Call func for the real cursor
-  func(register, count, char)
+  with_onemore(function() func(register, count, char) end)
 
   -- Call func for each virtual cursor and set the virtual cursor position
   virtual_cursors.edit_with_cursor(function(vc)
@@ -213,7 +239,7 @@ local function custom_function_with_motion_then_char(func)
   end
 
   -- Call func for the real cursor
-  func(register, count, motion_cmd, char)
+  with_onemore(function() func(register, count, motion_cmd, char) end)
 
   -- Call func for each virtual cursor and set the virtual cursor position
   virtual_cursors.edit_with_cursor(function(vc)
