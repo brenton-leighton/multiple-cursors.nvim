@@ -122,7 +122,7 @@ version = "*",
 opts = {
   enable_split_paste = true,
   custom_key_maps = {
-    -- j and k: use gj/gk when count is 0
+    -- Normal/visual j: use gj when count is 0
     {{"n", "x"}, {"j", "<Down>"}, function(_, count)
       if count == 0 then
         vim.cmd("normal! gj")
@@ -130,6 +130,7 @@ opts = {
         vim.cmd("normal! " .. count .. "j")
       end
     end},
+    -- Normal/visual k: use gj when count is 0
     {{"n", "x"}, {"k", "<Up>"}, function(_, count)
       if count == 0 then
         vim.cmd("normal! gk")
@@ -137,6 +138,10 @@ opts = {
         vim.cmd("normal! " .. count .. "k")
       end
     end},
+    -- Insert mode Down: use gj
+    {"i", "<Down>", function() vim.cmd("normal! gj") end},
+    -- Insert mode Up: use gk
+    {"i", "<Up>", function() vim.cmd("normal! gk") end},
   },
   pre_hook = function()
     vim.opt.cursorline = false
