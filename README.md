@@ -1,76 +1,76 @@
 # multiple-cursors.nvim
 
-A multi-cursor plugin for Neovim that works the way multiple cursors work in other editors (such as Visual Studio Code or JetBrains IDEs): create extra cursors and use Neovim as you normally would.
-Cursors can be added with an up/down movement, with a mouse click, or by searching for a pattern.
+A multi-cursor plugin for Neovim that works in normal, insert/replace, or visual modes, and with almost every command.
+Multiple cursors is a way of making multiple similar edits that can be easier, faster, or more flexible than other available methods.
 
-The plugin works by overriding key mappings while multiple cursors are active.
-Any user defined key mappings will need to be added to the [custom_key_maps](#custom_key_maps) table to be used with multiple cursors.
-See the [Plugin compatibility](#plugin-compatibility) section for examples of how to work with specific plugins.
-
-This plugin also has the ability to do "split pasting": if the number of lines of paste text matches the number of cursors, each line will be inserted at each cursor (this is only implemented for pasting, and not the put commands).
+Cursors can be added with an up or down movement, a mouse click, or by searching for a pattern.
 
 ![Basic usage](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/4ea42343-6784-458c-aedb-f16b958551e3)
 
-## Overview
+This plugin also has the ability to do "split pasting": When pasting text, if the number of lines of text matches the number of cursors, each line will be inserted at each cursor.
 
-The plugin doesn't initially bind any keys, but creates three commands:
+## Basic usage
 
-| Command | Description |
-| --- | --- |
-| `MultipleCursorsAddDown` | Add a new virtual cursor, then move the real cursor down. In normal mode multiple virtual cursors can be added with a `count`. |
-| `MultipleCursorsAddUp` | Add a new virtual cursor, then move the real cursor up. In normal mode multiple virtual cursors can be added with a `count`. |
-| `MultipleCursorsMouseAddDelete` | Add a new virtual cursor to the mouse click position, unless there is already a virtual cursor at the mouse click position, in which case it is removed |
-| `MultipleCursorsAddMatches` | Search for the word under the cursor (in normal mode) or the visual area (in visual mode) and add cursors to each match (by default this is limited to the visible buffer) |
-| `MultipleCursorsAddMatchesV` | As above, but limit matches to the previous visual area |
-| `MultipleCursorsAddJumpNextMatch` | Add a virtual cursor to the word under the cursor (in normal mode) or the visual area (in visual mode), then move the real cursor to the next match |
-| `MultipleCursorsJumpNextMatch` | Move the real cursor to the next match of the word under the cursor, or if `MultipleCursorsAddJumpNextMatch` was previously called in visual mode, the previously used visual area |
-| `MultipleCursorsLock` | Toggle locking or unlocking the virtual cursors to allow for moving (or editing at) only the real cursor |
+For [lazy.nvim](https://github.com/folke/lazy.nvim), add a section to the plugins table, e.g.:
 
-These commands can be bound to keys, e.g.:
 ```lua
-vim.keymap.set({"n", "i"}, "<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>")
-```
-to bind the `MultipleCursorsAddDown` command to `Ctrl+Down` in normal and insert modes.
-
-## Installation
-
-### Using [lazy.nvim](https://github.com/folke/lazy.nvim)
-
-Add a section to the Lazy plugins table, e.g.:
-```lua
-"brenton-leighton/multiple-cursors.nvim",
-version = "*",  -- Use the latest tagged version
-opts = {},  -- This causes the plugin setup function to be called
-keys = {
-  {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i"}},
-  {"<C-j>", "<Cmd>MultipleCursorsAddDown<CR>"},
-  {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i"}},
-  {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>"},
-  {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}},
-  {"<Leader>a", "<Cmd>MultipleCursorsAddMatches<CR>", mode = {"n", "x"}},
-  {"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}},
-  {"<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}},
-  {"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>"},
-  {"<Leader>l", "<Cmd>MultipleCursorsLockToggle<CR>", mode = {"n", "x"}},
+{
+  "brenton-leighton/multiple-cursors.nvim",
+  version = "*",  -- Use the latest tagged version
+  opts = {},  -- This causes the plugin setup function to be called
+  keys = {
+    {"<C-j>", "<Cmd>MultipleCursorsAddDown<CR>"},
+    {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i"}},
+    {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>"},
+    {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i"}},
+    {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}},
+    {"<Leader>a", "<Cmd>MultipleCursorsAddMatches<CR>", mode = {"n", "x"}},
+  },
 },
 ```
 
-This configures the plugin with the default options, and sets the following key maps:
+This creates a number of key mappings:
 
-- `Ctrl+Down` in normal and insert modes: `MultipleCursorsAddDown`
-- `Ctrl+j` in normal mode: `MultipleCursorsAddDown`
-- `Ctrl+Up` in normal and insert modes: `MultipleCursorsAddUp`
-- `Ctrl+k` in normal mode: `MultipleCursorsAddUp`
-- `Ctrl+LeftClick` in normal and insert modes: `MultipleCursorsMouseAddDelete`
-- `Leader+a` in normal and visual modes: `MultipleCursorsAddMatches` (note: `<Leader>` must have been set previously)
-- `Leader+A` in normal and visual modes: `MultipleCursorsAddMatchesV`
-- `Leader+d` in normal and visual modes: `MultipleCursorsAddJumpNextMatch`
-- `Leader+D` in normal mode: `MultipleCursorsJumpNextMatch`
-- `Leader+l` in normal and visual modes: `MultipleCursorsLock`
+- `Ctrl+j` in normal mode or `Ctrl+Down` in normal and insert modes: Add a new cursor then move the real cursor down
+- `Ctrl+k` in normal mode or `Ctrl+Up` in normal and insert modes: Add a new cursor then move the real cursor up
+- `Ctrl+LeftClick` in normal and insert modes: Add a new cursor (or remove an existing cursor) at the clicked position
+- `Leader+a` in normal and visual modes: Add new cursors to matches to the pattern under the cursor
 
-## Usage
+After cursors have been added, Neovim can be used mostly as normal.
+See [Supported commands](#Supported-commands) for more information.
 
-After adding a new cursor the following functions are available:
+This plugin works by overriding key mappings while multiple cursors are in use.
+Any user defined key mappings will need to be added to the [custom_key_maps](#custom_key_maps) table to be used with multiple cursors.
+
+See the [Plugin compatibility](#plugin-compatibility) section for examples of how to work with specific plugins.
+
+## User commands
+
+The plugin creates a number of user commands:
+
+| Command | Description |
+| --- | --- |
+| `MultipleCursorsAddDown` | Add a new virtual cursor, then move the real cursor down. In normal mode multiple new virtual cursors can be added with a `count`. |
+| `MultipleCursorsAddUp` | Add a new virtual cursor, then move the real cursor up. In normal mode multiple new virtual cursors can be added with a `count`. |
+| `MultipleCursorsMouseAddDelete` | Add a new virtual cursor to the mouse click position, or remove an existing cursor |
+| `MultipleCursorsAddMatches` | Search for the word under the cursor (in normal mode) or the visual area (in visual mode) and add a new cursor to each match. By default cursors are only added to matches in the visible buffer. |
+| `MultipleCursorsAddMatchesV` | As above, but limit matches to the previous visual area |
+| `MultipleCursorsAddJumpNextMatch` | Add a virtual cursor to the word under the cursor (in normal mode) or the visual area (in visual mode), then move the real cursor to the next match |
+| `MultipleCursorsJumpNextMatch` | Move the real cursor to the next match of the word under the cursor. If `MultipleCursorsAddJumpNextMatch` was previously called in visual mode, the real cursor is moved to the next match of the previously used visual area. |
+| `MultipleCursorsLock` | Toggle locking the virtual cursors |
+
+The additional commands can be mapped by adding them to the `keys` table, e.g.:
+
+```lua
+{"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}},
+{"<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}},
+{"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>"},
+{"<Leader>l", "<Cmd>MultipleCursorsLockToggle<CR>", mode = {"n", "x"}},
+```
+
+## Supported commands
+
+The following commands are supported while using multiple cursors:
 
 | Mode | Description | Commands | Notes |
 | --- | --- | --- | --- |
@@ -81,12 +81,12 @@ After adding a new cursor the following functions are available:
 | Normal/visual | Up/down motion | `j` `k` `-` `+` `<CR>` `kEnter` `_` | |
 | All | Text object motion | `<C-Left>` `<C-Right>` | |
 | Normal/visual | Text object motion | `w` `W` `e` `E` `b` `B` `ge` `gE` | |
-| Normal/visual | Percent symbol | `%` | Count is ignored i.e. [jump to match of item under cursor](https://neovim.io/doc/user/motion.html#%25) only |
-| Normal | Delete | `x` `<Del>` `X` `d` `dd` `D` | `d` doesn't indicate that it's waiting for a motion |
-| Normal | Change | `c` `cc` `C` `s` | These commands are implemented as a delete then switch to insert mode <br/> `c` doesn't indicate that it's waiting for a motion, and using a `w` or `W` motion may not behave exactly correctly <br/> The `cc` command won't auto indent |
+| Normal/visual | Percent symbol | `%` | Count is ignored, i.e. [jump to match of item under cursor](https://neovim.io/doc/user/motion.html#%25) only |
+| Normal | Delete | `x` `<Del>` `X` `d` `dd` `D` | `d` doesn't indicate that it's waiting for a motion. <br/> See [Registers](#registers) for information on how registers work. |
+| Normal | Change | `c` `cc` `C` `s` | These commands are implemented as a delete then switch to insert mode. <br/> `c` doesn't indicate that it's waiting for a motion, and using a `w` or `W` motion may not behave exactly correctly. <br/> The `cc` command won't auto indent. <br/> See [Registers](#registers) for information on how registers work. |
 | Normal | Replace | `r` | |
-| Normal | Yank | `y` `yy` | `y` doesn't indicate that it's waiting for a motion |
-| Normal | Put | `p` `P` | |
+| Normal | Yank | `y` `yy` | `y` doesn't indicate that it's waiting for a motion. <br/> See [Registers](#registers) for information on how registers work. |
+| Normal | Put | `p` `P` | See [Registers](#registers) for information on how registers work |
 | Normal | Indentation | `>>` `<<` | |
 | Normal | Join | `J` `gJ` | |
 | Normal | Change to insert/replace mode | `a` `A` `i` `I` `o` `O` `R` | Count is ignored |
@@ -104,60 +104,48 @@ After adding a new cursor the following functions are available:
 | Visual | Change | `c` | This command is implemented as a delete then switch to insert mode |
 | Insert/replace/visual | Exit to normal mode | `<Esc>` | |
 | Normal | Undo | `u` | Also exits multiple cursors, because cursor positions can't be restored by undo |
-| Normal | Exit multiple cursors | `<Esc>` | Clears virtual cursors, virtual cursor registers will be lost |
+| Normal | Exit multiple cursors | `<Esc>` | Clears all virtual cursors. <br/> Registers for the virtual cursors will be lost. |
 
-Notable missing functionality:
+### Registers
 
+The delete, yank, and put commands support named registers in addition to the unnamed register, and each virtual cursor has its own registers.
+
+If the put command is used and a virtual cursor doesn't have a register available, the register for the real cursor will be used.
+This means that if you use delete/yank before creating multiple cursors, add cursors, and then use the put command, the same text will be put to each cursor.
+
+### Notable unsupported functionality
+
+- Completion
 - Scrolling
-- `.` (repeat) command
-- Marks
+- Jumping to marks (`` ` `` or `'` commands)
+- Repeat (`.`) command
 
 ## Options
 
-Options can be configured by providing an options table to the setup function, e.g. with lazy.nvim:
+Options can be configured by providing an options table to the setup function, e.g. to define the `pre_hook` and `post_hook` functions:
 
 ```lua
-"brenton-leighton/multiple-cursors.nvim",
-version = "*",
-opts = {
-  enable_split_paste = true,
-  custom_key_maps = {
-    -- Normal/visual j: use gj when count is 0
-    {{"n", "x"}, {"j", "<Down>"}, function(_, count)
-      if count == 0 then
-        vim.cmd("normal! gj")
-      else
-        vim.cmd("normal! " .. count .. "j")
-      end
-    end},
-    -- Normal/visual k: use gj when count is 0
-    {{"n", "x"}, {"k", "<Up>"}, function(_, count)
-      if count == 0 then
-        vim.cmd("normal! gk")
-      else
-        vim.cmd("normal! " .. count .. "k")
-      end
-    end},
-    -- Insert mode Down: use gj
-    {"i", "<Down>", function() vim.cmd("normal! gj") end},
-    -- Insert mode Up: use gk
-    {"i", "<Up>", function() vim.cmd("normal! gk") end},
+{
+  "brenton-leighton/multiple-cursors.nvim",
+  version = "*",
+  opts = {
+    pre_hook = function()
+      vim.opt.cursorline = false
+      vim.cmd("NoMatchParen")
+    end,
+    post_hook = function()
+      vim.opt.cursorline = true
+      vim.cmd("DoMatchParen")
+    end,
   },
-  pre_hook = function()
-    vim.opt.cursorline = false
-    vim.cmd("NoMatchParen")
-  end,
-  post_hook = function()
-    vim.opt.cursorline = true
-    vim.cmd("DoMatchParen")
-  end,
-},
-keys = {
-  {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i"}},
-  {"<C-j>", "<Cmd>MultipleCursorsAddDown<CR>"},
-  {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i"}},
-  {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>"},
-  {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}},
+  keys = {
+    {"<C-j>", "<Cmd>MultipleCursorsAddDown<CR>"},
+    {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i"}},
+    {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>"},
+    {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i"}},
+    {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}},
+    {"<Leader>a", "<Cmd>MultipleCursorsAddMatches<CR>", mode = {"n", "x"}},
+  },
 },
 ```
 
@@ -171,19 +159,28 @@ This option allows for disabling the "split pasting" function, where if the numb
 
 Default value: `true`
 
-When adding cursors to the word under the cursor (i.e. using the `MultipleCursorsAddToWordUnderCursor` command), if `match_visible_only = true` then cursors will only be added to matches that are visible. This option doesn't apply if a visual area has been set.
+When adding cursors to the word under the cursor (i.e. using the `MultipleCursorsAddMatches` command), if `match_visible_only = true` then new cursors will only be added to matches that are in the visible buffer.
 
-### `disabled_default_key_maps`
+### `pre_hook` and `post_hook`
 
-Default value: `{}`
+Default values: `nil`
 
-This option can be used to disabled any of the default key maps.
-Note that this is not required if replacing the function with [custom_key_maps](#custom_key_maps).
+These options are to provide functions that are called when the first virtual cursor is added (`pre_hook`) and when the last virtual cursor is removed (`post_hook`).
 
-Each element in the `disabled_default_key_maps` table must have two elements:
+E.g. to disable [`cursorline`](https://neovim.io/doc/user/options.html#'cursorline') and [highlighting matching parentheses](https://neovim.io/doc/user/pi_paren.html) while multiple cursors is active:
 
-- Mode (string|table): Mode short-name string (`"n"`, `"i"`, or `"v"`), or a table of mode short-name strings
-- Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
+```lua
+opts = {
+  pre_hook = function()
+    vim.opt.cursorline = false
+    vim.cmd("NoMatchParen")
+  end,
+  post_hook = function()
+    vim.opt.cursorline = true
+    vim.cmd("DoMatchParen")
+  end,
+},
+```
 
 ### `custom_key_maps`
 
@@ -201,12 +198,43 @@ This option allows for mapping keys to custom functions for use with multiple cu
 	- If valid input isn't given by the user the function will not be called
 	- There will be no indication that Neovim is waiting for a motion command or character
 
-Example usage:
+E.g. to map `j` and `k` to `gj` and `gk` when `count` is 0 (as well as Up and Down in insert mode):
 
 ```lua
 opts = {
   custom_key_maps = {
+    -- Normal/visual j: use gj when count is 0
+    {{"n", "x"}, {"j", "<Down>"}, function(_, count)
+      if count == 0 then
+        vim.cmd("normal! gj")
+      else
+        vim.cmd("normal! " .. count .. "j")
+      end
+    end},
 
+    -- Normal/visual k: use gj when count is 0
+    {{"n", "x"}, {"k", "<Up>"}, function(_, count)
+      if count == 0 then
+        vim.cmd("normal! gk")
+      else
+        vim.cmd("normal! " .. count .. "k")
+      end
+    end},
+
+    -- Insert mode <Down>: Use gj
+    {"i", "<Down>", function() vim.cmd("normal! gj") end},
+
+    -- Insert mode <Up>: Use gk
+    {"i", "<Up>", function() vim.cmd("normal! gk") end},
+  },
+},
+```
+
+The following example shows how to use various options for user input:
+
+```lua
+opts = {
+  custom_key_maps = {
     -- No option
     {"n", "<Leader>a", function(register, count)
       vim.print(register .. count)
@@ -226,71 +254,21 @@ opts = {
     {"n", "<Leader>d", function(register, count, motion_cmd, char)
       vim.print(register .. count .. motion_cmd .. char)
     end, "mc"}
-
   },
 },
 ```
 
-See the [Plugin compatibility](#plugin-compatibility) section for more examples.
+### `disabled_default_key_maps`
 
-### `pre_hook` and `post_hook`
+Default value: `{}`
 
-Default values: `nil`
+This option can be used to disabled any of the default key maps.
+Note that this is not required if replacing the function with [custom_key_maps](#custom_key_maps).
 
-These options are to provide functions that are called a the start of initialisation and at the end of de-initialisation respectively.
+Each element in the `disabled_default_key_maps` table must have two elements:
 
-E.g. to disable [`cursorline`](https://neovim.io/doc/user/options.html#'cursorline') and [highlighting matching parentheses](https://neovim.io/doc/user/pi_paren.html) while multiple cursors are active:
-
-```lua
-opts = {
-  pre_hook = function()
-    vim.opt.cursorline = false
-    vim.cmd("NoMatchParen")
-  end,
-
-  post_hook = function()
-    vim.opt.cursorline = true
-    vim.cmd("DoMatchParen")
-  end,
-},
-```
-
-## Appearance
-
-This plugin uses the following highlight groups:
-
-- `MultipleCursorsCursor`: The cursor part of a virtual cursor (links to `Cursor` by default)
-- `MultipleCursorsVisual`: The visual area part of a virtual cursor (links to `Visual` by default)
-
-For example, colours can be defined in the `config` function of the [plugin spec](https://github.com/folke/lazy.nvim#-plugin-spec):
-
-```lua
-config = function(opts)
-  vim.api.nvim_set_hl(0, "MultipleCursorsCursor", {bg="#FFFFFF", fg="#000000"})
-  vim.api.nvim_set_hl(0, "MultipleCursorsVisual", {bg="#CCCCCC", fg="#000000"})
-
-  require("multiple-cursors").setup(opts)
-end,
-```
-
-Alternatively, colours could be defined in the `pre_hook` function (which runs every time multiple cursors mode is entered):
-
-```lua
-opts = {
-  pre_hook = function()
-    -- Set MultipleCursorsCursor and MultipleCursorsVisual to be slightly darker
-    -- than Cursor and Visual
-
-    local cursor = vim.api.nvim_get_hl(0, {name="Cursor"})
-    cursor.bg = cursor.bg - 3355443  -- -#333333
-    vim.api.nvim_set_hl(0, "MultipleCursorsCursor", cursor)
-
-    local visual = vim.api.nvim_get_hl(0, {name="Visual"})
-    visual.bg = visual.bg - 1118481  -- -#111111
-    vim.api.nvim_set_hl(0, "MultipleCursorsVisual", visual)
-  end,
-}
-```
+- Mode (string|table): Mode short-name string (`"n"`, `"i"`, or `"v"`), or a table of mode short-name strings
+- Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
 
 ## Plugin compatibility
 
@@ -299,7 +277,7 @@ opts = {
 Shows a pop up of possible key bindings for a given command.
 There's an issue with the normal `v` command that, if a movement command is used before `timeoutlen`, the position of the start of the visual area will be incorrect.
 
-The best solution seems to be [disabling the command](https://github.com/folke/which-key.nvim/blob/4433e5ec9a507e5097571ed55c02ea9658fb268a/doc/which-key.nvim.txt#L321-L328), e.g. by using a plugin spec like this:
+The best solution seems to be [disabling the command](https://github.com/folke/which-key.nvim/blob/4433e5ec9a507e5097571ed55c02ea9658fb268a/doc/which-key.nvim.txt#L321-L328), e.g. by using a plugin spec for whick-key like this:
 
 ```lua
 {
@@ -417,9 +395,46 @@ opts = {
 },
 ```
 
+## Appearance
+
+This plugin uses the following highlight groups:
+
+- `MultipleCursorsCursor`: The cursor part of a virtual cursor (links to `Cursor` by default)
+- `MultipleCursorsVisual`: The visual area part of a virtual cursor (links to `Visual` by default)
+
+For example, colours can be defined in the `config` function of the [plugin spec](https://github.com/folke/lazy.nvim#-plugin-spec):
+
+```lua
+config = function(opts)
+  vim.api.nvim_set_hl(0, "MultipleCursorsCursor", {bg="#FFFFFF", fg="#000000"})
+  vim.api.nvim_set_hl(0, "MultipleCursorsVisual", {bg="#CCCCCC", fg="#000000"})
+
+  require("multiple-cursors").setup(opts)
+end,
+```
+
+Alternatively, colours could be defined in the `pre_hook` function (which runs every time multiple cursors mode is entered):
+
+```lua
+opts = {
+  pre_hook = function()
+    -- Set MultipleCursorsCursor to be slightly darker than Cursor
+    local cursor = vim.api.nvim_get_hl(0, {name="Cursor"})
+    cursor.bg = cursor.bg - 3355443  -- -#333333
+    vim.api.nvim_set_hl(0, "MultipleCursorsCursor", cursor)
+
+    -- Set MultipleCursorsVisual to be slightly darker than Visual
+    local visual = vim.api.nvim_get_hl(0, {name="Visual"})
+    visual.bg = visual.bg - 1118481  -- -#111111
+    vim.api.nvim_set_hl(0, "MultipleCursorsVisual", visual)
+  end,
+}
+```
+
 ## API
 
 ### `add_cursor(lnum, col, curswant)`
+
 In addition to the provided commands there is a function to add a cursor to a given position, which can be called like so:
 
 ```lua
@@ -430,12 +445,6 @@ where `lnum` is the line number of the new cursor, `col` is the column, and `cur
 
 ## Notes and known issues
 
-- Anything other than the functionality listed above probably won't work correctly
-- This plugin has been developed and tested with Neovim 0.9.1 and there may be issues with other versions
-- This plugin hasn't been tested with completion and it will probably not behave correctly
-- In insert or replace mode, if a line has been auto-indented after a carriage return and nothing has been added to the line, the indentation will not be removed when exiting back to normal mode
-- In insert or replace mode, anything to do with tabs may not behave correctly, in particular if you are using less common options
-- Cursors may not be positioned correctly when moving up or down over extended characters
-- When using the mouse to add a cursor to an extended character, the cursor may be added to the next character
+- In insert/replace mode, `Backspace`, `Delete`, `Enter`, or `Tab` may behave incorrectly, in particular with less common indentation options. Please use the [Issues](https://github.com/brenton-leighton/multiple-cursors.nvim/issues) page to report issues.
+- Cursors may not be positioned correctly when moving up or down over extended characters, or when using the mouse to add a cursor to an extended character
 - When virtual cursors are locked, switching to or from visual mode won't update the virtual cursors and should be avoided
-- Please use the [Issues](https://github.com/brenton-leighton/multiple-cursors.nvim/issues) page to report issues, and please include any relevant Neovim options
