@@ -8,10 +8,6 @@ local input = require("multiple-cursors.input")
 -- mode(s), key(s), function
 default_key_maps = {}
 
--- To disable the default key maps
--- {mode(s), key(s)}
-disabled_default_key_maps = {}
-
 -- Custom key maps
 -- {mode(s), key(s), function}
 custom_key_maps = {}
@@ -20,9 +16,8 @@ custom_key_maps = {}
 -- mode, dict
 local existing_key_maps = {}
 
-function M.setup(_default_key_maps, _disabled_default_key_maps, _custom_key_maps)
+function M.setup(_default_key_maps, _custom_key_maps)
   default_key_maps = _default_key_maps
-  disabled_default_key_maps = _disabled_default_key_maps
   custom_key_maps = _custom_key_maps
 end
 
@@ -39,7 +34,7 @@ local function wrap_in_table(x)
   end
 end
 
--- Is the mode and key in custom_key_maps or disabled_default_key_maps?
+-- Is the mode and key in the custom_key_maps table
 local function is_in_table(t, mode, key)
 
   if next(t) == nil then
@@ -65,8 +60,7 @@ local function is_in_table(t, mode, key)
 end
 
 local function is_default_key_map_allowed(mode, key)
-  return (not is_in_table(custom_key_maps, mode, key)) and
-      (not is_in_table(disabled_default_key_maps, mode, key))
+  return not is_in_table(custom_key_maps, mode, key)
 end
 
 -- Save a single key map
@@ -103,10 +97,14 @@ function M.save_existing()
   for _, custom_key_map in ipairs(custom_key_maps) do
     local custom_modes = wrap_in_table(custom_key_map[1])
     local custom_keys = wrap_in_table(custom_key_map[2])
+    local func = custom_key_map[3]
 
-    for _, custom_mode in ipairs(custom_modes) do
-      for _, custom_key in ipairs(custom_keys) do
-        save_existing_key_map(custom_mode, custom_key)
+    -- If func is nil the key map won't be set
+    if func then
+      for _, custom_mode in ipairs(custom_modes) do
+        for _, custom_key in ipairs(custom_keys) do
+          save_existing_key_map(custom_mode, custom_key)
+        end
       end
     end
   end
@@ -259,25 +257,29 @@ function M.set_custom()
     local custom_keys = wrap_in_table(custom_key_map[2])
     local func = custom_key_map[3]
 
-    local wrapped_func = function() custom_function(func) end
+    if func then
 
-    -- Change wrapped_func if there's a valid option
-    if #custom_key_map >= 4 then
-      local opt = custom_key_map[4]
+      local wrapped_func = function() custom_function(func) end
 
-      if opt == "m" then -- Motion character
-        wrapped_func = function() custom_function_with_motion(func) end
-      elseif opt == "c" then -- Standard character
-        wrapped_func = function() custom_function_with_char(func) end
-      elseif opt == "mc" then -- Standard character
-        wrapped_func = function() custom_function_with_motion_then_char(func) end
+      -- Change wrapped_func if there's a valid option
+      if #custom_key_map >= 4 then
+        local opt = custom_key_map[4]
+
+        if opt == "m" then -- Motion character
+          wrapped_func = function() custom_function_with_motion(func) end
+        elseif opt == "c" then -- Standard character
+          wrapped_func = function() custom_function_with_char(func) end
+        elseif opt == "mc" then -- Standard character
+          wrapped_func = function() custom_function_with_motion_then_char(func) end
+        end
       end
-    end
 
-    for j=1, #custom_modes do
-      for k=1, #custom_keys do
-        vim.keymap.set(custom_modes[j], custom_keys[k], wrapped_func, {buffer=0})
+      for j=1, #custom_modes do
+        for k=1, #custom_keys do
+          vim.keymap.set(custom_modes[j], custom_keys[k], wrapped_func, {buffer=0})
+        end
       end
+
     end
 
   end -- for each custom key map
@@ -330,9 +332,12 @@ function M.delete()
     local custom_keys = wrap_in_table(custom_key_map[2])
     local func = custom_key_map[3]
 
-    for _, custom_mode in ipairs(custom_modes) do
-      for _, custom_key in ipairs(custom_keys) do
-        vim.keymap.del(custom_mode, custom_key, {buffer=0})
+    -- If func is nil then the key map hasn't been set
+    if func then
+      for _, custom_mode in ipairs(custom_modes) do
+        for _, custom_key in ipairs(custom_keys) do
+          vim.keymap.del(custom_mode, custom_key, {buffer=0})
+        end
       end
     end
   end

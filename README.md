@@ -186,11 +186,14 @@ opts = {
 
 Default value: `{}`
 
-This option allows for mapping keys to custom functions for use with multiple cursors. Each element in the `custom_key_maps` table must have three or four elements:
+This option allows for mapping keys to custom functions for use with multiple cursors.
+This can also be used to disable a [default key mapping](#supported-commands).
+
+Each element in the `custom_key_maps` table must have three or four elements:
 
 - Mode (string|table): Mode short-name string (`"n"`, `"i"` or `"x"`), or a table of mode short-name strings (for visual mode it's currently only possible to move the cursor)
 - Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
-- Function: A Lua function that will be called at each cursor, which receives [`register`](https://neovim.io/doc/user/vvars.html#v%3Aregister) and [`count`](https://neovim.io/doc/user/vvars.html#v%3Acount) (and optionally more) as arguments
+- Function: A Lua function that will be called at each cursor, which receives [`register`](https://neovim.io/doc/user/vvars.html#v%3Aregister) and [`count`](https://neovim.io/doc/user/vvars.html#v%3Acount) (and optionally more) as arguments. Setting this to `nil` will disable a [default key mapping](#supported-commands).
 - Option: A optional string containing "m", "c", or "mc". These enable getting input from the user, which is then forwarded to the function:
 	- "m" indicates that a motion command is requested (i.e. operator pending mode). The motion command can can include a count in addition to the `count` variable.
 	- "c" indicates that a printable character is requested (e.g. for character search)
@@ -257,18 +260,6 @@ opts = {
   },
 },
 ```
-
-### `disabled_default_key_maps`
-
-Default value: `{}`
-
-This option can be used to disabled any of the default key maps.
-Note that this is not required if replacing the function with [custom_key_maps](#custom_key_maps).
-
-Each element in the `disabled_default_key_maps` table must have two elements:
-
-- Mode (string|table): Mode short-name string (`"n"`, `"i"`, or `"v"`), or a table of mode short-name strings
-- Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
 
 ## Plugin compatibility
 
