@@ -553,7 +553,6 @@ function M.setup(opts)
   -- Options
   opts = opts or {}
 
-  local disabled_default_key_maps = opts.disabled_default_key_maps or {}
   local custom_key_maps = opts.custom_key_maps or {}
 
   local enable_split_paste = opts.enable_split_paste or true
@@ -567,7 +566,7 @@ function M.setup(opts)
   extmarks.setup()
 
   -- Set up key maps
-  key_maps.setup(default_key_maps, disabled_default_key_maps, custom_key_maps)
+  key_maps.setup(default_key_maps, custom_key_maps)
 
   -- Set up paste
   paste.setup(enable_split_paste)
