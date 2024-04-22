@@ -263,12 +263,26 @@ opts = {
 
 ## Plugin compatibility
 
+Plugin functions can be used from [custom key maps](#custom_key_maps).
+Plugins should work even if they are lazy loaded after adding multiple cursors, because this plugin will reapply custom key mappings on the `LazyLoad` event to handle the mappings being overridden.
+
+If it's necessary to load a plugin before using multiple cursors, you can do so in the [`pre_hook`](#pre_hook-and-post_hook) function, e.g.
+
+```lua
+pre_hook = function()
+  vim.cmd(":Lazy load PLUGIN_NAME")
+end,
+```
+
+Some plugins may need to be disabled while using multiple cursors.
+Use the `pre_hook` function to disable the plugin, then the `post_hook` function to re-enable it.
+
 ### [which-key.nvim](https://github.com/folke/which-key.nvim)
 
 Shows a pop up of possible key bindings for a given command.
 There's an issue with the normal `v` command that, if a movement command is used before `timeoutlen`, the position of the start of the visual area will be incorrect.
 
-The best solution seems to be [disabling the command](https://github.com/folke/which-key.nvim/blob/4433e5ec9a507e5097571ed55c02ea9658fb268a/doc/which-key.nvim.txt#L321-L328), e.g. by using a plugin spec for whick-key like this:
+The best solution seems to be [disabling the command](https://github.com/folke/which-key.nvim/blob/4433e5ec9a507e5097571ed55c02ea9658fb268a/doc/which-key.nvim.txt#L321-L328), e.g. by using a plugin spec for which-key like this:
 
 ```lua
 {
@@ -297,8 +311,6 @@ opts = {
   end,
 },
 ```
-
-Additionally, nvim-autopairs needs to be loaded before using multiple cursors (because it creates mappings when loaded), so the `event = "InsertEnter",` line must not be used in the [lazy.nvim plugin spec](https://github.com/windwp/nvim-autopairs/tree/master#lazynvim).
 
 ### [mini.pairs](https://github.com/echasnovski/mini.nvim/blob/main/readmes/mini-pairs.md)
 
