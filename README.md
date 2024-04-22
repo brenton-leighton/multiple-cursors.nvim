@@ -398,6 +398,32 @@ opts = {
 },
 ```
 
+### [mini.move](https://github.com/echasnovski/mini.move)
+
+The plugin functions can be used as custom key maps, e.g.:
+
+```lua
+custom_key_maps = {
+  {"n", {"<A-k>", "<A-Up>"}, function() MiniMove.move_line("up") end},
+  {"n", {"<A-j>", "<A-Down>"}, function() MiniMove.move_line("down") end},
+  {"n", {"<A-h>", "<A-Left>"}, function() MiniMove.move_line("left") end},
+  {"n", {"<A-l>", "<A-Right>"}, function() MiniMove.move_line("right") end},
+
+  {"x", {"<A-k>", "<A-Up>"}, function() MiniMove.move_selection("up") end},
+  {"x", {"<A-j>", "<A-Down>"}, function() MiniMove.move_selection("down") end},
+  {"x", {"<A-h>", "<A-Left>"}, function() MiniMove.move_selection("left") end},
+  {"x", {"<A-l>", "<A-Right>"}, function() MiniMove.move_selection("right") end},
+},
+```
+
+The plugin needs to be loaded for the `MiniMove` global variable to be available:
+
+```lua
+pre_hook = function()
+  vim.cmd(":Lazy load mini.move")
+end,
+```
+
 ## Appearance
 
 This plugin uses the following highlight groups:
