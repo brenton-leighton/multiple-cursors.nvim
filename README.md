@@ -313,6 +313,9 @@ pre_hook = function()
 end,
 ```
 
+Note: moving lines up or down may not work as expected when the cursors are on sequential lines.
+Use mini.move with visual line mode instead.
+
 #### [mini.pairs](https://github.com/echasnovski/mini.pairs)
 
 Automatically inserts and deletes paired characters.
