@@ -160,10 +160,9 @@ local function custom_function(func)
   -- Call func for the real cursor
   with_onemore(function() func(register, count) end)
 
-  -- Call func for each virtual cursor and set the virtual cursor position
+  -- Call func for each virtual cursor
   virtual_cursors.edit_with_cursor(function(vc)
     func(register, count)
-    vc:save_cursor_position()
   end)
 
 end
@@ -184,10 +183,9 @@ local function custom_function_with_motion(func)
   -- Call func for the real cursor
   with_onemore(function() func(register, count, motion_cmd) end)
 
-  -- Call func for each virtual cursor and set the virtual cursor position
+  -- Call func for each virtual cursor
   virtual_cursors.edit_with_cursor(function(vc)
     func(register, count, motion_cmd)
-    vc:save_cursor_position()
   end)
 
 end
@@ -208,10 +206,9 @@ local function custom_function_with_char(func)
   -- Call func for the real cursor
   with_onemore(function() func(register, count, char) end)
 
-  -- Call func for each virtual cursor and set the virtual cursor position
+  -- Call func for each virtual cursor
   virtual_cursors.edit_with_cursor(function(vc)
     func(register, count, char)
-    vc:save_cursor_position()
   end)
 
 end
@@ -239,10 +236,9 @@ local function custom_function_with_motion_then_char(func)
   -- Call func for the real cursor
   with_onemore(function() func(register, count, motion_cmd, char) end)
 
-  -- Call func for each virtual cursor and set the virtual cursor position
+  -- Call func for each virtual cursor
   virtual_cursors.edit_with_cursor(function(vc)
     func(register, count, motion_cmd, char)
-    vc:save_cursor_position()
   end)
 
 end

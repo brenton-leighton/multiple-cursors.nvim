@@ -57,7 +57,7 @@ local function _O()
   end)
 
   -- Carriage return
-  virtual_cursors.edit_with_cursor(function(vc)
+  virtual_cursors.edit_with_cursor_no_save(function(vc)
     -- If first line and first character
     if vc.lnum == 1 and vc.col == 1 then
       insert_mode.virtual_cursor_carriage_return(vc)
@@ -141,7 +141,6 @@ local function _c()
     common.normal_bang(register, count, "d", c_motion_cmd)
     local num_register_lines = vc:save_register(register)
     open_new_line_above(actual_motion_cmd, num_register_lines)
-    vc:save_cursor_position()
   end)
 
   c_motion_cmd = nil
@@ -190,7 +189,6 @@ local function _C()
       common.normal_bang(register, count, "D", nil)
     end
     vc:save_register(register)
-    vc:save_cursor_position()
   end)
 
 end
