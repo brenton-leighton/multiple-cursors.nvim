@@ -161,9 +161,15 @@ local function custom_function(func)
   with_onemore(function() func(register, count) end)
 
   -- Call func for each virtual cursor
-  virtual_cursors.edit_with_cursor(function(vc)
-    func(register, count)
-  end)
+  if common.is_mode("v") then
+    virtual_cursors.visual_mode(function(vc)
+      func(register, count)
+    end)
+  else
+    virtual_cursors.edit_with_cursor(function(vc)
+     func(register, count)
+    end)
+  end
 
 end
 
@@ -184,9 +190,15 @@ local function custom_function_with_motion(func)
   with_onemore(function() func(register, count, motion_cmd) end)
 
   -- Call func for each virtual cursor
-  virtual_cursors.edit_with_cursor(function(vc)
-    func(register, count, motion_cmd)
-  end)
+  if common.is_mode("v") then
+    virtual_cursors.visual_mode(function(vc)
+      func(register, count, motion_cmd)
+    end)
+  else
+    virtual_cursors.edit_with_cursor(function(vc)
+      func(register, count, motion_cmd)
+    end)
+  end
 
 end
 
@@ -207,9 +219,15 @@ local function custom_function_with_char(func)
   with_onemore(function() func(register, count, char) end)
 
   -- Call func for each virtual cursor
-  virtual_cursors.edit_with_cursor(function(vc)
-    func(register, count, char)
-  end)
+  if common.is_mode("v") then
+    virtual_cursors.visual_mode(function(vc)
+      func(register, count, char)
+    end)
+  else
+    virtual_cursors.edit_with_cursor(function(vc)
+      func(register, count, char)
+    end)
+  end
 
 end
 
@@ -237,9 +255,15 @@ local function custom_function_with_motion_then_char(func)
   with_onemore(function() func(register, count, motion_cmd, char) end)
 
   -- Call func for each virtual cursor
-  virtual_cursors.edit_with_cursor(function(vc)
-    func(register, count, motion_cmd, char)
-  end)
+  if common.is_mode("v") then
+    virtual_cursors.visual_mode(function(vc)
+      func(register, count, motion_cmd, char)
+    end)
+  else
+    virtual_cursors.edit_with_cursor(function(vc)
+      func(register, count, motion_cmd, char)
+    end)
+  end
 
 end
 
