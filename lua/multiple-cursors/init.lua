@@ -370,34 +370,9 @@ function M.mouse_add_delete_cursor()
   end
 end
 
--- Get the current visual area normalised
-local function get_visual_area()
-  local v_lnum = vim.fn.line("v")
-  local v_col = vim.fn.col("v")
-  local c_lnum = vim.fn.line(".")
-  local c_col = vim.fn.col(".")
-
-  if v_lnum == 0 or v_col == 0  or c_lnum == 0 or c_col == 0 then
-    return nil
-  end
-
-  -- Normalise
-  if v_lnum < c_lnum then
-    return v_lnum, v_col, c_lnum, c_col
-  elseif c_lnum < v_lnum then
-    return c_lnum, c_col, v_lnum, v_col
-  else -- v_lnum == c_lnum
-    if v_col <= c_col then
-      return v_lnum, v_col, c_lnum, c_col
-    else -- c_col < v_col
-      return c_lnum, c_col, v_lnum, v_col
-    end
-  end
-end
-
 local function get_visual_area_text()
 
- local lnum1, col1, lnum2, col2 = get_visual_area()
+  local lnum1, col1, lnum2, col2 = common.get_normalised_visual_area()
 
   if lnum1 ~= lnum2 then
     vim.print("Search pattern must be a single line")

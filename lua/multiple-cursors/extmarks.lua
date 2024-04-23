@@ -247,25 +247,6 @@ local function delete_virtual_cursor_visual_extmarks(vc)
 
 end
 
--- Get the positions of the visual area in a forward direction
-local function get_normalised_visual_area(vc)
-  local lnum1 = vc.visual_start_lnum
-  local col1 = vc.visual_start_col
-  local lnum2 = vc.lnum
-  local col2 = vc.col
-
-  if not vc:is_visual_area_forward() then
-    lnum1 = vc.lnum
-    col1 = vc.col
-    lnum2 = vc.visual_start_lnum
-
-    -- If backwards, add 1 to the end column because the cursor isn't there
-    col2 = vim.fn.min({vc.visual_start_col + 1, common.get_max_col(lnum2)})
-  end
-
-  return lnum1, col1, lnum2, col2
-end
-
 -- Find any empty lines, and adjust lnum1 (and col1) to not start on an empty line
 -- Returns a new lnum1, new col1, and empty lines
 local function find_empty_lines_in_visual_area(lnum1, col1, lnum2, col2)
@@ -303,7 +284,7 @@ local function update_virtual_cursor_visual_extmarks(vc)
   vc.visual_start_mark_id = set_extmark(vc.visual_start_lnum, vc.visual_start_col, vc.visual_start_mark_id, "", 0)
 
   -- Get the positions of the visual area in a forward direction
-  local lnum1, col1, lnum2, col2 = get_normalised_visual_area(vc)
+  local lnum1, col1, lnum2, col2 = vc:get_normalised_visual_area(true)
 
   -- Find any empty lines, and adjust lnum1 (and col1) to not start on an empty line
   local lnum1, col1, empty_lines = find_empty_lines_in_visual_area(lnum1, col1, lnum2, col2)
@@ -386,10 +367,10 @@ end
 
 function M.save_visual_area()
 
-  local visual_area = common.get_visual_area()
+  local v_lnum, v_col, lnum, col = common.get_visual_area()
 
-  visual_area_start_mark_id = set_extmark(visual_area[1], visual_area[2], visual_area_start_mark_id, "", 0)
-  visual_area_end_mark_id = set_extmark(visual_area[3], visual_area[4], visual_area_end_mark_id, "", 0)
+  visual_area_start_mark_id = set_extmark(v_lnum, v_col, visual_area_start_mark_id, "", 0)
+  visual_area_end_mark_id = set_extmark(lnum, col, visual_area_end_mark_id, "", 0)
 
 end
 

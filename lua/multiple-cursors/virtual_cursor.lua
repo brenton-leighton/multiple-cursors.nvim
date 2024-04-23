@@ -1,5 +1,7 @@
 local VirtualCursor = {}
 
+local common = require("multiple-cursors.common")
+
 function VirtualCursor.new(lnum, col, curswant, first)
   local self = setmetatable({}, VirtualCursor)
 
@@ -60,7 +62,12 @@ function VirtualCursor:is_visual_area_forward()
 end
 
 -- Get the positions of the visual area in a forward direction
-function VirtualCursor:get_normalised_visual_area()
+-- offset is true when getting a visual area for creating extmarks
+function VirtualCursor:get_normalised_visual_area(offset)
+
+  -- offset is false by default
+  offset = offset or false
+
   -- Get start and end positions for the extmarks representing the visual area
   local lnum1 = self.visual_start_lnum
   local col1 = self.visual_start_col
@@ -72,9 +79,15 @@ function VirtualCursor:get_normalised_visual_area()
     col1 = self.col
     lnum2 = self.visual_start_lnum
     col2 = self.visual_start_col
+
+    if offset then
+      -- Add 1 to col2 to include the cursor position
+      col2 = vim.fn.min({col2 + 1, common.get_max_col(lnum2)})
+    end
   end
 
   return lnum1, col1, lnum2, col2
+
 end
 
 -- Less than for sorting
