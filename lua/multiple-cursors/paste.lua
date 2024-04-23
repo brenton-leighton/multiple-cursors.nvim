@@ -123,7 +123,7 @@ local function paste(lines)
     end
 
     if func then
-      virtual_cursors.edit_with_cursor(function(vc, idx)
+      virtual_cursors.edit_with_cursor_no_save(function(vc, idx)
 
         if split_paste then
           func({lines[idx]}, vc)

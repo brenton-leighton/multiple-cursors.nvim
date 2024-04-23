@@ -61,7 +61,6 @@ function M.text_changed_i(event)
     virtual_cursors.edit_with_cursor(function(vc)
       delete_if_replace_mode(vc)
       vim.api.nvim_put({char}, "c", false, true)
-      vc:save_cursor_position()
     end)
     char = nil
   end
@@ -181,11 +180,11 @@ end
 local function all_virtual_cursors_backspace()
   -- Replace mode
   if common.is_mode("R") then
-    virtual_cursors.edit_with_cursor(function(vc)
+    virtual_cursors.edit_with_cursor_no_save(function(vc)
       virtual_cursor_replace_mode_backspace(vc)
     end)
   else
-    virtual_cursors.edit_with_cursor(function(vc)
+    virtual_cursors.edit_with_cursor_no_save(function(vc)
       virtual_cursor_insert_mode_backspace(vc)
     end)
   end
@@ -215,7 +214,7 @@ end
 
 -- Delete command for all virtual cursors
 local function all_virtual_cursors_delete()
-  virtual_cursors.edit_with_cursor(function(vc)
+  virtual_cursors.edit_with_cursor_no_save(function(vc)
     virtual_cursor_delete(vc)
   end)
 end
@@ -249,7 +248,7 @@ end
 -- Carriage return command for all virtual cursors
 -- This isn't local because it's used by normal_mode_change
 function M.all_virtual_cursors_carriage_return()
-  virtual_cursors.edit_with_cursor(function(vc)
+  virtual_cursors.edit_with_cursor_no_save(function(vc)
     M.virtual_cursor_carriage_return(vc)
   end)
 end
@@ -302,7 +301,6 @@ local function virtual_cursor_tab(vc)
     return
   end
 
-  vc:save_cursor_position()
 end
 
 -- Tab command for all virtual cursors

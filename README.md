@@ -193,7 +193,7 @@ Each element in the `custom_key_maps` table must have three or four elements:
 
 - Mode (string|table): Mode short-name string (`"n"`, `"i"` or `"x"`), or a table of mode short-name strings (for visual mode it's currently only possible to move the cursor)
 - Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
-- Function: A Lua function that will be called at each cursor, which receives [`register`](https://neovim.io/doc/user/vvars.html#v%3Aregister) and [`count`](https://neovim.io/doc/user/vvars.html#v%3Acount) (and optionally more) as arguments. Setting this to `nil` will disable a [default key mapping](#supported-commands).
+- Function: A Lua function that will be called at each cursor, which receives [`register`](https://neovim.io/doc/user/vvars.html#v%3Aregister) (note: working with virtual cursor registers is not currently implemented), [`count`](https://neovim.io/doc/user/vvars.html#v%3Acount), and optionally more, as arguments. Setting this to `nil` will disable a [default key mapping](#supported-commands).
 - Option: A optional string containing "m", "c", or "mc". These enable getting input from the user, which is then forwarded to the function:
 	- "m" indicates that a motion command is requested (i.e. operator pending mode). The motion command can can include a count in addition to the `count` variable.
 	- "c" indicates that a printable character is requested (e.g. for character search)
@@ -263,44 +263,60 @@ opts = {
 
 ## Plugin compatibility
 
-### [which-key.nvim](https://github.com/folke/which-key.nvim)
+Plugin functions can be used from [custom key maps](#custom_key_maps).
+Plugins should work even if they are lazy loaded after adding multiple cursors, because this plugin will reapply custom key mappings on the `LazyLoad` event to handle the mappings being overridden.
 
-Shows a pop up of possible key bindings for a given command.
-There's an issue with the normal `v` command that, if a movement command is used before `timeoutlen`, the position of the start of the visual area will be incorrect.
-
-The best solution seems to be [disabling the command](https://github.com/folke/which-key.nvim/blob/4433e5ec9a507e5097571ed55c02ea9658fb268a/doc/which-key.nvim.txt#L321-L328), e.g. by using a plugin spec for whick-key like this:
+If it's necessary to load a plugin before using multiple cursors, you can do so in the [`pre_hook`](#pre_hook-and-post_hook) function, e.g.
 
 ```lua
-{
-  "folke/which-key.nvim",
-  opts = {},
-  config = function(opts)
-    require("which-key.plugins.presets").operators["v"] = nil
-    require("which-key").setup(opts)
-  end,
+pre_hook = function()
+  vim.cmd(":Lazy load PLUGIN_NAME")
+end,
+```
+
+Some plugins may need to be disabled while using multiple cursors.
+Use the `pre_hook` function to disable the plugin, then the `post_hook` function to re-enable it.
+
+### Examples
+
+- [mini.move](#mini.move)
+- [mini.pairs](#mini.pairs)
+- [mini.surround and nvim-surround](#mini.surround-and-nvim-surround)
+- [nvim-autopairs](#nvim-autopairs)
+- [nvim-spider](#nvim-spider)
+- [stay-in-place.nvim](#stay-in-place.nvim)
+- [which-key.nvim](#which-key.nvim)
+
+#### [mini.move](https://github.com/echasnovski/mini.move)
+
+The plugin functions can be used as custom key maps, e.g.:
+
+```lua
+custom_key_maps = {
+  {"n", {"<A-k>", "<A-Up>"}, function() MiniMove.move_line("up") end},
+  {"n", {"<A-j>", "<A-Down>"}, function() MiniMove.move_line("down") end},
+  {"n", {"<A-h>", "<A-Left>"}, function() MiniMove.move_line("left") end},
+  {"n", {"<A-l>", "<A-Right>"}, function() MiniMove.move_line("right") end},
+
+  {"x", {"<A-k>", "<A-Up>"}, function() MiniMove.move_selection("up") end},
+  {"x", {"<A-j>", "<A-Down>"}, function() MiniMove.move_selection("down") end},
+  {"x", {"<A-h>", "<A-Left>"}, function() MiniMove.move_selection("left") end},
+  {"x", {"<A-l>", "<A-Right>"}, function() MiniMove.move_selection("right") end},
 },
 ```
 
-### [windwp/nvim-autopairs](https://github.com/windwp/nvim-autopairs)
-
-Automatically inserts and deletes paired characters.
-The plugin needs to be disabled while using multiple cursors:
+The plugin needs to be loaded for the `MiniMove` global variable to be available:
 
 ```lua
-opts = {
-  pre_hook = function()
-    require('nvim-autopairs').disable()
-  end,
-
-  post_hook = function()
-    require('nvim-autopairs').enable()
-  end,
-},
+pre_hook = function()
+  vim.cmd(":Lazy load mini.move")
+end,
 ```
 
-Additionally, nvim-autopairs needs to be loaded before using multiple cursors (because it creates mappings when loaded), so the `event = "InsertEnter",` line must not be used in the [lazy.nvim plugin spec](https://github.com/windwp/nvim-autopairs/tree/master#lazynvim).
+Note: moving lines up or down may not work as expected when the cursors are on sequential lines.
+Use mini.move with visual line mode instead.
 
-### [mini.pairs](https://github.com/echasnovski/mini.nvim/blob/main/readmes/mini-pairs.md)
+#### [mini.pairs](https://github.com/echasnovski/mini.pairs)
 
 Automatically inserts and deletes paired characters.
 The plugin needs to be disabled while using multiple cursors:
@@ -310,14 +326,48 @@ opts = {
   pre_hook = function()
     vim.g.minipairs_disable = true
   end,
-
   post_hook = function()
     vim.g.minipairs_disable = false
   end,
 },
 ```
 
-### [chrisgrieser/nvim-spider](https://github.com/chrisgrieser/nvim-spider)
+#### [mini.surround](https://github.com/echasnovski/mini.surround) and [nvim-surround](https://github.com/kylechui/nvim-surround)
+
+Adds characters to surround text.
+The issue with both of these plugins is that they don't have functions that can be given the motion and character as arguments.
+
+One workaround would be to use a different key sequence to execute the command while using multiple cursors, e.g. for mini.surround `sa` command:
+
+```lua
+opts = {
+  custom_key_maps = {
+    {"n", "<Leader>sa", function(_, count, motion_cmd, char)
+      vim.cmd("normal " .. count .. "sa" .. motion_cmd .. char)
+    end, "mc"},
+  },
+},
+```
+
+This would map `<Leader>sa` to work like `sa`.
+
+#### [nvim-autopairs](https://github.com/windwp/nvim-autopairs)
+
+Automatically inserts and deletes paired characters.
+The plugin needs to be disabled while using multiple cursors:
+
+```lua
+opts = {
+  pre_hook = function()
+    require('nvim-autopairs').disable()
+  end,
+  post_hook = function()
+    require('nvim-autopairs').enable()
+  end,
+},
+```
+
+#### [nvim-spider](https://github.com/chrisgrieser/nvim-spider)
 
 Improves `w`, `e`, and `b` motions.
 For normal mode `count` must be set before nvim-spider's motion function is called:
@@ -352,26 +402,7 @@ opts = {
 },
 ```
 
-### [mini.surround](https://github.com/echasnovski/mini.surround) and [kylechui/nvim-surround](https://github.com/kylechui/nvim-surround)
-
-Adds characters to surround text.
-The issue with both of these plugins is that they don't have functions that can be given the motion and character as arguments.
-
-One workaround would be to use a different key sequence to execute the command while using multiple cursors, e.g. for mini.pairs `sa` command:
-
-```lua
-opts = {
-  custom_key_maps = {
-    {"n", "<Leader>sa", function(_, count, motion_cmd, char)
-      vim.cmd("normal " .. count .. "sa" .. motion_cmd .. char)
-    end, "mc"},
-  },
-},
-```
-
-This would map `<Leader>sa` to work like `sa`.
-
-### [gbprod/stay-in-place.nvim](https://github.com/gbprod/stay-in-place.nvim)
+#### [stay-in-place.nvim](https://github.com/gbprod/stay-in-place.nvim)
 
 Maintains cursor position when indenting and unindenting.
 This plugin can be used with multiple cursors by adding key maps, e.g.
@@ -383,6 +414,24 @@ opts = {
     {"n", "<<", function() require("stay-in-place").shift_left_line() end},
     {{"n", "i"}, "<S-Tab>", function() require("stay-in-place").shift_left_line() end},
   },
+},
+```
+
+#### [which-key.nvim](https://github.com/folke/which-key.nvim)
+
+Shows a pop up of possible key bindings for a given command.
+There's an issue with the normal `v` command that, if a movement command is used before `timeoutlen`, the position of the start of the visual area will be incorrect.
+
+The best solution seems to be [disabling the command](https://github.com/folke/which-key.nvim/blob/4433e5ec9a507e5097571ed55c02ea9658fb268a/doc/which-key.nvim.txt#L321-L328), e.g. by using a plugin spec for which-key like this:
+
+```lua
+{
+  "folke/which-key.nvim",
+  opts = {},
+  config = function(opts)
+    require("which-key.plugins.presets").operators["v"] = nil
+    require("which-key").setup(opts)
+  end,
 },
 ```
 

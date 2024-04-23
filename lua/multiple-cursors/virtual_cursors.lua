@@ -257,11 +257,21 @@ end
 
 -- Call func to perform an edit at each virtual cursor using the real cursor
 -- The virtual cursor position is not set after calling func
-function M.edit_with_cursor(func)
+function M.edit_with_cursor_no_save(func)
 
   M.edit(function(vc, idx)
     vc:set_cursor_position()
     func(vc, idx)
+  end)
+
+end
+
+-- Call func to perform an edit at each virtual cursor using the real cursor
+function M.edit_with_cursor(func)
+
+  M.edit_with_cursor_no_save(function(vc, idx)
+    func(vc, idx)
+    vc:save_cursor_position()
   end)
 
 end
@@ -272,7 +282,6 @@ function M.edit_with_normal_command(count, cmd, motion_cmd)
 
   M.edit_with_cursor(function(vc)
     common.normal_bang(nil, count, cmd, motion_cmd)
-    vc:save_cursor_position()
   end)
 
 end
@@ -285,7 +294,6 @@ function M.normal_mode_delete_yank(register, count, cmd, motion_cmd)
   M.edit_with_cursor(function(vc, idx)
     common.normal_bang(register, count, cmd, motion_cmd)
     vc:save_register(register)
-    vc:save_cursor_position()
   end)
 
 end
@@ -327,8 +335,6 @@ function M.normal_mode_put(register, count, cmd)
 
     -- Put the register
     common.normal_bang(register, count, cmd, nil)
-
-    vc:save_cursor_position()
 
     -- Restore the register
     if register_info then
