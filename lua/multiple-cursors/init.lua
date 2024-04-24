@@ -310,13 +310,35 @@ local function add_virtual_cursor_at_real_cursor(down)
   -- Initialise if this is the first cursor
   M.init()
 
-  -- If normal mode
-  if common.is_mode("n") then
+  -- If visual mode
+  if common.is_mode("v") then
 
     -- Add count1 virtual cursors
     local count1 = vim.v.count1
 
     for i = 1, count1 do
+      -- Get the current visual area
+      local v_lnum, v_col, lnum, col, curswant = common.get_visual_area()
+
+      -- Add a virtual cursor with the visual area
+      virtual_cursors.add_with_visual_area(lnum, col, curswant, v_lnum, v_col, true)
+
+      -- Move the real cursor visual area
+      if down then
+        vim.api.nvim_buf_set_mark(0, "<", v_lnum + 1, v_col - 1, {})
+        vim.api.nvim_buf_set_mark(0, ">", lnum + 1, col - 1, {})
+      else
+        vim.api.nvim_buf_set_mark(0, "<", v_lnum - 1, v_col - 1, {})
+        vim.api.nvim_buf_set_mark(0, ">", lnum - 1, col - 1, {})
+      end
+
+      vim.cmd("normal! gv")
+    end
+
+  elseif common.is_mode("n") then  -- If normal mode
+
+    -- Add count1 virtual cursors
+    for i = 1, vim.v.count1 do
       -- Add virtual cursor at the real cursor position
       local pos = vim.fn.getcurpos()
       virtual_cursors.add(pos[2], pos[3], pos[5], true)

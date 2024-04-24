@@ -2,17 +2,17 @@ local VirtualCursor = {}
 
 local common = require("multiple-cursors.common")
 
-function VirtualCursor.new(lnum, col, curswant, first)
+function VirtualCursor.new(lnum, col, curswant, visual_start_lnum, visual_start_col, first)
   local self = setmetatable({}, VirtualCursor)
 
   self.lnum = lnum
   self.col = col
   self.curswant = curswant
 
-  self.first = first                    -- Is this the first cursor added?
+  self.first = first  -- Is this the first cursor added?
 
-  self.visual_start_lnum = 0            -- lnum for the start of the visual area
-  self.visual_start_col = 0             -- col for the start of the visual area
+  self.visual_start_lnum = visual_start_lnum  -- lnum for the start of the visual area
+  self.visual_start_col = visual_start_col    -- col for the start of the visual area
 
   self.mark_id = 0                      -- extmark ID
   self.visual_start_mark_id = 0         -- ID of the hidden extmark that stores the start of the visual area

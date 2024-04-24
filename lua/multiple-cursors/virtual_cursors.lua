@@ -54,10 +54,10 @@ function M.sort()
   table.sort(virtual_cursors)
 end
 
--- Add a new virtual cursor
+-- Add a new virtual cursor with a visual area
 -- set_first indicates that the first field should be set to true if this is the first virtual cursor
 -- On exit the cursor position will be set to the virtual cursor which has first = true
-function M.add(lnum, col, curswant, set_first)
+function M.add_with_visual_area(lnum, col, curswant, visual_start_lnum, visual_start_col, set_first)
 
   -- Check for existing virtual cursor
   for _, vc in ipairs(virtual_cursors) do
@@ -68,10 +68,18 @@ function M.add(lnum, col, curswant, set_first)
 
   local first = set_first and #virtual_cursors == 0
 
-  table.insert(virtual_cursors, VirtualCursor.new(lnum, col, curswant, first))
+  table.insert(virtual_cursors, VirtualCursor.new(lnum, col, curswant, visual_start_lnum, visual_start_col, first))
 
   -- Create an extmark
   extmarks.update_virtual_cursor_extmarks(virtual_cursors[#virtual_cursors])
+
+end
+
+-- Add a new virtual cursor
+-- set_first indicates that the first field should be set to true if this is the first virtual cursor
+-- On exit the cursor position will be set to the virtual cursor which has first = true
+function M.add(lnum, col, curswant, set_first)
+  M.add_with_visual_area(lnum, col, curswant, 0, 0, set_first)
 end
 
 -- Add a new virtual cursor, or delete if there's already an existing virtual
