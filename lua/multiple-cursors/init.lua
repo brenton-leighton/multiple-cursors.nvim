@@ -436,6 +436,16 @@ end
 -- Add cursors by searching for the word under the cursor or visual area
 local function _add_cursors_to_matches(use_prev_visual_area)
 
+  -- Save data to restore visual area
+  local v = common.is_mode("v")
+  local v_lnum, v_col, lnum, col = 0
+  local length = 0
+
+  if v then
+    v_lnum, v_col, lnum, col = common.get_normalised_visual_area()
+    length = col - v_col
+  end
+
   -- Get the search pattern: either the cursor under the word in normal mode or the visual area in
   -- visual mode
   local pattern = get_search_pattern(false)
@@ -451,20 +461,26 @@ local function _add_cursors_to_matches(use_prev_visual_area)
     return
   end
 
-  -- Exit visual mode
-  if common.is_mode("v") then
-    vim.cmd("normal!:")
-  end
-
   -- Initialise if not already initialised
   M.init()
 
   -- Create a virtual cursor at every match
   for _, match in ipairs(matches) do
-    virtual_cursors.add(match[1], match[2], match[2], false)
+    if not v then
+     -- Normal mode
+      virtual_cursors.add(match[1], match[2], match[2], false)
+    else
+      -- Visual mode
+      virtual_cursors.add_with_visual_area(match[1], match[2] + length, match[2] + length, match[1], match[2], false)
+    end
   end
 
   vim.print(#matches .. " cursors added")
+
+  -- Restore visual area
+  if v then
+    common.set_visual_area(v_lnum, v_col, lnum, col)
+  end
 
 end
 
