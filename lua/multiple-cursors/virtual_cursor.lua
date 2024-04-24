@@ -2,14 +2,17 @@ local VirtualCursor = {}
 
 local common = require("multiple-cursors.common")
 
-function VirtualCursor.new(lnum, col, curswant, visual_start_lnum, visual_start_col, first)
+function VirtualCursor.new(lnum, col, curswant, visual_start_lnum, visual_start_col, seq)
   local self = setmetatable({}, VirtualCursor)
 
   self.lnum = lnum
   self.col = col
   self.curswant = curswant
 
-  self.first = first  -- Is this the first cursor added?
+  self.seq = seq  -- Sequence number to store the order that cursors were added
+                  -- When cursors are added with an up/down motion, at exit the
+                  -- real cursor is returned to the position of the oldest
+                  -- virtual cursor
 
   self.visual_start_lnum = visual_start_lnum  -- lnum for the start of the visual area
   self.visual_start_col = visual_start_col    -- col for the start of the visual area

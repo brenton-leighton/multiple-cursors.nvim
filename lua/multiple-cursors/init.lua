@@ -257,8 +257,8 @@ function M.deinit(clear_virtual_cursors)
 
     if clear_virtual_cursors then
 
-      -- Restore cursor to the position of the first virtual cursor
-      local pos = virtual_cursors.get_first_pos()
+      -- Restore cursor to the position of the oldest virtual cursor
+      local pos = virtual_cursors.get_exit_pos()
 
       if pos then
         vim.fn.cursor({pos[1], pos[2], 0, pos[3]})
@@ -385,7 +385,7 @@ function M.mouse_add_delete_cursor()
   local mouse_pos = vim.fn.getmousepos()
 
   -- Add a virtual cursor to the mouse click position, or delete an existing one
-  virtual_cursors.add_or_delete(mouse_pos.line, mouse_pos.column, false)
+  virtual_cursors.add_or_delete(mouse_pos.line, mouse_pos.column)
 
   if virtual_cursors.get_num_virtual_cursors() == 0 then
     M.deinit(true) -- Deinitialise if there are no more cursors
