@@ -391,10 +391,7 @@ function M.restore_visual_area()
 
     -- If the extmark positions are valid
     if next(start_pos) ~= nil and next(end_pos) ~= nil then
-        vim.cmd("normal!:") -- Exit to normal mode
-        vim.api.nvim_buf_set_mark(0, "<", start_pos[1] + 1, start_pos[2], {})
-        vim.api.nvim_buf_set_mark(0, ">", end_pos[1] + 1, end_pos[2], {})
-        vim.cmd("normal! gv") -- Return to visual mode
+        common.set_visual_area(start_pos[1] + 1, start_pos[2] + 1, end_pos[1] + 1, end_pos[2] + 1)
     end
 
   end

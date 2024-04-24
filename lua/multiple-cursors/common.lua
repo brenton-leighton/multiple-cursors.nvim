@@ -116,4 +116,11 @@ function M.get_normalised_visual_area()
 
 end
 
+-- Set visual area marks and apply
+function M.set_visual_area(v_lnum, v_col, lnum, col)
+  vim.api.nvim_buf_set_mark(0, "<", v_lnum, v_col - 1, {})
+  vim.api.nvim_buf_set_mark(0, ">", lnum, col - 1, {})
+  vim.cmd("normal! gv")
+end
+
 return M

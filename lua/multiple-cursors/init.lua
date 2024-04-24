@@ -325,14 +325,10 @@ local function add_virtual_cursor_at_real_cursor(down)
 
       -- Move the real cursor visual area
       if down then
-        vim.api.nvim_buf_set_mark(0, "<", v_lnum + 1, v_col - 1, {})
-        vim.api.nvim_buf_set_mark(0, ">", lnum + 1, col - 1, {})
+        common.set_visual_area(v_lnum + 1, v_col, lnum + 1, col)
       else
-        vim.api.nvim_buf_set_mark(0, "<", v_lnum - 1, v_col - 1, {})
-        vim.api.nvim_buf_set_mark(0, ">", lnum - 1, col - 1, {})
+        common.set_visual_area(v_lnum - 1, v_col, lnum - 1, col)
       end
-
-      vim.cmd("normal! gv")
     end
 
   elseif common.is_mode("n") then  -- If normal mode

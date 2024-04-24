@@ -154,19 +154,7 @@ end
 
 -- Set the visual area from the virtual cursor
 function VirtualCursor:set_visual_area()
-
-  -- Exit visual mode
-  vim.cmd("normal!:")
-
-  -- Set start mark
-  vim.api.nvim_buf_set_mark(0, "<", self.visual_start_lnum, self.visual_start_col - 1, {})
-
-  -- Set end mark
-  vim.api.nvim_buf_set_mark(0, ">", self.lnum, self.col - 1, {})
-
-  -- Return to visual mode
-  vim.cmd("normal! gv")
-
+  common.set_visual_area(self.visual_start_lnum, self.visual_start_col, self.lnum, self.col)
 end
 
 -- Save the register to the virtual cursor
