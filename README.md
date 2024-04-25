@@ -64,7 +64,7 @@ The additional commands can be mapped by adding them to the `keys` table, e.g.:
 ```lua
 {"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}},
 {"<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}},
-{"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>"},
+{"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>", mode = {"n", "x"}},
 {"<Leader>l", "<Cmd>MultipleCursorsLockToggle<CR>", mode = {"n", "x"}},
 ```
 
