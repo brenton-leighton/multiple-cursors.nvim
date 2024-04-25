@@ -8,6 +8,8 @@ local VirtualCursor = require("multiple-cursors.virtual_cursor")
 -- A table of the virtual cursors
 local virtual_cursors = {}
 
+local next_seq = 1
+
 -- Set to true when the cursor is being moved to suppress M.cursor_moved()
 local ignore_cursor_movement = false
 
@@ -54,10 +56,9 @@ function M.sort()
   table.sort(virtual_cursors)
 end
 
--- Add a new virtual cursor
--- set_first indicates that the first field should be set to true if this is the first virtual cursor
--- On exit the cursor position will be set to the virtual cursor which has first = true
-function M.add(lnum, col, curswant, set_first)
+-- Add a new virtual cursor with a visual area
+-- add_seq indicates that a sequence number should be added to store the order that cursors have being added
+function M.add_with_visual_area(lnum, col, curswant, visual_start_lnum, visual_start_col, add_seq)
 
   -- Check for existing virtual cursor
   for _, vc in ipairs(virtual_cursors) do
@@ -68,10 +69,25 @@ function M.add(lnum, col, curswant, set_first)
 
   local first = set_first and #virtual_cursors == 0
 
-  table.insert(virtual_cursors, VirtualCursor.new(lnum, col, curswant, first))
+  local seq = 0  -- 0 is ignored for restoring position
+
+  if add_seq then
+    seq = next_seq
+    next_seq = next_seq + 1
+  end
+
+  table.insert(virtual_cursors,
+               VirtualCursor.new(lnum, col, curswant, visual_start_lnum, visual_start_col, seq))
 
   -- Create an extmark
   extmarks.update_virtual_cursor_extmarks(virtual_cursors[#virtual_cursors])
+
+end
+
+-- Add a new virtual cursor
+-- add_seq indicates that a sequence number should be added to store the order that cursors have being added
+function M.add(lnum, col, curswant, add_seq)
+  M.add_with_visual_area(lnum, col, curswant, 0, 0, add_seq)
 end
 
 -- Add a new virtual cursor, or delete if there's already an existing virtual
@@ -90,26 +106,40 @@ function M.add_or_delete(lnum, col)
   if delete then
     clean_up()
   else
-    M.add(lnum, col, col)
+    M.add(lnum, col, col, false)
   end
 end
 
--- Get the position of the virtual cursor with first = true
-function M.get_first_pos()
+-- Get the position that the real cursor should take on exit, i.e. the position
+-- of the virtual cursor with the lowest non-zero seq
+function M.get_exit_pos()
+
+  local seq = 999999
+  local lnum = 0
+  local col = 0
+  local curswant = 0
 
   for _, vc in ipairs(virtual_cursors) do
-    if vc.first == true then
-      return {vc.lnum, vc.col, vc.curswant}
+    if vc.seq ~= 0 and vc.seq < seq then
+      seq = vc.seq
+      lnum = vc.lnum
+      col = vc.col
+      curswant = vc.curswant
     end
   end
 
-  return nil
+  if seq ~= 999999 then
+    return {lnum, col, curswant}
+  else
+    return nil
+  end
 
 end
 
 -- Clear all virtual cursors
 function M.clear()
   virtual_cursors = {}
+  next_seq = 1
   locked = false
 end
 

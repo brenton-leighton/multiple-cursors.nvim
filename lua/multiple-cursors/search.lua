@@ -103,6 +103,11 @@ function M.get_matches_and_move_cursor(word, limit_to_visible, limit_to_prev_vis
   -- Handle the use_prev_visual_area argument
   local visual_area_end = set_cursor(limit)
 
+  if limit_to_prev_visual_area and not visual_area_end then
+    virtual_cursors.set_ignore_cursor_movement(false)
+    return nil
+  end
+
   -- Find matches
   local matches = {}
 

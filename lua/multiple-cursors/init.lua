@@ -23,7 +23,6 @@ local post_hook = nil
 local bufnr = nil
 
 local match_visiable_only = nil
-local saved_pattern = nil
 
 default_key_maps = {
   -- Up/down motion in normal/visual modes
@@ -257,8 +256,8 @@ function M.deinit(clear_virtual_cursors)
 
     if clear_virtual_cursors then
 
-      -- Restore cursor to the position of the first virtual cursor
-      local pos = virtual_cursors.get_first_pos()
+      -- Restore cursor to the position of the oldest virtual cursor
+      local pos = virtual_cursors.get_exit_pos()
 
       if pos then
         vim.fn.cursor({pos[1], pos[2], 0, pos[3]})
@@ -266,7 +265,6 @@ function M.deinit(clear_virtual_cursors)
 
       virtual_cursors.clear()
       bufnr = nil
-      saved_pattern = nil
       vim.api.nvim_del_autocmd(buf_enter_autocmd_id)
       buf_enter_autocmd_id = nil
     end
@@ -310,13 +308,31 @@ local function add_virtual_cursor_at_real_cursor(down)
   -- Initialise if this is the first cursor
   M.init()
 
-  -- If normal mode
-  if common.is_mode("n") then
+  -- If visual mode
+  if common.is_mode("v") then
 
     -- Add count1 virtual cursors
     local count1 = vim.v.count1
 
     for i = 1, count1 do
+      -- Get the current visual area
+      local v_lnum, v_col, lnum, col, curswant = common.get_visual_area()
+
+      -- Add a virtual cursor with the visual area
+      virtual_cursors.add_with_visual_area(lnum, col, curswant, v_lnum, v_col, true)
+
+      -- Move the real cursor visual area
+      if down then
+        common.set_visual_area(v_lnum + 1, v_col, lnum + 1, col)
+      else
+        common.set_visual_area(v_lnum - 1, v_col, lnum - 1, col)
+      end
+    end
+
+  elseif common.is_mode("n") then  -- If normal mode
+
+    -- Add count1 virtual cursors
+    for i = 1, vim.v.count1 do
       -- Add virtual cursor at the real cursor position
       local pos = vim.fn.getcurpos()
       virtual_cursors.add(pos[2], pos[3], pos[5], true)
@@ -363,41 +379,16 @@ function M.mouse_add_delete_cursor()
   local mouse_pos = vim.fn.getmousepos()
 
   -- Add a virtual cursor to the mouse click position, or delete an existing one
-  virtual_cursors.add_or_delete(mouse_pos.line, mouse_pos.column, false)
+  virtual_cursors.add_or_delete(mouse_pos.line, mouse_pos.column)
 
   if virtual_cursors.get_num_virtual_cursors() == 0 then
     M.deinit(true) -- Deinitialise if there are no more cursors
   end
 end
 
--- Get the current visual area normalised
-local function get_visual_area()
-  local v_lnum = vim.fn.line("v")
-  local v_col = vim.fn.col("v")
-  local c_lnum = vim.fn.line(".")
-  local c_col = vim.fn.col(".")
-
-  if v_lnum == 0 or v_col == 0  or c_lnum == 0 or c_col == 0 then
-    return nil
-  end
-
-  -- Normalise
-  if v_lnum < c_lnum then
-    return v_lnum, v_col, c_lnum, c_col
-  elseif c_lnum < v_lnum then
-    return c_lnum, c_col, v_lnum, v_col
-  else -- v_lnum == c_lnum
-    if v_col <= c_col then
-      return v_lnum, v_col, c_lnum, c_col
-    else -- c_col < v_col
-      return c_lnum, c_col, v_lnum, v_col
-    end
-  end
-end
-
 local function get_visual_area_text()
 
- local lnum1, col1, lnum2, col2 = get_visual_area()
+  local lnum1, col1, lnum2, col2 = common.get_normalised_visual_area()
 
   if lnum1 ~= lnum2 then
     vim.print("Search pattern must be a single line")
@@ -410,26 +401,15 @@ local function get_visual_area_text()
 end
 
 -- Get a search pattern
--- In normal mode, returns cword or saved_pattern if use_saved_pattern is true and saved_pattern is
--- valid
--- In visual mode, returns the visual area and also saves it to saved_pattern if use_saved_pattern
--- is true
-local function get_search_pattern(use_saved_pattern)
+-- Returns cword in normal mode and the visual area text in visual mode
+local function get_search_pattern()
 
   local pattern = nil
 
   if common.is_mode("v") then
     pattern = get_visual_area_text()
-    if use_saved_pattern then
-      saved_pattern = pattern
-    end
   else -- Normal mode
-    if use_saved_pattern and saved_pattern then
-      pattern = saved_pattern
-    else
-      -- Use the word under the cursor
-      pattern = vim.fn.expand("<cword>")
-    end
+    pattern = vim.fn.expand("<cword>")
   end
 
   if pattern == "" then
@@ -440,12 +420,29 @@ local function get_search_pattern(use_saved_pattern)
 
 end
 
+-- Get the normalise visual area if in visual mode
+-- returns is_v, lnum1, col1, lnum2, col2
+local function maybe_get_normalised_visual_area()
+
+  if not common.is_mode("v") then
+    return false
+  end
+
+  local lnum1, col1, lnum2, col2 = common.get_normalised_visual_area()
+
+  return true, lnum1, col1, lnum2, col2
+
+end
+
 -- Add cursors by searching for the word under the cursor or visual area
 local function _add_cursors_to_matches(use_prev_visual_area)
 
+  -- Get the visual area if in visual mode
+  local is_v, lnum1, col1, lnum2, col2 = maybe_get_normalised_visual_area()
+
   -- Get the search pattern: either the cursor under the word in normal mode or the visual area in
   -- visual mode
-  local pattern = get_search_pattern(false)
+  local pattern = get_search_pattern()
 
   if pattern == nil then
     return
@@ -458,20 +455,31 @@ local function _add_cursors_to_matches(use_prev_visual_area)
     return
   end
 
-  -- Exit visual mode
-  if common.is_mode("v") then
-    vim.cmd("normal!:")
-  end
-
   -- Initialise if not already initialised
   M.init()
 
   -- Create a virtual cursor at every match
   for _, match in ipairs(matches) do
-    virtual_cursors.add(match[1], match[2], match[2], false)
+    local match_lnum1 = match[1]
+    local match_col1 = match[2]
+
+    -- If normal mode
+    if not is_v then
+      virtual_cursors.add(match_lnum1, match_col1, match_col1, false)
+
+    else  -- Visual mode
+      local match_col2 = match_col1 + string.len(pattern) - 1
+      virtual_cursors.add_with_visual_area(match_lnum1, match_col2, match_col2, match_lnum1, match_col1, false)
+
+    end
   end
 
   vim.print(#matches .. " cursors added")
+
+  -- Restore visual area
+  if is_v then
+    common.set_visual_area(lnum1, col1, lnum2, col2)
+  end
 
 end
 
@@ -485,13 +493,11 @@ function M.add_cursors_to_matches_v() _add_cursors_to_matches(true) end
 -- cursor to to the next match
 function M.add_cursor_and_jump_to_next_match()
 
-  -- Get the search pattern
-  local pattern = get_search_pattern(true)
+  -- Get the visual area if in visual mode
+  local is_v, lnum1, col1, lnum2, col2 = maybe_get_normalised_visual_area()
 
-  -- Exit visual mode
-  if common.is_mode("v") then
-    vim.cmd("normal!:")
-  end
+  -- Get the search pattern
+  local pattern = get_search_pattern()
 
   -- Get a match without moving the cursor if there are already virtual cursors
   local match = search.get_next_match(pattern, not initialised)
@@ -503,12 +509,27 @@ function M.add_cursor_and_jump_to_next_match()
   -- Initialise if not already initialised
   M.init()
 
-  -- Add virtual cursor to cursor position
-  local pos = vim.fn.getcurpos()
-  virtual_cursors.add(pos[2], pos[3], pos[5], true)
+  local match_lnum1 = match[1]
+  local match_col1 = match[2]
 
-  -- Move cursor to match
-  vim.fn.cursor({match[1], match[2], 0, match[2]})
+  -- Normal mode
+  if not is_v then
+    -- Add virtual cursor to cursor position
+    local pos = vim.fn.getcurpos()
+    virtual_cursors.add(pos[2], pos[3], pos[5], true)
+
+    -- Move cursor to match
+    vim.fn.cursor({match_lnum1, match_col1, 0, match_col1})
+
+  else  -- Visual mode
+    -- Add virtual cursor to cursor position
+    virtual_cursors.add_with_visual_area(lnum2, col2, col2, lnum1, col1, true)
+
+    -- Move cursor to match
+    local match_col2 = match_col1 + string.len(pattern) - 1
+    common.set_visual_area(match_lnum1, match_col1, match_lnum1, match_col2)
+
+  end
 
 end
 
@@ -516,7 +537,7 @@ end
 function M.jump_to_next_match()
 
   -- Get the search pattern
-  local pattern = get_search_pattern(true)
+  local pattern = get_search_pattern()
 
   -- Get a match without moving the cursor
   local match = search.get_next_match(pattern, false)
@@ -525,8 +546,16 @@ function M.jump_to_next_match()
     return
   end
 
+  local match_lnum1 = match[1]
+  local match_col1 = match[2]
+
   -- Move cursor to match
-  vim.fn.cursor({match[1], match[2], 0, match[2]})
+  if not common.is_mode("v") then
+    vim.fn.cursor({match[1], match[2], 0, match[2]})
+  else
+    local match_col2 = match_col1 + string.len(pattern) - 1
+    common.set_visual_area(match_lnum1, match_col1, match_lnum1, match_col2)
+  end
 
 end
 

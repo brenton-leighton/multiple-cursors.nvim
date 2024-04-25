@@ -1,16 +1,21 @@
 local VirtualCursor = {}
 
-function VirtualCursor.new(lnum, col, curswant, first)
+local common = require("multiple-cursors.common")
+
+function VirtualCursor.new(lnum, col, curswant, visual_start_lnum, visual_start_col, seq)
   local self = setmetatable({}, VirtualCursor)
 
   self.lnum = lnum
   self.col = col
   self.curswant = curswant
 
-  self.first = first                    -- Is this the first cursor added?
+  self.seq = seq  -- Sequence number to store the order that cursors were added
+                  -- When cursors are added with an up/down motion, at exit the
+                  -- real cursor is returned to the position of the oldest
+                  -- virtual cursor
 
-  self.visual_start_lnum = 0            -- lnum for the start of the visual area
-  self.visual_start_col = 0             -- col for the start of the visual area
+  self.visual_start_lnum = visual_start_lnum  -- lnum for the start of the visual area
+  self.visual_start_col = visual_start_col    -- col for the start of the visual area
 
   self.mark_id = 0                      -- extmark ID
   self.visual_start_mark_id = 0         -- ID of the hidden extmark that stores the start of the visual area
@@ -60,7 +65,12 @@ function VirtualCursor:is_visual_area_forward()
 end
 
 -- Get the positions of the visual area in a forward direction
-function VirtualCursor:get_normalised_visual_area()
+-- offset is true when getting a visual area for creating extmarks
+function VirtualCursor:get_normalised_visual_area(offset)
+
+  -- offset is false by default
+  offset = offset or false
+
   -- Get start and end positions for the extmarks representing the visual area
   local lnum1 = self.visual_start_lnum
   local col1 = self.visual_start_col
@@ -72,9 +82,15 @@ function VirtualCursor:get_normalised_visual_area()
     col1 = self.col
     lnum2 = self.visual_start_lnum
     col2 = self.visual_start_col
+
+    if offset then
+      -- Add 1 to col2 to include the cursor position
+      col2 = vim.fn.min({col2 + 1, common.get_max_col(lnum2)})
+    end
   end
 
   return lnum1, col1, lnum2, col2
+
 end
 
 -- Less than for sorting
@@ -138,19 +154,7 @@ end
 
 -- Set the visual area from the virtual cursor
 function VirtualCursor:set_visual_area()
-
-  -- Exit visual mode
-  vim.cmd("normal!:")
-
-  -- Set start mark
-  vim.api.nvim_buf_set_mark(0, "<", self.visual_start_lnum, self.visual_start_col - 1, {})
-
-  -- Set end mark
-  vim.api.nvim_buf_set_mark(0, ">", self.lnum, self.col - 1, {})
-
-  -- Return to visual mode
-  vim.cmd("normal! gv")
-
+  common.set_visual_area(self.visual_start_lnum, self.visual_start_col, self.lnum, self.col)
 end
 
 -- Save the register to the virtual cursor

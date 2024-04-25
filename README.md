@@ -19,10 +19,10 @@ For [lazy.nvim](https://github.com/folke/lazy.nvim), add a section to the plugin
   version = "*",  -- Use the latest tagged version
   opts = {},  -- This causes the plugin setup function to be called
   keys = {
-    {"<C-j>", "<Cmd>MultipleCursorsAddDown<CR>"},
-    {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i"}},
-    {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>"},
-    {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i"}},
+    {"<C-j>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "x"}},
+    {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i", "x"}},
+    {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "x"}},
+    {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i", "x"}},
     {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}},
     {"<Leader>a", "<Cmd>MultipleCursorsAddMatches<CR>", mode = {"n", "x"}},
   },
@@ -31,10 +31,10 @@ For [lazy.nvim](https://github.com/folke/lazy.nvim), add a section to the plugin
 
 This creates a number of key mappings:
 
-- `Ctrl+j` in normal mode or `Ctrl+Down` in normal and insert modes: Add a new cursor then move the real cursor down
-- `Ctrl+k` in normal mode or `Ctrl+Up` in normal and insert modes: Add a new cursor then move the real cursor up
-- `Ctrl+LeftClick` in normal and insert modes: Add a new cursor (or remove an existing cursor) at the clicked position
-- `Leader+a` in normal and visual modes: Add new cursors to matches to the pattern under the cursor
+- `Ctrl+j` and `Ctrl+Down`: Add a new cursor then move the real cursor down
+- `Ctrl+k` and `Ctrl+Up`: Add a new cursor then move the real cursor up
+- `Ctrl+LeftClick`: Add a new cursor (or remove an existing cursor) at the clicked position
+- `Leader+a`: Add new cursors to matches to the pattern under the cursor
 
 After cursors have been added, Neovim can be used mostly as normal.
 See [Supported commands](#Supported-commands) for more information.
@@ -50,13 +50,13 @@ The plugin creates a number of user commands:
 
 | Command | Description |
 | --- | --- |
-| `MultipleCursorsAddDown` | Add a new virtual cursor, then move the real cursor down. In normal mode multiple new virtual cursors can be added with a `count`. |
-| `MultipleCursorsAddUp` | Add a new virtual cursor, then move the real cursor up. In normal mode multiple new virtual cursors can be added with a `count`. |
+| `MultipleCursorsAddDown` | Add a new virtual cursor, then move the real cursor down. </br> In normal or visual modes multiple new virtual cursors can be added with a `count`. |
+| `MultipleCursorsAddUp` | Add a new virtual cursor, then move the real cursor up. </br> In normal or visual modes multiple new virtual cursors can be added with a `count`. |
 | `MultipleCursorsMouseAddDelete` | Add a new virtual cursor to the mouse click position, or remove an existing cursor |
 | `MultipleCursorsAddMatches` | Search for the word under the cursor (in normal mode) or the visual area (in visual mode) and add a new cursor to each match. By default cursors are only added to matches in the visible buffer. |
 | `MultipleCursorsAddMatchesV` | As above, but limit matches to the previous visual area |
 | `MultipleCursorsAddJumpNextMatch` | Add a virtual cursor to the word under the cursor (in normal mode) or the visual area (in visual mode), then move the real cursor to the next match |
-| `MultipleCursorsJumpNextMatch` | Move the real cursor to the next match of the word under the cursor. If `MultipleCursorsAddJumpNextMatch` was previously called in visual mode, the real cursor is moved to the next match of the previously used visual area. |
+| `MultipleCursorsJumpNextMatch` | Move the real cursor to the next match of the word under the cursor (in normal mode) or the visual area (in visual mode) |
 | `MultipleCursorsLock` | Toggle locking the virtual cursors |
 
 The additional commands can be mapped by adding them to the `keys` table, e.g.:
@@ -64,7 +64,7 @@ The additional commands can be mapped by adding them to the `keys` table, e.g.:
 ```lua
 {"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}},
 {"<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}},
-{"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>"},
+{"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>", mode = {"n", "x"}},
 {"<Leader>l", "<Cmd>MultipleCursorsLockToggle<CR>", mode = {"n", "x"}},
 ```
 
@@ -322,14 +322,12 @@ Automatically inserts and deletes paired characters.
 The plugin needs to be disabled while using multiple cursors:
 
 ```lua
-opts = {
-  pre_hook = function()
-    vim.g.minipairs_disable = true
-  end,
-  post_hook = function()
-    vim.g.minipairs_disable = false
-  end,
-},
+pre_hook = function()
+  vim.g.minipairs_disable = true
+end,
+post_hook = function()
+  vim.g.minipairs_disable = false
+end,
 ```
 
 #### [mini.surround](https://github.com/echasnovski/mini.surround) and [nvim-surround](https://github.com/kylechui/nvim-surround)
@@ -340,12 +338,10 @@ The issue with both of these plugins is that they don't have functions that can 
 One workaround would be to use a different key sequence to execute the command while using multiple cursors, e.g. for mini.surround `sa` command:
 
 ```lua
-opts = {
-  custom_key_maps = {
-    {"n", "<Leader>sa", function(_, count, motion_cmd, char)
-      vim.cmd("normal " .. count .. "sa" .. motion_cmd .. char)
-    end, "mc"},
-  },
+custom_key_maps = {
+  {"n", "<Leader>sa", function(_, count, motion_cmd, char)
+    vim.cmd("normal " .. count .. "sa" .. motion_cmd .. char)
+  end, "mc"},
 },
 ```
 
@@ -357,14 +353,12 @@ Automatically inserts and deletes paired characters.
 The plugin needs to be disabled while using multiple cursors:
 
 ```lua
-opts = {
-  pre_hook = function()
-    require('nvim-autopairs').disable()
-  end,
-  post_hook = function()
-    require('nvim-autopairs').enable()
-  end,
-},
+pre_hook = function()
+  require('nvim-autopairs').disable()
+end,
+post_hook = function()
+  require('nvim-autopairs').enable()
+end,
 ```
 
 #### [nvim-spider](https://github.com/chrisgrieser/nvim-spider)
@@ -373,32 +367,30 @@ Improves `w`, `e`, and `b` motions.
 For normal mode `count` must be set before nvim-spider's motion function is called:
 
 ```lua
-opts = {
-  custom_key_maps = {
-    -- w
-    {{"n", "x"}, "w", function(_, count)
-      if  count ~=0 and vim.api.nvim_get_mode().mode == "n" then
-        vim.cmd("normal! " .. count)
-      end
-      require('spider').motion('w')
-    end},
+custom_key_maps = {
+  -- w
+  {{"n", "x"}, "w", function(_, count)
+    if  count ~=0 and vim.api.nvim_get_mode().mode == "n" then
+      vim.cmd("normal! " .. count)
+    end
+    require('spider').motion('w')
+  end},
 
-    -- e
-    {{"n", "x"}, "e", function(_, count)
-      if  count ~=0 and vim.api.nvim_get_mode().mode == "n" then
-        vim.cmd("normal! " .. count)
-      end
-      require('spider').motion('e')
-    end},
+  -- e
+  {{"n", "x"}, "e", function(_, count)
+    if  count ~=0 and vim.api.nvim_get_mode().mode == "n" then
+      vim.cmd("normal! " .. count)
+    end
+    require('spider').motion('e')
+  end},
 
-    -- b
-    {{"n", "x"}, "b", function(_, count)
-      if  count ~=0 and vim.api.nvim_get_mode().mode == "n" then
-        vim.cmd("normal! " .. count)
-      end
-      require('spider').motion('b')
-    end},
-  },
+  -- b
+  {{"n", "x"}, "b", function(_, count)
+    if  count ~=0 and vim.api.nvim_get_mode().mode == "n" then
+      vim.cmd("normal! " .. count)
+    end
+    require('spider').motion('b')
+  end},
 },
 ```
 
@@ -408,12 +400,10 @@ Maintains cursor position when indenting and unindenting.
 This plugin can be used with multiple cursors by adding key maps, e.g.
 
 ```lua
-opts = {
-  custom_key_maps = {
-    {"n", {">>", "<Tab>"}, function() require("stay-in-place").shift_right_line() end},
-    {"n", "<<", function() require("stay-in-place").shift_left_line() end},
-    {{"n", "i"}, "<S-Tab>", function() require("stay-in-place").shift_left_line() end},
-  },
+custom_key_maps = {
+  {"n", {">>", "<Tab>"}, function() require("stay-in-place").shift_right_line() end},
+  {"n", "<<", function() require("stay-in-place").shift_left_line() end},
+  {{"n", "i"}, "<S-Tab>", function() require("stay-in-place").shift_left_line() end},
 },
 ```
 
@@ -456,19 +446,17 @@ end,
 Alternatively, colours could be defined in the `pre_hook` function (which runs every time multiple cursors mode is entered):
 
 ```lua
-opts = {
-  pre_hook = function()
-    -- Set MultipleCursorsCursor to be slightly darker than Cursor
-    local cursor = vim.api.nvim_get_hl(0, {name="Cursor"})
-    cursor.bg = cursor.bg - 3355443  -- -#333333
-    vim.api.nvim_set_hl(0, "MultipleCursorsCursor", cursor)
+pre_hook = function()
+  -- Set MultipleCursorsCursor to be slightly darker than Cursor
+  local cursor = vim.api.nvim_get_hl(0, {name="Cursor"})
+  cursor.bg = cursor.bg - 3355443  -- -#333333
+  vim.api.nvim_set_hl(0, "MultipleCursorsCursor", cursor)
 
-    -- Set MultipleCursorsVisual to be slightly darker than Visual
-    local visual = vim.api.nvim_get_hl(0, {name="Visual"})
-    visual.bg = visual.bg - 1118481  -- -#111111
-    vim.api.nvim_set_hl(0, "MultipleCursorsVisual", visual)
-  end,
-}
+  -- Set MultipleCursorsVisual to be slightly darker than Visual
+  local visual = vim.api.nvim_get_hl(0, {name="Visual"})
+  visual.bg = visual.bg - 1118481  -- -#111111
+  vim.api.nvim_set_hl(0, "MultipleCursorsVisual", visual)
+end,
 ```
 
 ## API

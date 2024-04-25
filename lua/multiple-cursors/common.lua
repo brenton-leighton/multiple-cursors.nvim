@@ -88,11 +88,39 @@ function M.get_col(lnum, curswant)
 end
 
 -- Get current visual area
--- Returns {lnum1, col1, lnum2, col2}
+-- Returns v_lnum, v_col, lnum, col, curswant
 function M.get_visual_area()
-  local cursor_pos = vim.fn.getcurpos()
-  local visual_start_pos = vim.fn.getpos("v")
-  return {visual_start_pos[2], visual_start_pos[3], cursor_pos[2], cursor_pos[3]}
+  local vpos = vim.fn.getpos("v")
+  local cpos = vim.fn.getcurpos()
+  return vpos[2], vpos[3], cpos[2], cpos[3], cpos[5]
+end
+
+-- Get current visual area in a forward direction
+-- returns lnum1, col1, lnum2, col2
+function M.get_normalised_visual_area()
+
+  local v_lnum, v_col, lnum, col = M.get_visual_area()
+
+  -- Normalise
+  if v_lnum < lnum then
+    return v_lnum, v_col, lnum, col
+  elseif lnum < v_lnum then
+    return lnum, col, v_lnum, v_col
+  else -- v_lnum == lnum
+    if v_col <= col then
+      return v_lnum, v_col, lnum, col
+    else -- col < v_col
+      return lnum, col, v_lnum, v_col
+    end
+  end
+
+end
+
+-- Set visual area marks and apply
+function M.set_visual_area(v_lnum, v_col, lnum, col)
+  vim.api.nvim_buf_set_mark(0, "<", v_lnum, v_col - 1, {})
+  vim.api.nvim_buf_set_mark(0, ">", lnum, col - 1, {})
+  vim.cmd("normal! gv")
 end
 
 return M
