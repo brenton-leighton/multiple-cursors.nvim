@@ -56,7 +56,7 @@ The plugin creates a number of user commands:
 | `MultipleCursorsAddMatches` | Search for the word under the cursor (in normal mode) or the visual area (in visual mode) and add a new cursor to each match. By default cursors are only added to matches in the visible buffer. |
 | `MultipleCursorsAddMatchesV` | As above, but limit matches to the previous visual area |
 | `MultipleCursorsAddJumpNextMatch` | Add a virtual cursor to the word under the cursor (in normal mode) or the visual area (in visual mode), then move the real cursor to the next match |
-| `MultipleCursorsJumpNextMatch` | Move the real cursor to the next match of the word under the cursor. </br> If `MultipleCursorsAddJumpNextMatch` was previously called in visual mode, the real cursor is moved to the next match of the previously used visual area. |
+| `MultipleCursorsJumpNextMatch` | Move the real cursor to the next match of the word under the cursor (in normal mode) or the visual area (in visual mode) |
 | `MultipleCursorsLock` | Toggle locking the virtual cursors |
 
 The additional commands can be mapped by adding them to the `keys` table, e.g.:
