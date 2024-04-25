@@ -23,7 +23,6 @@ local post_hook = nil
 local bufnr = nil
 
 local match_visiable_only = nil
-local saved_pattern = nil
 
 default_key_maps = {
   -- Up/down motion in normal/visual modes
@@ -266,7 +265,6 @@ function M.deinit(clear_virtual_cursors)
 
       virtual_cursors.clear()
       bufnr = nil
-      saved_pattern = nil
       vim.api.nvim_del_autocmd(buf_enter_autocmd_id)
       buf_enter_autocmd_id = nil
     end
@@ -403,30 +401,15 @@ local function get_visual_area_text()
 end
 
 -- Get a search pattern
--- In normal mode, returns cword or saved_pattern if use_saved_pattern is true and saved_pattern is
--- valid
--- In visual mode, returns the visual area and also saves it to saved_pattern if use_saved_pattern
--- is true
-local function get_search_pattern(use_saved_pattern)
+-- Returns cword in normal mode and the visual area text in visual mode
+local function get_search_pattern()
 
   local pattern = nil
 
   if common.is_mode("v") then
-    if use_saved_pattern and saved_pattern then
-      pattern = saved_pattern
-    else
-      pattern = get_visual_area_text()
-      if use_saved_pattern then
-        saved_pattern = pattern
-      end
-    end
+    pattern = get_visual_area_text()
   else -- Normal mode
-    if use_saved_pattern and saved_pattern then
-      pattern = saved_pattern
-    else
-      -- Use the word under the cursor
-      pattern = vim.fn.expand("<cword>")
-    end
+    pattern = vim.fn.expand("<cword>")
   end
 
   if pattern == "" then
@@ -459,7 +442,7 @@ local function _add_cursors_to_matches(use_prev_visual_area)
 
   -- Get the search pattern: either the cursor under the word in normal mode or the visual area in
   -- visual mode
-  local pattern = get_search_pattern(false)
+  local pattern = get_search_pattern()
 
   if pattern == nil then
     return
@@ -514,7 +497,7 @@ function M.add_cursor_and_jump_to_next_match()
   local is_v, lnum1, col1, lnum2, col2 = maybe_get_normalised_visual_area()
 
   -- Get the search pattern
-  local pattern = get_search_pattern(true)
+  local pattern = get_search_pattern()
 
   -- Get a match without moving the cursor if there are already virtual cursors
   local match = search.get_next_match(pattern, not initialised)
@@ -554,7 +537,7 @@ end
 function M.jump_to_next_match()
 
   -- Get the search pattern
-  local pattern = get_search_pattern(true)
+  local pattern = get_search_pattern()
 
   -- Get a match without moving the cursor
   local match = search.get_next_match(pattern, false)
