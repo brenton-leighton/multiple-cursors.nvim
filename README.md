@@ -119,7 +119,6 @@ This means that if you use delete/yank before creating multiple cursors, add cur
 - Completion
 - Scrolling
 - Jumping to marks (`` ` `` or `'` commands)
-- Insert mode repeat commands (`CTRL-A` or `CTRL-@`)
 
 ## Options
 
