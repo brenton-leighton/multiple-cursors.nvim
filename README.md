@@ -89,6 +89,7 @@ The following commands are supported while using multiple cursors:
 | Normal | Put | `p` `P` | See [Registers](#registers) for information on how registers work |
 | Normal | Indentation | `>>` `<<` | |
 | Normal | Join | `J` `gJ` | |
+| Normal | Repeat | `.` | |
 | Normal | Change to insert/replace mode | `a` `A` `i` `I` `o` `O` `R` | Count is ignored |
 | Insert/replace | Character insertion | | |
 | Insert/replace | Other edits | `<BS>` `<Del>` `<CR>` `<Tab>` | These commands are implemented manually, and may not behave correctly <br/> In replace mode `<BS>` will only move any virtual cursors back, and not undo edits |
@@ -118,7 +119,6 @@ This means that if you use delete/yank before creating multiple cursors, add cur
 - Completion
 - Scrolling
 - Jumping to marks (`` ` `` or `'` commands)
-- Repeat (`.`, `CTRL-A`, or `CTRL-@`) commands
 
 ## Options
 

@@ -117,6 +117,9 @@ default_key_maps = {
   {"n", "J", normal_edit.J},
   {"n", "gJ", normal_edit.gJ},
 
+  -- Repeat command in normal mode
+  {"n", ".", normal_edit.dot},
+
   -- Insert mode
   {"i", "<BS>", insert_mode.bs},
   {"i", "<Del>", insert_mode.del},

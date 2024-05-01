@@ -28,6 +28,12 @@ function M.gJ()
   virtual_cursors.edit_with_normal_command(vim.v.count, "gJ", nil)
 end
 
+-- Repeat
+function M.dot()
+  common.feedkeys(nil, vim.v.count, ".", nil)
+  virtual_cursors.edit_with_normal_command(vim.v.count, ".", nil)
+end
+
 -- Replace char
 function M.r()
   local count = vim.v.count
