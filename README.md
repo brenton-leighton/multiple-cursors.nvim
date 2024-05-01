@@ -118,7 +118,7 @@ This means that if you use delete/yank before creating multiple cursors, add cur
 - Completion
 - Scrolling
 - Jumping to marks (`` ` `` or `'` commands)
-- Repeat (`.`) command
+- Repeat (`.`, `CTRL-A`, or `CTRL-@`) commands
 
 ## Options
 
@@ -283,6 +283,7 @@ Use the `pre_hook` function to disable the plugin, then the `post_hook` function
 - [mini.pairs](#mini.pairs)
 - [mini.surround and nvim-surround](#mini.surround-and-nvim-surround)
 - [nvim-autopairs](#nvim-autopairs)
+- [nvim-cmp](#nvim-cmp)
 - [nvim-spider](#nvim-spider)
 - [stay-in-place.nvim](#stay-in-place.nvim)
 - [which-key.nvim](#which-key.nvim)
@@ -358,6 +359,20 @@ pre_hook = function()
 end,
 post_hook = function()
   require('nvim-autopairs').enable()
+end,
+```
+
+#### [nvim-cmp](https://github.com/hrsh7th/nvim-cmp)
+
+Text completion.
+The plugin needs to be disabled while using multiple cursors:
+
+```lua
+pre_hook = function()
+  require("cmp").setup({enabled=false})
+end,
+post_hook = function()
+  require("cmp").setup({enabled=true})
 end,
 ```
 
