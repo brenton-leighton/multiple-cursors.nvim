@@ -199,6 +199,10 @@ local function create_autocmds()
       { group = autocmd_group_id, callback = insert_mode.text_changed_i }
     )
 
+    vim.api.nvim_create_autocmd({"CompleteDonePre"},
+      { group = autocmd_group_id, callback = insert_mode.complete_done_pre }
+    )
+
     -- Mode changed from normal to insert or visual
     vim.api.nvim_create_autocmd({"ModeChanged"}, {
       group = autocmd_group_id,

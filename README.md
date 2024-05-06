@@ -94,6 +94,7 @@ The following commands are supported while using multiple cursors:
 | Insert/replace | Character insertion | | |
 | Insert/replace | Other edits | `<BS>` `<Del>` `<CR>` `<Tab>` | These commands are implemented manually, and may not behave correctly <br/> In replace mode `<BS>` will only move any virtual cursors back, and not undo edits |
 | Insert/replace | Paste | | [Split pasting](#enable_split_paste) is enabled by default |
+| Insert/replace | Completion | `<C-n>` `<C-p>` | |
 | Insert | Change to replace mode | `<Insert>` | |
 | Normal | Change to visual mode | `v` | |
 | Visual | Swap cursor to other end of visual area | `o` | |
@@ -116,7 +117,6 @@ This means that if you use delete/yank before creating multiple cursors, add cur
 
 ### Notable unsupported functionality
 
-- Completion
 - Scrolling
 - Jumping to marks (`` ` `` or `'` commands)
 

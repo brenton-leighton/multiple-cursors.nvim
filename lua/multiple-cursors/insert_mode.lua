@@ -3,6 +3,8 @@ local M = {}
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
 
+local deferred_cr = false
+local deferred_tab = false
 
 -- Character to insert
 local char = nil
@@ -63,6 +65,65 @@ function M.text_changed_i(event)
       vim.api.nvim_put({char}, "c", false, true)
     end)
     char = nil
+  end
+
+end
+
+
+-- Completion ------------------------------------------------------------------
+
+-- Return the completion word without the part that triggered the completion
+local function crop_completion_word(line, col, word)
+
+  -- Start from the longest possible length
+  local length = vim.fn.min({col - 1, word:len()})
+
+  while length > 0 do
+    local l = line:sub(col-length, col-1)
+    local w = word:sub(1, length)
+
+    if l == w then
+      return word:sub(length + 1)
+    end
+
+    length = length - 1
+  end
+
+  return word
+
+end
+
+-- Callback for the CompleteDonePre event
+function M.complete_done_pre(event)
+
+  local complete_info = vim.fn.complete_info()
+
+  -- If an item has been selected
+  if complete_info.selected >= 0 then
+
+    -- Get the word
+    local word = complete_info.items[complete_info.selected + 1].word
+
+    virtual_cursors.edit_with_cursor(function(vc)
+
+      -- Remove the part of the word that triggered the completion
+      local line = vim.fn.getline(vc.lnum)
+      local cropped_word = crop_completion_word(line, vc.col, word)
+
+      vim.api.nvim_put({cropped_word}, "c", false, true)
+
+    end)
+
+  end
+
+  if deferred_cr then
+    deferred_cr = false
+    M.all_virtual_cursors_carriage_return()
+  end
+
+  if deferred_tab then
+    deferred_tab = false
+    M.all_virtual_cursors_tab()
   end
 
 end
@@ -256,8 +317,17 @@ end
 -- Carriage return command
 -- Also for <kEnter>
 function M.cr()
+
   common.feedkeys(nil, 0, "<CR>", nil)
-  M.all_virtual_cursors_carriage_return()
+
+  -- If a completion item has been selected
+  if vim.fn.complete_info().selected >= 0 then
+    -- Delay calling all_virtual_cursors_carriage_return() until the end of complete_done_pre
+    deferred_cr = true
+  else
+    M.all_virtual_cursors_carriage_return()
+  end
+
 end
 
 
@@ -304,7 +374,7 @@ local function virtual_cursor_tab(vc)
 end
 
 -- Tab command for all virtual cursors
-local function all_virtual_cursors_tab()
+function M.all_virtual_cursors_tab()
   virtual_cursors.edit_with_cursor(function(vc)
     delete_if_replace_mode(vc)
     virtual_cursor_tab(vc)
@@ -313,8 +383,17 @@ end
 
 -- Tab command
 function M.tab()
+
   common.feedkeys(nil, 0, "<Tab>", nil)
-  all_virtual_cursors_tab()
+
+  -- If a completion item has been selected
+  if vim.fn.complete_info().selected >= 0 then
+    -- Delay calling all_virtual_cursors_tab() until the end of complete_done_pre
+    deferred_tab = true
+  else
+    M.all_virtual_cursors_tab()
+  end
+
 end
 
 return M
