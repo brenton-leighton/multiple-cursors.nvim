@@ -12,13 +12,7 @@ local char = nil
 -- Delete a charater if in replace mode
 local function delete_if_replace_mode(vc)
   if common.is_mode("R") then
-    -- ToDo save and restore register info
-    if vc.col == common.get_length_of_line(vc.lnum) then
-      vim.cmd("normal! \"_x")
-      vc:set_cursor_position()
-    elseif vc.col < common.get_length_of_line(vc.lnum) then
-      vim.cmd("normal! \"_x")
-    end
+    vim.cmd("normal! \"_x")
   end
 end
 
