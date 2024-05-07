@@ -10,9 +10,9 @@ local deferred_tab = false
 local char = nil
 
 -- Delete a charater if in replace mode
-local function delete_if_replace_mode(vc)
-  if common.is_mode("R") then
-    vim.cmd("normal! \"_x")
+local function delete_if_replace_mode(vc, num)
+  if common.is_mode("R") or common.is_mode("Rc") then
+    vim.cmd("normal! \"_" .. num .. "x")
   end
 end
 
@@ -55,7 +55,7 @@ function M.text_changed_i(event)
   if char then
     -- Put it to virtual cursors
     virtual_cursors.edit_with_cursor(function(vc)
-      delete_if_replace_mode(vc)
+      delete_if_replace_mode(vc, 1)
       vim.api.nvim_put({char}, "c", false, true)
     end)
     char = nil
@@ -103,6 +103,9 @@ function M.complete_done_pre(event)
       -- Remove the part of the word that triggered the completion
       local line = vim.fn.getline(vc.lnum)
       local cropped_word = crop_completion_word(line, vc.col, word)
+
+      -- Delete characters for replace mode
+      delete_if_replace_mode(vc, cropped_word:len())
 
       vim.api.nvim_put({cropped_word}, "c", false, true)
 
@@ -370,7 +373,7 @@ end
 -- Tab command for all virtual cursors
 function M.all_virtual_cursors_tab()
   virtual_cursors.edit_with_cursor(function(vc)
-    delete_if_replace_mode(vc)
+    delete_if_replace_mode(vc, 1)
     virtual_cursor_tab(vc)
   end)
 end
