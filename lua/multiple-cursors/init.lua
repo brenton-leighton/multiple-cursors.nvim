@@ -9,6 +9,7 @@ local move_special = require("multiple-cursors.move_special")
 local normal_edit = require("multiple-cursors.normal_edit")
 local normal_mode_change = require("multiple-cursors.normal_mode_change")
 local insert_mode = require("multiple-cursors.insert_mode")
+local insert_mode_motion = require("multiple-cursors.insert_mode.motion")
 local visual_mode = require("multiple-cursors.visual_mode")
 local paste = require("multiple-cursors.paste")
 local search = require("multiple-cursors.search")
@@ -121,14 +122,14 @@ default_key_maps = {
   -- Insert (and replace) mode -------------------------------------------------
 
   -- Motion
-  {"i", "<Up>", move.insert_up},
-  {"i", "<Down>", move.insert_down},
-  {"i", "<Left>", move.insert_left},
-  {"i", "<Right>", move.insert_right},
-  {"i", "<Home>", move.home},
-  {"i", "<End>", move.eol},
-  {"i", "<C-Left>", move.insert_word_left},
-  {"i", "<C-Right>", move.insert_word_right},
+  {"i", "<Up>", insert_mode_motion.up},
+  {"i", "<Down>", insert_mode_motion.down},
+  {"i", "<Left>", insert_mode_motion.left},
+  {"i", "<Right>", insert_mode_motion.right},
+  {"i", "<Home>", insert_mode_motion.home},
+  {"i", "<End>", insert_mode_motion.eol},
+  {"i", "<C-Left>", insert_mode_motion.word_left},
+  {"i", "<C-Right>", insert_mode_motion.word_right},
 
   -- Non-printing characters
   {"i", {"<BS>", "<C-h>"}, insert_mode.bs},

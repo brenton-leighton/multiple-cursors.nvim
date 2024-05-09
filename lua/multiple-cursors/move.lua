@@ -30,17 +30,6 @@ function M.normal_underscore()
   virtual_cursors.move_with_normal_command(vim.v.count, "_")
 end
 
--- Up/down motion in insert/replace modes
-function M.insert_up()
-  common.feedkeys(nil, 0, "<Up>", nil)
-  virtual_cursors.move_with_normal_command(0, "k")
-end
-
-function M.insert_down()
-  common.feedkeys(nil, 0, "<Down>", nil)
-  virtual_cursors.move_with_normal_command(0, "j")
-end
-
 -- Left/right motion in normal/visual modes
 function M.normal_h()
   common.feedkeys(nil, vim.v.count, "h", nil)
@@ -100,28 +89,6 @@ function M.normal_T()
   normal_fFtT("T")
 end
 
--- Left/right motion in insert/replace modes
-function M.insert_left()
-  common.feedkeys(nil, 0, "<Left>", nil)
-  virtual_cursors.move_with_normal_command(0, "h")
-end
-
-function M.insert_right()
-  common.feedkeys(nil, 0, "<Right>", nil)
-  virtual_cursors.move_with_normal_command(0, "l")
-end
-
--- Home/End motion in all modes
-function M.home()
-  common.feedkeys(nil, 0, "<Home>", nil)
-  virtual_cursors.move_with_normal_command(0, "0")
-end
-
-function M.eol()
-  common.feedkeys(nil, 0, "<End>", nil)
-  virtual_cursors.move_with_normal_command(0, "$")
-end
-
 -- Text object movement in normal/visual mode
 function M.normal_b()
   common.feedkeys(nil, vim.v.count, "b", nil)
@@ -161,17 +128,6 @@ end
 function M.normal_gE()
   common.feedkeys(nil, vim.v.count, "gE", nil)
   virtual_cursors.move_with_normal_command(vim.v.count, "gE")
-end
-
--- Text object motion in insert/replace modes
-function M.insert_word_left()
-  common.feedkeys(nil, 0, "<C-Left>", nil)
-  virtual_cursors.move_with_normal_command(0, "b")
-end
-
-function M.insert_word_right()
-  common.feedkeys(nil, 0, "<C-Right>", nil)
-  virtual_cursors.move_with_normal_command(0, "w")
 end
 
 -- Various motions in normal/visual modes
