@@ -2,6 +2,7 @@ local M = {}
 
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
+local insert_mode_completion = require("multiple-cursors.insert_mode.completion")
 
 -- Is lnum, col before the first non-whitespace character
 local function is_before_first_non_whitespace_char(lnum, col)
@@ -138,8 +139,9 @@ end
 
 -- Backspace command
 function M.bs()
-  common.feedkeys(nil, 0, "<BS>", nil)
+  insert_mode_completion.complete_if_selected()
   all_virtual_cursors_backspace()
+  common.feedkeys(nil, 0, "<BS>", nil)
 end
 
 
@@ -167,8 +169,9 @@ end
 
 -- Delete command
 function M.del()
-  common.feedkeys(nil, 0, "<Del>", nil)
+  insert_mode_completion.complete_if_selected()
   all_virtual_cursors_delete()
+  common.feedkeys(nil, 0, "<Del>", nil)
 end
 
 
@@ -202,8 +205,9 @@ end
 -- Carriage return command
 -- Also for <kEnter>
 function M.cr()
-  common.feedkeys(nil, 0, "<CR>", nil)
+  insert_mode_completion.complete_if_selected()
   M.all_virtual_cursors_carriage_return()
+  common.feedkeys(nil, 0, "<CR>", nil)
 end
 
 
@@ -264,8 +268,9 @@ end
 
 -- Tab command
 function M.tab()
-  common.feedkeys(nil, 0, "<Tab>", nil)
+  insert_mode_completion.complete_if_selected()
   M.all_virtual_cursors_tab()
+  common.feedkeys(nil, 0, "<Tab>", nil)
 end
 
 

@@ -3,12 +3,8 @@ local M = {}
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
 
--- Delete a charater if in replace mode
-local function delete_if_replace_mode(vc, num)
-  if common.is_mode("R") or common.is_mode("Rc") then
-    vim.cmd("normal! \"_" .. num .. "x")
-  end
-end
+-- Indicate that the completion word has already been inserted before complete_done_pre
+local completed = false
 
 -- Return the completion word without the part that triggered the completion
 local function crop_completion_word(line, col, word)
@@ -31,8 +27,9 @@ local function crop_completion_word(line, col, word)
 
 end
 
--- Callback for the CompleteDonePre event
-function M.complete_done_pre(event)
+-- Insert the completion word if selected
+-- Used directly by insert mode mappings or by complete_done_pre
+function M.complete_if_selected()
 
   local complete_info = vim.fn.complete_info()
 
@@ -49,13 +46,28 @@ function M.complete_done_pre(event)
       local cropped_word = crop_completion_word(line, vc.col, word)
 
       -- Delete characters for replace mode
-      delete_if_replace_mode(vc, cropped_word:len())
+      if common.is_mode("R") or common.is_mode("Rc") then
+        vim.cmd("normal! \"_" .. cropped_word:len() .. "x")
+      end
 
       vim.api.nvim_put({cropped_word}, "c", false, true)
 
     end)
 
+    completed = true
+
   end
+
+end
+
+-- Callback for the CompleteDonePre event
+function M.complete_done_pre(event)
+
+  if not completed then
+    M.complete_if_selected()
+  end
+
+  completed = false
 
 end
 

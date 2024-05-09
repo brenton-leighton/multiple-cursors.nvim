@@ -2,6 +2,7 @@ local M = {}
 
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
+local insert_mode_completion = require("multiple-cursors.insert_mode.completion")
 
 -- Character to insert
 local char = nil
@@ -17,6 +18,7 @@ function M.text_changed_i(event)
 
   -- If there's a saved character
   if char then
+
     -- Put it to virtual cursors
     virtual_cursors.edit_with_cursor(function(vc)
 

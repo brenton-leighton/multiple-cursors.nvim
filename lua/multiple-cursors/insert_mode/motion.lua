@@ -2,8 +2,10 @@ local M = {}
 
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
+local insert_mode_completion = require("multiple-cursors.insert_mode.completion")
 
 local function normal_command_and_feedkeys(cmd, key)
+  insert_mode_completion.complete_if_selected()
   virtual_cursors.move_with_normal_command(0, cmd)
   common.feedkeys(nil, 0, key, nil)
 end

@@ -13,6 +13,7 @@ local normal_mode_change = require("multiple-cursors.normal_mode_change")
 local insert_mode_motion = require("multiple-cursors.insert_mode.motion")
 local insert_mode_character = require("multiple-cursors.insert_mode.character")
 local insert_mode_nonprinting = require("multiple-cursors.insert_mode.nonprinting")
+local insert_mode_completion = require("multiple-cursors.insert_mode.completion")
 local insert_mode_escape = require("multiple-cursors.insert_mode.escape")
 
 local visual_mode = require("multiple-cursors.visual_mode")
@@ -211,6 +212,10 @@ local function create_autocmds()
 
     vim.api.nvim_create_autocmd({"TextChangedI"},
       { group = autocmd_group_id, callback = insert_mode_character.text_changed_i }
+    )
+
+    vim.api.nvim_create_autocmd({"CompleteDonePre"},
+      { group = autocmd_group_id, callback = insert_mode_completion.complete_done_pre }
     )
 
     -- Mode changed from normal to insert or visual
