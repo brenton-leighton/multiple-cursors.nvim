@@ -4,12 +4,17 @@ local key_maps = require("multiple-cursors.key_maps")
 local common = require("multiple-cursors.common")
 local extmarks = require("multiple-cursors.extmarks")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
+
 local move = require("multiple-cursors.move")
 local move_special = require("multiple-cursors.move_special")
 local normal_edit = require("multiple-cursors.normal_edit")
 local normal_mode_change = require("multiple-cursors.normal_mode_change")
-local insert_mode = require("multiple-cursors.insert_mode")
+
 local insert_mode_motion = require("multiple-cursors.insert_mode.motion")
+local insert_mode_character = require("multiple-cursors.insert_mode.character")
+local insert_mode_nonprinting = require("multiple-cursors.insert_mode.nonprinting")
+local insert_mode_escape = require("multiple-cursors.insert_mode.escape")
+
 local visual_mode = require("multiple-cursors.visual_mode")
 local paste = require("multiple-cursors.paste")
 local search = require("multiple-cursors.search")
@@ -132,13 +137,13 @@ default_key_maps = {
   {"i", "<C-Right>", insert_mode_motion.word_right},
 
   -- Non-printing characters
-  {"i", {"<BS>", "<C-h>"}, insert_mode.bs},
-  {"i", "<Del>", insert_mode.del},
-  {"i", {"<CR>", "<kEnter>"}, insert_mode.cr},
-  {"i", "<Tab>", insert_mode.tab},
+  {"i", {"<BS>", "<C-h>"}, insert_mode_nonprinting.bs},
+  {"i", "<Del>", insert_mode_nonprinting.del},
+  {"i", {"<CR>", "<kEnter>"}, insert_mode_nonprinting.cr},
+  {"i", "<Tab>", insert_mode_nonprinting.tab},
 
   -- Exit
-  {"i", "<Esc>", insert_mode.escape},
+  {"i", "<Esc>", insert_mode_escape.escape},
 
 
   -- Visual mode ---------------------------------------------------------------
@@ -201,15 +206,11 @@ local function create_autocmds()
 
     -- Insert characters
     vim.api.nvim_create_autocmd({"InsertCharPre"},
-      { group = autocmd_group_id, callback = insert_mode.insert_char_pre }
+      { group = autocmd_group_id, callback = insert_mode_character.insert_char_pre }
     )
 
     vim.api.nvim_create_autocmd({"TextChangedI"},
-      { group = autocmd_group_id, callback = insert_mode.text_changed_i }
-    )
-
-    vim.api.nvim_create_autocmd({"CompleteDonePre"},
-      { group = autocmd_group_id, callback = insert_mode.complete_done_pre }
+      { group = autocmd_group_id, callback = insert_mode_character.text_changed_i }
     )
 
     -- Mode changed from normal to insert or visual

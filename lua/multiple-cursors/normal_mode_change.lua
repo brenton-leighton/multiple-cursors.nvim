@@ -2,7 +2,7 @@ local M = {}
 
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
-local insert_mode = require("multiple-cursors.insert_mode")
+local insert_mode_nonprinting = require("multiple-cursors.insert_mode.nonprinting")
 local input = require("multiple-cursors.input")
 
 local mode_cmd = nil
@@ -39,7 +39,7 @@ end
 local function _o()
   -- New line after current line
   virtual_cursors.move_with_normal_command(0, "$")
-  insert_mode.all_virtual_cursors_carriage_return()
+  insert_mode_nonprinting.all_virtual_cursors_carriage_return()
 end
 
 local function _O()
@@ -60,10 +60,10 @@ local function _O()
   virtual_cursors.edit_with_cursor_no_save(function(vc)
     -- If first line and first character
     if vc.lnum == 1 and vc.col == 1 then
-      insert_mode.virtual_cursor_carriage_return(vc)
+      insert_mode_nonprinting.virtual_cursor_carriage_return(vc)
       vc.lnum = 1 -- Move the cursor back
     else
-      insert_mode.virtual_cursor_carriage_return(vc)
+      insert_mode_nonprinting.virtual_cursor_carriage_return(vc)
     end
   end)
 
@@ -154,7 +154,7 @@ local function _cc()
 
   -- Virtual cursors
   virtual_cursors.move_with_normal_command(0, "0")
-  insert_mode.all_virtual_cursors_carriage_return()
+  insert_mode_nonprinting.all_virtual_cursors_carriage_return()
   virtual_cursors.normal_mode_delete_yank(register, count, "dd", nil)
   virtual_cursors.move_with_normal_command(0, "k")
 
