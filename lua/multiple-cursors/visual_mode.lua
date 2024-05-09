@@ -6,6 +6,7 @@ local input = require("multiple-cursors.input")
 
 -- Escape command
 function M.escape()
+
   virtual_cursors.visit_all(function(vc)
     -- Move cursor back if it's at the end of a non empty line
     vc.col = vim.fn.min({vc.col, common.get_max_col(vc.lnum) - 1})
@@ -15,6 +16,9 @@ function M.escape()
     vc.visual_start_lnum = 0
     vc.visual_start_col = 0
   end)
+
+  common.feedkeys(nil, 0, "<Esc>", nil)
+
 end
 
 

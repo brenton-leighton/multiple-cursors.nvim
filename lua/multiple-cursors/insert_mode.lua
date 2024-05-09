@@ -30,6 +30,7 @@ end
 -- Escape key ------------------------------------------------------------------
 
 function M.escape()
+
   -- Move the cursor back
   virtual_cursors.visit_with_cursor(function(vc)
     if vc.col ~= 1 then
@@ -37,6 +38,9 @@ function M.escape()
       vc:save_cursor_position()
     end
   end)
+
+  common.feedkeys(nil, 0, "<Esc>", nil)
+
 end
 
 
