@@ -13,6 +13,7 @@ local normal_mode_change = require("multiple-cursors.normal_mode_change")
 local insert_mode_motion = require("multiple-cursors.insert_mode.motion")
 local insert_mode_character = require("multiple-cursors.insert_mode.character")
 local insert_mode_nonprinting = require("multiple-cursors.insert_mode.nonprinting")
+local insert_mode_special = require("multiple-cursors.insert_mode.special")
 local insert_mode_completion = require("multiple-cursors.insert_mode.completion")
 local insert_mode_escape = require("multiple-cursors.insert_mode.escape")
 
@@ -142,6 +143,11 @@ default_key_maps = {
   {"i", "<Del>", insert_mode_nonprinting.del},
   {"i", {"<CR>", "<kEnter>"}, insert_mode_nonprinting.cr},
   {"i", "<Tab>", insert_mode_nonprinting.tab},
+
+  -- Special
+  {"i", "<C-w>", insert_mode_special.c_w},
+  {"i", "<C-t>", insert_mode_special.c_t},
+  {"i", "<C-d>", insert_mode_special.c_d},
 
   -- Exit
   {"i", "<Esc>", insert_mode_escape.escape},

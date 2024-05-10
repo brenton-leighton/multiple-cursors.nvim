@@ -91,12 +91,13 @@ The following commands are supported while using multiple cursors:
 | Normal | Join | `J` `gJ` | |
 | Normal | Repeat | `.` | |
 | Normal | Change to insert/replace mode | `a` `A` `i` `I` `o` `O` `R` | Count is ignored |
+| Normal | Change to visual mode | `v` | |
 | Insert/replace | Character insertion | | |
-| Insert/replace | Other edits | `<BS>` `<Del>` `<CR>` `<Tab>` | These commands are implemented manually, and may not behave correctly <br/> In replace mode `<BS>` will only move any virtual cursors back, and not undo edits |
-| Insert/replace | Paste | | [Split pasting](#enable_split_paste) is enabled by default |
+| Insert/replace | Non-printing characters | `<BS>` `<Del>` `<CR>` `<Tab>` | These commands are implemented manually, and may not behave correctly <br/> In replace mode `<BS>` will only move any virtual cursors back, and not undo edits |
+| Insert/replace | Delete word before | `<C-w>` | |
+| Insert/replace | Indentation | `<C-t>` `<C-d>` | |
 | Insert/replace | Completion | `<C-n>` `<C-p>` | |
 | Insert | Change to replace mode | `<Insert>` | |
-| Normal | Change to visual mode | `v` | |
 | Visual | Swap cursor to other end of visual area | `o` | |
 | Visual | Modify visual area | `aw` `iw` `aW` `iW` `ab` `ib` `aB` `iB` `a>` `i>` `at` `it` `a'` `i'` `a"` `i"` `` a` `` `` i` `` | |
 | Visual | Join lines | `J` `gJ` | |
@@ -104,9 +105,10 @@ The following commands are supported while using multiple cursors:
 | Visual | Change case | `~` `u` `U` `g~` `gu` `gU` | |
 | Visual | Yank/delete | `y` `d` `<Del>` | |
 | Visual | Change | `c` | This command is implemented as a delete then switch to insert mode |
+| All | Paste | | [Split pasting](#enable_split_paste) is enabled by default |
 | Insert/replace/visual | Exit to normal mode | `<Esc>` | |
-| Normal | Undo | `u` | Also exits multiple cursors, because cursor positions can't be restored by undo |
 | Normal | Exit multiple cursors | `<Esc>` | Clears all virtual cursors. <br/> Registers for the virtual cursors will be lost. |
+| Normal | Undo | `u` | Also exits multiple cursors, because cursor positions can't be restored by undo |
 
 ### Registers
 
