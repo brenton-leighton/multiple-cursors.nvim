@@ -178,7 +178,7 @@ end
 -- Carriage return -------------------------------------------------------------
 
 -- Carriage return command for a virtual cursor
--- This isn't local because it's used by normal_mode_change
+-- This isn't local because it's used by normal_mode/mode_change.lua
 function M.virtual_cursor_carriage_return(vc)
   if vc.col <= common.get_length_of_line(vc.lnum) then
     vim.api.nvim_put({"", ""}, "c", false, true)
@@ -195,7 +195,7 @@ function M.virtual_cursor_carriage_return(vc)
 end
 
 -- Carriage return command for all virtual cursors
--- This isn't local because it's used by normal_mode_change
+-- This isn't local because it's used by normal_mode/mode_change.lua
 function M.all_virtual_cursors_carriage_return()
   virtual_cursors.edit_with_cursor_no_save(function(vc)
     M.virtual_cursor_carriage_return(vc)

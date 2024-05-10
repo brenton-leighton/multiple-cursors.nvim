@@ -236,39 +236,39 @@ function M.mode_changed()
 end
 
 function M.a()
-  common.feedkeys(nil, 0, "a", nil)
   mode_cmd = "a"
+  common.feedkeys(nil, 0, "a", nil)
 end
 
 function M.A()
-  common.feedkeys(nil, 0, "A", nil)
   mode_cmd = "A"
+  common.feedkeys(nil, 0, "A", nil)
 end
 
 function M.i() -- Also <Insert>
-  common.feedkeys(nil, 0, "i", nil)
   mode_cmd = "i"
+  common.feedkeys(nil, 0, "i", nil)
 end
 
 function M.I()
-  common.feedkeys(nil, 0, "I", nil)
   mode_cmd = "I"
+  common.feedkeys(nil, 0, "I", nil)
 end
 
 function M.o()
-  common.feedkeys(nil, 0, "o", nil)
   mode_cmd = "o"
+  common.feedkeys(nil, 0, "o", nil)
 end
 
 function M.O()
-  common.feedkeys(nil, 0, "O", nil)
   mode_cmd = "O"
+  common.feedkeys(nil, 0, "O", nil)
 end
 
 function M.v()
-  common.feedkeys(nil, vim.v.count, "v", nil)
   count = vim.v.count - 1
   mode_cmd = "v"
+  common.feedkeys(nil, vim.v.count, "v", nil)
 end
 
 function M.c()
@@ -286,27 +286,21 @@ function M.c()
 end
 
 function M.cc()
-
   count = vim.v.count
   mode_cmd = "cc"
   common.feedkeys(nil, 0, "i", nil)
-
 end
 
 function M.C()
-
   count = vim.v.count
   mode_cmd = "C"
   common.feedkeys(nil, 0, "i", nil)
-
 end
 
 function M.s()
-
   count = vim.v.count
   mode_cmd = "s"
   common.feedkeys(nil, 0, "i", nil)
-
 end
 
 return M
