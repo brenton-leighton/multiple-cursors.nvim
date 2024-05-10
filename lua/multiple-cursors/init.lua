@@ -18,7 +18,11 @@ local insert_mode_special = require("multiple-cursors.insert_mode.special")
 local insert_mode_completion = require("multiple-cursors.insert_mode.completion")
 local insert_mode_escape = require("multiple-cursors.insert_mode.escape")
 
-local visual_mode = require("multiple-cursors.visual_mode")
+local visual_mode_modify_area = require("multiple-cursors.visual_mode.modify_area")
+local visual_mode_delete_yank_change = require("multiple-cursors.visual_mode.delete_yank_change")
+local visual_mode_edit = require("multiple-cursors.visual_mode.edit")
+local visual_mode_escape = require("multiple-cursors.visual_mode.escape")
+
 local paste = require("multiple-cursors.paste")
 local search = require("multiple-cursors.search")
 
@@ -157,33 +161,33 @@ default_key_maps = {
   -- Visual mode ---------------------------------------------------------------
 
   -- Modify area
-  {"x", "o", visual_mode.o},
-  {"x", "a", visual_mode.a},
-  {"x", "i", visual_mode.i},
+  {"x", "o", visual_mode_modify_area.o},
+  {"x", "a", visual_mode_modify_area.a},
+  {"x", "i", visual_mode_modify_area.i},
 
   -- Delete, yank, change
-  {"x", {"d", "<Del>"}, visual_mode.d},
-  {"x", "y", visual_mode.y},
-  {"x", "c", visual_mode.c},
+  {"x", {"d", "<Del>"}, visual_mode_delete_yank_change.d},
+  {"x", "y", visual_mode_delete_yank_change.y},
+  {"x", "c", visual_mode_delete_yank_change.c},
 
   -- Indentation
-  {"x", ">", visual_mode.greater_than},
-  {"x", "<", visual_mode.less_than},
+  {"x", ">", visual_mode_edit.indent},
+  {"x", "<", visual_mode_edit.deindent},
 
   -- Join lines
-  {"x", "J", visual_mode.J},
-  {"x", "gJ", visual_mode.gJ},
+  {"x", "J", visual_mode_edit.J},
+  {"x", "gJ", visual_mode_edit.gJ},
 
   -- Change case
-  {"x", "u", visual_mode.u},
-  {"x", "U", visual_mode.U},
-  {"x", "~", visual_mode.tilde},
-  {"x", "gu", visual_mode.gu},
-  {"x", "gU", visual_mode.gU},
-  {"x", "g~", visual_mode.g_tilde},
+  {"x", "u", visual_mode_edit.u},
+  {"x", "U", visual_mode_edit.U},
+  {"x", "~", visual_mode_edit.tilde},
+  {"x", "gu", visual_mode_edit.gu},
+  {"x", "gU", visual_mode_edit.gU},
+  {"x", "g~", visual_mode_edit.g_tilde},
 
   -- Exit
-  {"x", {"<Esc>", "v"}, visual_mode.escape},
+  {"x", {"<Esc>", "v"}, visual_mode_escape.escape},
 
 }
 
