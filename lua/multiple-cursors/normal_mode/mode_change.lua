@@ -2,7 +2,7 @@ local M = {}
 
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
-local insert_mode = require("multiple-cursors.insert_mode")
+local insert_mode_nonprinting = require("multiple-cursors.insert_mode.nonprinting")
 local input = require("multiple-cursors.input")
 
 local mode_cmd = nil
@@ -39,7 +39,7 @@ end
 local function _o()
   -- New line after current line
   virtual_cursors.move_with_normal_command(0, "$")
-  insert_mode.all_virtual_cursors_carriage_return()
+  insert_mode_nonprinting.all_virtual_cursors_carriage_return()
 end
 
 local function _O()
@@ -60,10 +60,10 @@ local function _O()
   virtual_cursors.edit_with_cursor_no_save(function(vc)
     -- If first line and first character
     if vc.lnum == 1 and vc.col == 1 then
-      insert_mode.virtual_cursor_carriage_return(vc)
+      insert_mode_nonprinting.virtual_cursor_carriage_return(vc)
       vc.lnum = 1 -- Move the cursor back
     else
-      insert_mode.virtual_cursor_carriage_return(vc)
+      insert_mode_nonprinting.virtual_cursor_carriage_return(vc)
     end
   end)
 
@@ -154,7 +154,7 @@ local function _cc()
 
   -- Virtual cursors
   virtual_cursors.move_with_normal_command(0, "0")
-  insert_mode.all_virtual_cursors_carriage_return()
+  insert_mode_nonprinting.all_virtual_cursors_carriage_return()
   virtual_cursors.normal_mode_delete_yank(register, count, "dd", nil)
   virtual_cursors.move_with_normal_command(0, "k")
 
@@ -236,39 +236,39 @@ function M.mode_changed()
 end
 
 function M.a()
-  common.feedkeys(nil, 0, "a", nil)
   mode_cmd = "a"
+  common.feedkeys(nil, 0, "a", nil)
 end
 
 function M.A()
-  common.feedkeys(nil, 0, "A", nil)
   mode_cmd = "A"
+  common.feedkeys(nil, 0, "A", nil)
 end
 
 function M.i() -- Also <Insert>
-  common.feedkeys(nil, 0, "i", nil)
   mode_cmd = "i"
+  common.feedkeys(nil, 0, "i", nil)
 end
 
 function M.I()
-  common.feedkeys(nil, 0, "I", nil)
   mode_cmd = "I"
+  common.feedkeys(nil, 0, "I", nil)
 end
 
 function M.o()
-  common.feedkeys(nil, 0, "o", nil)
   mode_cmd = "o"
+  common.feedkeys(nil, 0, "o", nil)
 end
 
 function M.O()
-  common.feedkeys(nil, 0, "O", nil)
   mode_cmd = "O"
+  common.feedkeys(nil, 0, "O", nil)
 end
 
 function M.v()
-  common.feedkeys(nil, vim.v.count, "v", nil)
   count = vim.v.count - 1
   mode_cmd = "v"
+  common.feedkeys(nil, vim.v.count, "v", nil)
 end
 
 function M.c()
@@ -286,27 +286,21 @@ function M.c()
 end
 
 function M.cc()
-
   count = vim.v.count
   mode_cmd = "cc"
   common.feedkeys(nil, 0, "i", nil)
-
 end
 
 function M.C()
-
   count = vim.v.count
   mode_cmd = "C"
   common.feedkeys(nil, 0, "i", nil)
-
 end
 
 function M.s()
-
   count = vim.v.count
   mode_cmd = "s"
   common.feedkeys(nil, 0, "i", nil)
-
 end
 
 return M

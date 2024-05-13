@@ -4,12 +4,25 @@ local key_maps = require("multiple-cursors.key_maps")
 local common = require("multiple-cursors.common")
 local extmarks = require("multiple-cursors.extmarks")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
-local move = require("multiple-cursors.move")
-local move_special = require("multiple-cursors.move_special")
-local normal_edit = require("multiple-cursors.normal_edit")
-local normal_mode_change = require("multiple-cursors.normal_mode_change")
-local insert_mode = require("multiple-cursors.insert_mode")
-local visual_mode = require("multiple-cursors.visual_mode")
+
+local normal_mode_motion = require("multiple-cursors.normal_mode.motion")
+local normal_mode_backspace = require("multiple-cursors.normal_mode.backspace")
+local normal_mode_delete_yank_put = require("multiple-cursors.normal_mode.delete_yank_put")
+local normal_mode_edit = require("multiple-cursors.normal_mode.edit")
+local normal_mode_mode_change = require("multiple-cursors.normal_mode.mode_change")
+
+local insert_mode_motion = require("multiple-cursors.insert_mode.motion")
+local insert_mode_character = require("multiple-cursors.insert_mode.character")
+local insert_mode_nonprinting = require("multiple-cursors.insert_mode.nonprinting")
+local insert_mode_special = require("multiple-cursors.insert_mode.special")
+local insert_mode_completion = require("multiple-cursors.insert_mode.completion")
+local insert_mode_escape = require("multiple-cursors.insert_mode.escape")
+
+local visual_mode_modify_area = require("multiple-cursors.visual_mode.modify_area")
+local visual_mode_delete_yank_change = require("multiple-cursors.visual_mode.delete_yank_change")
+local visual_mode_edit = require("multiple-cursors.visual_mode.edit")
+local visual_mode_escape = require("multiple-cursors.visual_mode.escape")
+
 local paste = require("multiple-cursors.paste")
 local search = require("multiple-cursors.search")
 
@@ -25,144 +38,157 @@ local bufnr = nil
 local match_visiable_only = nil
 
 default_key_maps = {
-  -- Up/down motion in normal/visual modes
-  {{"n", "x"}, {"j", "<Down>"}, move.normal_j},
-  {{"n", "x"}, {"k", "<Up>"}, move.normal_k},
-  {{"n", "x"}, "-", move.normal_minus},
-  {{"n", "x"}, {"+", "<CR>", "<kEnter>"}, move.normal_plus},
-  {{"n", "x"}, "_", move.normal_underscore},
 
-  -- Up/down motion in insert/replace modes
-  {"i", "<Up>", move.insert_up},
-  {"i", "<Down>", move.insert_down},
+  -- Normal and visual mode motion ---------------------------------------------
 
-  -- Left/right motion in normal/visual modes
-  {{"n", "x"}, {"h", "<Left>"}, move.normal_h},
-  {{"n", "x"}, "<BS>", move_special.normal_bs},
-  {{"n", "x"}, {"l", "<Right>", "<Space>"}, move.normal_l},
-  {{"n", "x"}, "0", move.normal_0},
-  {{"n", "x"}, "^", move.normal_caret},
-  {{"n", "x"}, "$", move.normal_dollar},
-  {{"n", "x"}, "|", move.normal_bar},
-  {{"n", "x"}, "f", move.normal_f},
-  {{"n", "x"}, "F", move.normal_F},
-  {{"n", "x"}, "t", move.normal_t},
-  {{"n", "x"}, "T", move.normal_T},
+  -- Up/down
+  {{"n", "x"}, {"k", "<Up>"}, normal_mode_motion.k},
+  {{"n", "x"}, {"j", "<Down>"}, normal_mode_motion.j},
+  {{"n", "x"}, "-", normal_mode_motion.minus},
+  {{"n", "x"}, {"+", "<CR>", "<kEnter>"}, normal_mode_motion.plus},
+  {{"n", "x"}, "_", normal_mode_motion.underscore},
 
-  -- Left/right motion in insert/replace modes
-  {"i", "<Left>", move.insert_left},
-  {"i", "<Right>", move.insert_right},
+  -- Left/right
+  {{"n", "x"}, {"h", "<Left>"}, normal_mode_motion.h},
+  {{"n", "x"}, "<BS>", normal_mode_backspace.bs},
+  {{"n", "x"}, {"l", "<Right>", "<Space>"}, normal_mode_motion.l},
+  {{"n", "x"}, {"0", "<Home>"}, normal_mode_motion.zero},
+  {{"n", "x"}, "^", normal_mode_motion.caret},
+  {{"n", "x"}, {"$", "<End>"}, normal_mode_motion.dollar},
+  {{"n", "x"}, "|", normal_mode_motion.bar},
+  {{"n", "x"}, "f", normal_mode_motion.f},
+  {{"n", "x"}, "F", normal_mode_motion.F},
+  {{"n", "x"}, "t", normal_mode_motion.t},
+  {{"n", "x"}, "T", normal_mode_motion.T},
 
-  -- Left/right motion in all modes
-  {{"n", "i", "x"}, "<Home>", move.home},
-  {{"n", "i", "x"}, "<End>", move.eol},
+  -- Text object motion
+  {{"n", "x"}, {"w", "<S-Right>", "<C-Right>"}, normal_mode_motion.w},
+  {{"n", "x"}, "W", normal_mode_motion.W},
+  {{"n", "x"}, "e", normal_mode_motion.e},
+  {{"n", "x"}, "E", normal_mode_motion.E},
+  {{"n", "x"}, {"b", "<S-Left>", "<C-Left>"}, normal_mode_motion.b},
+  {{"n", "x"}, "B", normal_mode_motion.B},
+  {{"n", "x"}, "ge", normal_mode_motion.ge},
+  {{"n", "x"}, "gE", normal_mode_motion.gE},
 
-  -- Text object motion in normal/visual modes
-  {{"n", "x"}, {"w", "<S-Right>", "<C-Right>"}, move.normal_w},
-  {{"n", "x"}, "W", move.normal_W},
-  {{"n", "x"}, "e", move.normal_e},
-  {{"n", "x"}, "E", move.normal_E},
-  {{"n", "x"}, {"b", "<S-Left>", "<C-Left>"}, move.normal_b},
-  {{"n", "x"}, "B", move.normal_B},
-  {{"n", "x"}, "ge", move.normal_ge},
-  {{"n", "x"}, "gE", move.normal_gE},
+  -- Other
+  {{"n", "x"}, "%", normal_mode_motion.percent},
 
-  -- Text object motion in insert/replace modes
-  {"i", "<C-Left>", move.insert_word_left},
-  {"i", "<C-Right>", move.insert_word_right},
 
-  -- Various motions in normal/visual modes
-  {{"n", "x"}, "%", move.normal_percent},
+  -- Normal mode edit ----------------------------------------------------------
 
-  -- Inserting text (from normal mode)
-  {"n", "a", normal_mode_change.a},
-  {"n", "A", normal_mode_change.A},
-  {"n", {"i", "<Insert>"}, normal_mode_change.i},
-  {"n", "I", normal_mode_change.I},
-  {"n", "o", normal_mode_change.o},
-  {"n", "O", normal_mode_change.O},
+  -- Delete, yank, put
+  {"n", {"x", "<Del>"}, normal_mode_delete_yank_put.x},
+  {"n", "X", normal_mode_delete_yank_put.X},
+  {"n", "d", normal_mode_delete_yank_put.d},
+  {"n", "dd", normal_mode_delete_yank_put.dd},
+  {"n", "D", normal_mode_delete_yank_put.D},
+  {"n", "y", normal_mode_delete_yank_put.y},
+  {"n", "yy", normal_mode_delete_yank_put.yy},
+  {"n", "p", normal_mode_delete_yank_put.p},
+  {"n", "P", normal_mode_delete_yank_put.P},
 
-  -- Delete in normal mode
-  {"n", {"x", "<Del>"}, normal_edit.x},
-  {"n", "X", normal_edit.X},
-  {"n", "d", normal_edit.d},
-  {"n", "dd", normal_edit.dd},
-  {"n", "D", normal_edit.D},
+  -- Replace characters
+  {"n", "r", normal_mode_edit.r},
 
-  -- Change in normal mode
-  {"n", "c", normal_mode_change.c},
-  {"n", "cc", normal_mode_change.cc},
-  {"n", "C", normal_mode_change.C},
-  {"n", "s", normal_mode_change.s},
+  -- Indentation
+  {"n", ">>", normal_mode_edit.indent},
+  {"n", "<<", normal_mode_edit.deindent},
 
-  -- Change case in normal mode
-  {"n", "gu", normal_edit.gu},
-  {"n", "gU", normal_edit.gU},
-  {"n", "g~", normal_edit.g_tilde},
+  -- Join lines
+  {"n", "J", normal_mode_edit.J},
+  {"n", "gJ", normal_mode_edit.gJ},
 
-  -- Yank and put in normal mode
-  {"n", "y", normal_edit.y},
-  {"n", "yy", normal_edit.yy},
-  {"n", "p", normal_edit.p},
-  {"n", "P", normal_edit.P},
+  -- Change case
+  {"n", "gu", normal_mode_edit.gu},
+  {"n", "gU", normal_mode_edit.gU},
+  {"n", "g~", normal_mode_edit.g_tilde},
 
-  -- Replace char in normal mode
-  {"n", "r", normal_edit.r},
+  -- Repeat
+  {"n", ".", normal_mode_edit.dot},
 
-  -- Indentation in normal mode
-  {"n", ">>", normal_edit.indent},
-  {"n", "<<", normal_edit.deindent},
 
-  -- Join lines in normal mode
-  {"n", "J", normal_edit.J},
-  {"n", "gJ", normal_edit.gJ},
+  -- Normal mode mode change ---------------------------------------------------
 
-  -- Repeat command in normal mode
-  {"n", ".", normal_edit.dot},
+  -- To insert mode
+  {"n", "a", normal_mode_mode_change.a},
+  {"n", "A", normal_mode_mode_change.A},
+  {"n", {"i", "<Insert>"}, normal_mode_mode_change.i},
+  {"n", "I", normal_mode_mode_change.I},
+  {"n", "o", normal_mode_mode_change.o},
+  {"n", "O", normal_mode_mode_change.O},
+  {"n", "c", normal_mode_mode_change.c},
+  {"n", "cc", normal_mode_mode_change.cc},
+  {"n", "C", normal_mode_mode_change.C},
+  {"n", "s", normal_mode_mode_change.s},
 
-  -- Insert mode
-  {"i", "<BS>", insert_mode.bs},
-  {"i", "<Del>", insert_mode.del},
-  {"i", {"<CR>", "<kEnter>"}, insert_mode.cr},
-  {"i", "<Tab>", insert_mode.tab},
+  -- To visual mode
+  {"n", "v", normal_mode_mode_change.v},
 
-  -- Visual mode
-  {"n", "v", normal_mode_change.v},
-  {"x", "o", visual_mode.o},
 
-  -- Modify visual area
-  {"x", "a", visual_mode.a},
-  {"x", "i", visual_mode.i},
+  -- Normal mode exit ----------------------------------------------------------
+  {"n", "u", function() M.normal_undo() end},
+  {"n", "<Esc>", function() M.normal_escape() end},
 
-  -- Join lines in visual mode
-  {"x", "J", visual_mode.J},
-  {"x", "gJ", visual_mode.gJ},
 
-  -- Indentation in visual mode
-  {"x", "<", visual_mode.less_than},
-  {"x", ">", visual_mode.greater_than},
+  -- Insert (and replace) mode -------------------------------------------------
 
-  -- Change case in visual mode
-  {"x", "~", visual_mode.tilde},
-  {"x", "u", visual_mode.u},
-  {"x", "U", visual_mode.U},
-  {"x", "g~", visual_mode.g_tilde},
-  {"x", "gu", visual_mode.gu},
-  {"x", "gU", visual_mode.gU},
+  -- Motion
+  {"i", "<Up>", insert_mode_motion.up},
+  {"i", "<Down>", insert_mode_motion.down},
+  {"i", "<Left>", insert_mode_motion.left},
+  {"i", "<Right>", insert_mode_motion.right},
+  {"i", "<Home>", insert_mode_motion.home},
+  {"i", "<End>", insert_mode_motion.eol},
+  {"i", "<C-Left>", insert_mode_motion.word_left},
+  {"i", "<C-Right>", insert_mode_motion.word_right},
 
-  -- Yank and delete in visual mode
-  {"x", "y", visual_mode.y},
-  {"x", {"d", "<Del>"}, visual_mode.d},
-  {"x", "c", visual_mode.c},
+  -- Non-printing characters
+  {"i", {"<BS>", "<C-h>"}, insert_mode_nonprinting.bs},
+  {"i", "<Del>", insert_mode_nonprinting.del},
+  {"i", {"<CR>", "<kEnter>"}, insert_mode_nonprinting.cr},
+  {"i", "<Tab>", insert_mode_nonprinting.tab},
 
-  -- Undo in normal mode
-  {"n", "u", function() M.undo() end},
+  -- Special
+  {"i", "<C-w>", insert_mode_special.c_w},
+  {"i", "<C-t>", insert_mode_special.c_t},
+  {"i", "<C-d>", insert_mode_special.c_d},
 
-  -- Escape in all modes
-  {{"n", "i", "x"}, "<Esc>", function() M.escape() end},
+  -- Exit
+  {"i", "<Esc>", insert_mode_escape.escape},
 
-  -- v in visual mode is also escape
-  {"x", "v", function() M.escape() end},
+
+  -- Visual mode ---------------------------------------------------------------
+
+  -- Modify area
+  {"x", "o", visual_mode_modify_area.o},
+  {"x", "a", visual_mode_modify_area.a},
+  {"x", "i", visual_mode_modify_area.i},
+
+  -- Delete, yank, change
+  {"x", {"d", "<Del>"}, visual_mode_delete_yank_change.d},
+  {"x", "y", visual_mode_delete_yank_change.y},
+  {"x", "c", visual_mode_delete_yank_change.c},
+
+  -- Indentation
+  {"x", ">", visual_mode_edit.indent},
+  {"x", "<", visual_mode_edit.deindent},
+
+  -- Join lines
+  {"x", "J", visual_mode_edit.J},
+  {"x", "gJ", visual_mode_edit.gJ},
+
+  -- Change case
+  {"x", "u", visual_mode_edit.u},
+  {"x", "U", visual_mode_edit.U},
+  {"x", "~", visual_mode_edit.tilde},
+  {"x", "gu", visual_mode_edit.gu},
+  {"x", "gU", visual_mode_edit.gU},
+  {"x", "g~", visual_mode_edit.g_tilde},
+
+  -- Exit
+  {"x", {"<Esc>", "v"}, visual_mode_escape.escape},
+
 }
 
 local function buf_delete()
@@ -192,18 +218,22 @@ local function create_autocmds()
 
     -- Insert characters
     vim.api.nvim_create_autocmd({"InsertCharPre"},
-      { group = autocmd_group_id, callback = insert_mode.insert_char_pre }
+      { group = autocmd_group_id, callback = insert_mode_character.insert_char_pre }
     )
 
     vim.api.nvim_create_autocmd({"TextChangedI"},
-      { group = autocmd_group_id, callback = insert_mode.text_changed_i }
+      { group = autocmd_group_id, callback = insert_mode_character.text_changed_i }
+    )
+
+    vim.api.nvim_create_autocmd({"CompleteDonePre"},
+      { group = autocmd_group_id, callback = insert_mode_completion.complete_done_pre }
     )
 
     -- Mode changed from normal to insert or visual
     vim.api.nvim_create_autocmd({"ModeChanged"}, {
       group = autocmd_group_id,
       pattern = "n:{i,v}",
-      callback = normal_mode_change.mode_changed,
+      callback = normal_mode_mode_change.mode_changed,
     })
 
     -- If there are custom key maps, reset the custom key maps on the LazyLoad
@@ -288,21 +318,14 @@ function M.deinit(clear_virtual_cursors)
 end
 
 -- Normal mode undo will exit because cursor positions can't be restored
-function M.undo()
+function M.normal_undo()
   M.deinit(true)
   common.feedkeys(nil, vim.v.count, "u", nil)
 end
 
 -- Escape key
-function M.escape()
-  if common.is_mode("n") then
-    M.deinit(true)
-  elseif common.is_mode_insert_replace() then
-    insert_mode.escape()
-  elseif common.is_mode("v") then
-    visual_mode.escape()
-  end
-
+function M.normal_escape()
+  M.deinit(true)
   common.feedkeys(nil, 0, "<Esc>", nil)
 end
 

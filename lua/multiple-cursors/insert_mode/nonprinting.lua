@@ -2,23 +2,7 @@ local M = {}
 
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
-
-
--- Character to insert
-local char = nil
-
--- Delete a charater if in replace mode
-local function delete_if_replace_mode(vc)
-  if common.is_mode("R") then
-    -- ToDo save and restore register info
-    if vc.col == common.get_length_of_line(vc.lnum) then
-      vim.cmd("normal! \"_x")
-      vc:set_cursor_position()
-    elseif vc.col < common.get_length_of_line(vc.lnum) then
-      vim.cmd("normal! \"_x")
-    end
-  end
-end
+local insert_mode_completion = require("multiple-cursors.insert_mode.completion")
 
 -- Is lnum, col before the first non-whitespace character
 local function is_before_first_non_whitespace_char(lnum, col)
@@ -28,43 +12,6 @@ local function is_before_first_non_whitespace_char(lnum, col)
   else
     return col <= idx + 1
   end
-end
-
-
--- Escape key ------------------------------------------------------------------
-
-function M.escape()
-  -- Move the cursor back
-  virtual_cursors.visit_with_cursor(function(vc)
-    if vc.col ~= 1 then
-      common.normal_bang(nil, 0, "h", nil)
-      vc:save_cursor_position()
-    end
-  end)
-end
-
-
--- Insert text -----------------------------------------------------------------
-
--- Callback for InsertCharPre event
-function M.insert_char_pre(event)
-  -- Save the inserted character
-  char = vim.v.char
-end
-
--- Callback for the TextChangedI event
-function M.text_changed_i(event)
-
-  -- If there's a saved character
-  if char then
-    -- Put it to virtual cursors
-    virtual_cursors.edit_with_cursor(function(vc)
-      delete_if_replace_mode(vc)
-      vim.api.nvim_put({char}, "c", false, true)
-    end)
-    char = nil
-  end
-
 end
 
 
@@ -192,8 +139,21 @@ end
 
 -- Backspace command
 function M.bs()
-  common.feedkeys(nil, 0, "<BS>", nil)
+
+  local completed = insert_mode_completion.complete_if_selected()
+
   all_virtual_cursors_backspace()
+
+  -- If a completion word was inserted
+  if completed then
+    -- Use escape to end completion, then return to insert mode and backspace
+    -- This is because backspace on the completion word is problematic
+    common.feedkeys(nil, 0, "<Esc>a<BS>", nil)
+  else
+    -- Just pass the backspace
+    common.feedkeys(nil, 0, "<BS>", nil)
+  end
+
 end
 
 
@@ -221,15 +181,16 @@ end
 
 -- Delete command
 function M.del()
-  common.feedkeys(nil, 0, "<Del>", nil)
+  insert_mode_completion.complete_if_selected()
   all_virtual_cursors_delete()
+  common.feedkeys(nil, 0, "<Del>", nil)
 end
 
 
 -- Carriage return -------------------------------------------------------------
 
 -- Carriage return command for a virtual cursor
--- This isn't local because it's used by normal_mode_change
+-- This isn't local because it's used by normal_mode/mode_change.lua
 function M.virtual_cursor_carriage_return(vc)
   if vc.col <= common.get_length_of_line(vc.lnum) then
     vim.api.nvim_put({"", ""}, "c", false, true)
@@ -246,7 +207,7 @@ function M.virtual_cursor_carriage_return(vc)
 end
 
 -- Carriage return command for all virtual cursors
--- This isn't local because it's used by normal_mode_change
+-- This isn't local because it's used by normal_mode/mode_change.lua
 function M.all_virtual_cursors_carriage_return()
   virtual_cursors.edit_with_cursor_no_save(function(vc)
     M.virtual_cursor_carriage_return(vc)
@@ -256,8 +217,9 @@ end
 -- Carriage return command
 -- Also for <kEnter>
 function M.cr()
-  common.feedkeys(nil, 0, "<CR>", nil)
+  insert_mode_completion.complete_if_selected()
   M.all_virtual_cursors_carriage_return()
+  common.feedkeys(nil, 0, "<CR>", nil)
 end
 
 
@@ -304,17 +266,24 @@ local function virtual_cursor_tab(vc)
 end
 
 -- Tab command for all virtual cursors
-local function all_virtual_cursors_tab()
+function M.all_virtual_cursors_tab()
   virtual_cursors.edit_with_cursor(function(vc)
-    delete_if_replace_mode(vc)
+    -- Delete a character if in replace mode
+    if common.is_mode("R") then
+      vim.cmd("normal! \"_x")
+    end
+
+    -- Put a tab
     virtual_cursor_tab(vc)
   end)
 end
 
 -- Tab command
 function M.tab()
+  insert_mode_completion.complete_if_selected()
+  M.all_virtual_cursors_tab()
   common.feedkeys(nil, 0, "<Tab>", nil)
-  all_virtual_cursors_tab()
 end
+
 
 return M

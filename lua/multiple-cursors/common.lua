@@ -63,7 +63,7 @@ end
 -- Check if mode is insert or replace
 function M.is_mode_insert_replace()
   local mode = vim.api.nvim_get_mode().mode
-  return mode == "i" or mode == "R"
+  return mode == "i" or mode == "ic"  or mode == "R" or mode == "Rc"
 end
 
 -- Number of characters in a line

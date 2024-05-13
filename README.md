@@ -19,12 +19,12 @@ For [lazy.nvim](https://github.com/folke/lazy.nvim), add a section to the plugin
   version = "*",  -- Use the latest tagged version
   opts = {},  -- This causes the plugin setup function to be called
   keys = {
-    {"<C-j>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "x"}},
-    {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i", "x"}},
-    {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "x"}},
-    {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i", "x"}},
-    {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}},
-    {"<Leader>a", "<Cmd>MultipleCursorsAddMatches<CR>", mode = {"n", "x"}},
+    {"<C-j>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "x"}, desc = "Add a cursor then move down"},
+    {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i", "x"}, desc = "Add a cursor then move down"},
+    {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "x"}, desc = "Add a cursor then move up"},
+    {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i", "x"}, desc = "Add a cursor then move up"},
+    {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}, desc = "Add or remove a cursor"},
+    {"<Leader>a", "<Cmd>MultipleCursorsAddMatches<CR>", mode = {"n", "x"}, desc = "Add cursors to the word under the cursor"},
   },
 },
 ```
@@ -62,10 +62,10 @@ The plugin creates a number of user commands:
 The additional commands can be mapped by adding them to the `keys` table, e.g.:
 
 ```lua
-{"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}},
-{"<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}},
-{"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>", mode = {"n", "x"}},
-{"<Leader>l", "<Cmd>MultipleCursorsLockToggle<CR>", mode = {"n", "x"}},
+{"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}, desc = "Add cursors to the word under the cursor, limited to the previous visual area"},
+{"<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Add a cursor then jump to the next match of the word under the cursor"},
+{"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Jump to the next match of the word under the cursor"},
+{"<Leader>l", "<Cmd>MultipleCursorsLockToggle<CR>", mode = {"n", "x"}, desc = "Toggle locking virtual cursors"},
 ```
 
 ## Supported commands
@@ -91,11 +91,13 @@ The following commands are supported while using multiple cursors:
 | Normal | Join | `J` `gJ` | |
 | Normal | Repeat | `.` | |
 | Normal | Change to insert/replace mode | `a` `A` `i` `I` `o` `O` `R` | Count is ignored |
-| Insert/replace | Character insertion | | |
-| Insert/replace | Other edits | `<BS>` `<Del>` `<CR>` `<Tab>` | These commands are implemented manually, and may not behave correctly <br/> In replace mode `<BS>` will only move any virtual cursors back, and not undo edits |
-| Insert/replace | Paste | | [Split pasting](#enable_split_paste) is enabled by default |
-| Insert | Change to replace mode | `<Insert>` | |
 | Normal | Change to visual mode | `v` | |
+| Insert/replace | Character insertion | | |
+| Insert/replace | Non-printing characters | `<BS>` `<Del>` `<CR>` `<Tab>` | These commands are implemented manually, and may not behave correctly <br/> In replace mode `<BS>` will only move any virtual cursors back, and not undo edits |
+| Insert/replace | Delete word before | `<C-w>` | |
+| Insert/replace | Indentation | `<C-t>` `<C-d>` | |
+| Insert/replace | [Completion](https://neovim.io/doc/user/usr_24.html#24.3) | `<C-n>` `<C-p>` <br/> [`<C-x> ...`](https://neovim.io/doc/user/usr_24.html#_completing-specific-items) | Using backspace while completing a word will accept the word |
+| Insert | Change to replace mode | `<Insert>` | |
 | Visual | Swap cursor to other end of visual area | `o` | |
 | Visual | Modify visual area | `aw` `iw` `aW` `iW` `ab` `ib` `aB` `iB` `a>` `i>` `at` `it` `a'` `i'` `a"` `i"` `` a` `` `` i` `` | |
 | Visual | Join lines | `J` `gJ` | |
@@ -103,9 +105,10 @@ The following commands are supported while using multiple cursors:
 | Visual | Change case | `~` `u` `U` `g~` `gu` `gU` | |
 | Visual | Yank/delete | `y` `d` `<Del>` | |
 | Visual | Change | `c` | This command is implemented as a delete then switch to insert mode |
+| All | Paste | | [Split pasting](#enable_split_paste) is enabled by default |
 | Insert/replace/visual | Exit to normal mode | `<Esc>` | |
-| Normal | Undo | `u` | Also exits multiple cursors, because cursor positions can't be restored by undo |
 | Normal | Exit multiple cursors | `<Esc>` | Clears all virtual cursors. <br/> Registers for the virtual cursors will be lost. |
+| Normal | Undo | `u` | Also exits multiple cursors, because cursor positions can't be restored by undo |
 
 ### Registers
 
@@ -116,7 +119,6 @@ This means that if you use delete/yank before creating multiple cursors, add cur
 
 ### Notable unsupported functionality
 
-- Completion
 - Scrolling
 - Jumping to marks (`` ` `` or `'` commands)
 
@@ -139,12 +141,12 @@ Options can be configured by providing an options table to the setup function, e
     end,
   },
   keys = {
-    {"<C-j>", "<Cmd>MultipleCursorsAddDown<CR>"},
-    {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i"}},
-    {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>"},
-    {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i"}},
-    {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}},
-    {"<Leader>a", "<Cmd>MultipleCursorsAddMatches<CR>", mode = {"n", "x"}},
+    {"<C-j>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "x"}, desc = "Add a cursor then move down"},
+    {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i", "x"}, desc = "Add a cursor then move down"},
+    {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "x"}, desc = "Add a cursor then move up"},
+    {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i", "x"}, desc = "Add a cursor then move up"},
+    {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}, desc = "Add or remove a cursor"},
+    {"<Leader>a", "<Cmd>MultipleCursorsAddMatches<CR>", mode = {"n", "x"}, desc = "Add cursors to the word under the cursor"},
   },
 },
 ```

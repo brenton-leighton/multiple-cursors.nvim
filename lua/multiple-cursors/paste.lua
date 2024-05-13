@@ -2,7 +2,6 @@ local M = {}
 
 local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
-local visual_mode = require("multiple-cursors.visual_mode")
 
 local enable_split_paste = nil
 local original_paste_function = nil
