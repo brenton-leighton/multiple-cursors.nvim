@@ -96,7 +96,7 @@ The following commands are supported while using multiple cursors:
 | Insert/replace | Non-printing characters | `<BS>` `<Del>` `<CR>` `<Tab>` | These commands are implemented manually, and may not behave correctly <br/> In replace mode `<BS>` will only move any virtual cursors back, and not undo edits |
 | Insert/replace | Delete word before | `<C-w>` | |
 | Insert/replace | Indentation | `<C-t>` `<C-d>` | |
-| Insert/replace | Completion | `<C-n>` `<C-p>` | |
+| Insert/replace | [Completion](https://neovim.io/doc/user/usr_24.html#24.3) | `<C-n>` `<C-p>` <br/> [`<C-x> ...`](https://neovim.io/doc/user/usr_24.html#_completing-specific-items) | Using backspace while completing a word will accept the word |
 | Insert | Change to replace mode | `<Insert>` | |
 | Visual | Swap cursor to other end of visual area | `o` | |
 | Visual | Modify visual area | `aw` `iw` `aW` `iW` `ab` `ib` `aB` `iB` `a>` `i>` `at` `it` `a'` `i'` `a"` `i"` `` a` `` `` i` `` | |

@@ -34,6 +34,7 @@ end
 
 -- Insert the completion word if selected
 -- Used directly by insert mode mappings or by complete_done_pre
+-- Returns true if a completion item was inserted, and false if not
 function M.complete_if_selected()
 
   local complete_info = vim.fn.complete_info()
@@ -70,7 +71,11 @@ function M.complete_if_selected()
 
     completed = true
 
+    return true
+
   end
+
+  return false
 
 end
 

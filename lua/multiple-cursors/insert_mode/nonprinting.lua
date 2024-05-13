@@ -139,9 +139,21 @@ end
 
 -- Backspace command
 function M.bs()
-  insert_mode_completion.complete_if_selected()
+
+  local completed = insert_mode_completion.complete_if_selected()
+
   all_virtual_cursors_backspace()
-  common.feedkeys(nil, 0, "<BS>", nil)
+
+  -- If a completion word was inserted
+  if completed then
+    -- Use escape to end completion, then return to insert mode and backspace
+    -- This is because backspace on the completion word is problematic
+    common.feedkeys(nil, 0, "<Esc>a<BS>", nil)
+  else
+    -- Just pass the backspace
+    common.feedkeys(nil, 0, "<BS>", nil)
+  end
+
 end
 
 
