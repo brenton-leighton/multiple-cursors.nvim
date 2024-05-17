@@ -272,7 +272,7 @@ If it's necessary to load a plugin before using multiple cursors, you can do so 
 
 ```lua
 pre_hook = function()
-  vim.cmd(":Lazy load PLUGIN_NAME")
+  vim.cmd("Lazy load PLUGIN_NAME")
 end,
 ```
 
@@ -312,7 +312,7 @@ The plugin needs to be loaded for the `MiniMove` global variable to be available
 
 ```lua
 pre_hook = function()
-  vim.cmd(":Lazy load mini.move")
+  vim.cmd("Lazy load mini.move")
 end,
 ```
 
