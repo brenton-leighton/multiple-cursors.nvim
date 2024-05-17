@@ -132,11 +132,11 @@ Options can be configured by providing an options table to the setup function, e
   version = "*",
   opts = {
     pre_hook = function()
-      vim.opt.cursorline = false
+      vim.cmd("set nocul")
       vim.cmd("NoMatchParen")
     end,
     post_hook = function()
-      vim.opt.cursorline = true
+      vim.cmd("set cul")
       vim.cmd("DoMatchParen")
     end,
   },
