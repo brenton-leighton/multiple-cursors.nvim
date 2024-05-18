@@ -122,6 +122,21 @@ This means that if you use delete/yank before creating multiple cursors, add cur
 - Scrolling
 - Jumping to marks (`` ` `` or `'` commands)
 
+### Commenting in Neovim 0.10+
+
+Neovim 0.10+ includes a plugin for commenting (inherited from Vim) which is mapped to `gc` and `gcc`.
+Because these commands need to be called with `remap = true` it doesn't seem to be possible to map them for use with multiple cursors.
+You can however use them from a different key combination using [custom_key_maps](#custom_key_maps), e.g.
+
+```lua
+opts = {
+  custom_key_maps = {
+    {{"n", "i"}, "<C-/>", function() vim.cmd("normal gcc") end},
+    {"v", "<C-/>", function() vim.cmd("normal gc") end},
+  },
+},
+```
+
 ## Options
 
 Options can be configured by providing an options table to the setup function, e.g. to define the `pre_hook` and `post_hook` functions:
@@ -132,11 +147,11 @@ Options can be configured by providing an options table to the setup function, e
   version = "*",
   opts = {
     pre_hook = function()
-      vim.opt.cursorline = false
+      vim.cmd("set nocul")
       vim.cmd("NoMatchParen")
     end,
     post_hook = function()
-      vim.opt.cursorline = true
+      vim.cmd("set cul")
       vim.cmd("DoMatchParen")
     end,
   },
@@ -203,38 +218,6 @@ Each element in the `custom_key_maps` table must have three or four elements:
 	- If valid input isn't given by the user the function will not be called
 	- There will be no indication that Neovim is waiting for a motion command or character
 
-E.g. to map `j` and `k` to `gj` and `gk` when `count` is 0 (as well as Up and Down in insert mode):
-
-```lua
-opts = {
-  custom_key_maps = {
-    -- Normal/visual j: use gj when count is 0
-    {{"n", "x"}, {"j", "<Down>"}, function(_, count)
-      if count == 0 then
-        vim.cmd("normal! gj")
-      else
-        vim.cmd("normal! " .. count .. "j")
-      end
-    end},
-
-    -- Normal/visual k: use gj when count is 0
-    {{"n", "x"}, {"k", "<Up>"}, function(_, count)
-      if count == 0 then
-        vim.cmd("normal! gk")
-      else
-        vim.cmd("normal! " .. count .. "k")
-      end
-    end},
-
-    -- Insert mode <Down>: Use gj
-    {"i", "<Down>", function() vim.cmd("normal! gj") end},
-
-    -- Insert mode <Up>: Use gk
-    {"i", "<Up>", function() vim.cmd("normal! gk") end},
-  },
-},
-```
-
 The following example shows how to use various options for user input:
 
 ```lua
@@ -272,7 +255,7 @@ If it's necessary to load a plugin before using multiple cursors, you can do so 
 
 ```lua
 pre_hook = function()
-  vim.cmd(":Lazy load PLUGIN_NAME")
+  vim.cmd("Lazy load PLUGIN_NAME")
 end,
 ```
 
@@ -312,7 +295,7 @@ The plugin needs to be loaded for the `MiniMove` global variable to be available
 
 ```lua
 pre_hook = function()
-  vim.cmd(":Lazy load mini.move")
+  vim.cmd("Lazy load mini.move")
 end,
 ```
 
