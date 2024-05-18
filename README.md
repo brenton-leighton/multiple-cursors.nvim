@@ -44,9 +44,9 @@ Any user defined key mappings will need to be added to the [custom_key_maps](#cu
 
 See the [Plugin compatibility](#plugin-compatibility) section for examples of how to work with specific plugins.
 
-## User commands
+## Creating cursors
 
-The plugin creates a number of user commands:
+The plugin creates a number of user commands for creating cursors:
 
 | Command | Description |
 | --- | --- |
@@ -57,15 +57,41 @@ The plugin creates a number of user commands:
 | `MultipleCursorsAddMatchesV` | As above, but limit matches to the previous visual area |
 | `MultipleCursorsAddJumpNextMatch` | Add a virtual cursor to the word under the cursor (in normal mode) or the visual area (in visual mode), then move the real cursor to the next match |
 | `MultipleCursorsJumpNextMatch` | Move the real cursor to the next match of the word under the cursor (in normal mode) or the visual area (in visual mode) |
-| `MultipleCursorsLock` | Toggle locking the virtual cursors |
 
 The additional commands can be mapped by adding them to the `keys` table, e.g.:
 
 ```lua
-{"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}, desc = "Add cursors to the word under the cursor, limited to the previous visual area"},
-{"<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Add a cursor then jump to the next match of the word under the cursor"},
-{"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Jump to the next match of the word under the cursor"},
-{"<Leader>l", "<Cmd>MultipleCursorsLockToggle<CR>", mode = {"n", "x"}, desc = "Toggle locking virtual cursors"},
+keys = {
+  {"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}, desc = "Add cursors to the word under the cursor, limited to the previous visual area"},
+  {"<Leader>j", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Add a cursor then jump to the next match of the word under the cursor"},
+  {"<Leader>J", "<Cmd>MultipleCursorsJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Jump to the next match of the word under the cursor"},
+},
+```
+
+## Other functions
+
+### Locking cursors
+
+The `MultipleCursorsLock` user command will toggle locking the virtual cursors.
+It can be used by adding it to the `keys` table, e.g.:
+
+```lua
+keys = {
+  {"<Leader>l", "<Cmd>MultipleCursorsLockToggle<CR>", mode = {"n", "x"}, desc = "Toggle locking virtual cursors"},
+},
+```
+
+### Align
+
+The `align` function will insert spaces before each cursor in order to align the cursors vertically with the rightmost cursor.
+It can be used by adding it to the `custom_key_maps` table, e.g.:
+
+```lua
+opts = {
+  custom_key_maps = {
+    {"n", "<Leader>|", function() require("multiple-cursors").align() end},
+  },
+},
 ```
 
 ## Supported commands
