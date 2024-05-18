@@ -94,6 +94,8 @@ opts = {
 },
 ```
 
+https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/2edb3e83-ee37-4ff2-9781-6a98723ac19e
+
 ## Supported commands
 
 The following commands are supported while using multiple cursors:
