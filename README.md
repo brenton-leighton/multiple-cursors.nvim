@@ -5,7 +5,7 @@ Multiple cursors is a way of making multiple similar edits that can be easier, f
 
 Cursors can be added with an up or down movement, a mouse click, or by searching for a pattern.
 
-![Basic usage](https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/4ea42343-6784-458c-aedb-f16b958551e3)
+https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/75670a09-1735-4c53-89e9-eb67abdf1bf0
 
 This plugin also has the ability to do "split pasting": When pasting text, if the number of lines of text matches the number of cursors, each line will be inserted at each cursor.
 
@@ -44,9 +44,9 @@ Any user defined key mappings will need to be added to the [custom_key_maps](#cu
 
 See the [Plugin compatibility](#plugin-compatibility) section for examples of how to work with specific plugins.
 
-## User commands
+## Creating cursors
 
-The plugin creates a number of user commands:
+The plugin creates a number of user commands for creating cursors:
 
 | Command | Description |
 | --- | --- |
@@ -57,16 +57,44 @@ The plugin creates a number of user commands:
 | `MultipleCursorsAddMatchesV` | As above, but limit matches to the previous visual area |
 | `MultipleCursorsAddJumpNextMatch` | Add a virtual cursor to the word under the cursor (in normal mode) or the visual area (in visual mode), then move the real cursor to the next match |
 | `MultipleCursorsJumpNextMatch` | Move the real cursor to the next match of the word under the cursor (in normal mode) or the visual area (in visual mode) |
-| `MultipleCursorsLock` | Toggle locking the virtual cursors |
 
 The additional commands can be mapped by adding them to the `keys` table, e.g.:
 
 ```lua
-{"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}, desc = "Add cursors to the word under the cursor, limited to the previous visual area"},
-{"<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Add a cursor then jump to the next match of the word under the cursor"},
-{"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Jump to the next match of the word under the cursor"},
-{"<Leader>l", "<Cmd>MultipleCursorsLockToggle<CR>", mode = {"n", "x"}, desc = "Toggle locking virtual cursors"},
+keys = {
+  {"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}, desc = "Add cursors to the word under the cursor, limited to the previous visual area"},
+  {"<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Add a cursor then jump to the next match of the word under the cursor"},
+  {"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Jump to the next match of the word under the cursor"},
+},
 ```
+
+## Other functions
+
+### Locking cursors
+
+The `MultipleCursorsLock` user command will toggle locking the virtual cursors.
+It can be used by adding it to the `keys` table, e.g.:
+
+```lua
+keys = {
+  {"<Leader>l", "<Cmd>MultipleCursorsLockToggle<CR>", mode = {"n", "x"}, desc = "Toggle locking virtual cursors"},
+},
+```
+
+### Align
+
+The `align` function will insert spaces before each cursor in order to align the cursors vertically with the rightmost cursor.
+It can be used by adding it to the `custom_key_maps` table, e.g.:
+
+```lua
+opts = {
+  custom_key_maps = {
+    {"n", "<Leader>|", function() require("multiple-cursors").align() end},
+  },
+},
+```
+
+https://github.com/brenton-leighton/multiple-cursors.nvim/assets/12228142/346eedcd-83c4-47f8-a595-8f96a3665a9a
 
 ## Supported commands
 

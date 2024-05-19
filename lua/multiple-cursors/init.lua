@@ -596,6 +596,37 @@ function M.add_cursor(lnum, col, curswant)
 
 end
 
+-- Insert spaces before each cursor to align them all to the rightmost cursor
+function M.align()
+
+  -- This function should only be used when there are multiple cursors
+  if not initialised then
+    return
+  end
+
+  -- Find the column of the rightmost cursor
+  local col = vim.fn.col(".")
+
+  virtual_cursors.visit_all(function(vc)
+    col = vim.fn.max({col, vc.col})
+  end)
+
+  -- For each virtual cursor, insert spaces to move the cursor to col
+  virtual_cursors.edit_with_cursor(function(vc)
+    local num = col - vc.col
+    for i = 1, num do
+      vim.api.nvim_put({" "}, "c", false, true)
+    end
+  end)
+
+  -- Insert spaces for the real cursor
+  local num = col - vim.fn.col(".")
+  for i = 1, num do
+    vim.api.nvim_put({" "}, "c", false, true)
+  end
+
+end
+
 -- Toggle locking the virtual cursors if initialised
 function M.lock()
   if initialised then
