@@ -147,11 +147,18 @@ function M.get_motion_cmd()
 
   -- If the character is a digit
   while digits[motion_char] do
-      -- Concatenate
-      count = count .. motion_char
 
-      -- Get another character
-      motion_char = vim.fn.getcharstr()
+    -- If 0 is the first count character then it's not a digit, it's the home motion
+    if count == "" and motion_char == "0" then
+      break
+    end
+
+    -- Concatenate
+    count = count .. motion_char
+
+    -- Get another character
+    motion_char = vim.fn.getcharstr()
+
   end
 
   -- If the character is a character search motion
