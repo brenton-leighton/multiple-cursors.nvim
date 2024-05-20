@@ -292,14 +292,14 @@ Use the `pre_hook` function to disable the plugin, then the `post_hook` function
 
 ### Examples
 
-- [mini.move](#mini.move)
-- [mini.pairs](#mini.pairs)
-- [mini.surround and nvim-surround](#mini.surround-and-nvim-surround)
+- [mini.move](#minimove)
+- [mini.pairs](#minipairs)
+- [mini.surround and nvim-surround](#minisurround-and-nvim-surround)
 - [nvim-autopairs](#nvim-autopairs)
 - [nvim-cmp](#nvim-cmp)
 - [nvim-spider](#nvim-spider)
-- [stay-in-place.nvim](#stay-in-place.nvim)
-- [which-key.nvim](#which-key.nvim)
+- [stay-in-place.nvim](#stay-in-placenvim)
+- [which-key.nvim](#which-keynvim)
 
 #### [mini.move](https://github.com/echasnovski/mini.move)
 
