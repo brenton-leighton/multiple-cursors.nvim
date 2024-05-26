@@ -19,22 +19,28 @@ For [lazy.nvim](https://github.com/folke/lazy.nvim), add a section to the plugin
   version = "*",  -- Use the latest tagged version
   opts = {},  -- This causes the plugin setup function to be called
   keys = {
-    {"<C-j>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "x"}, desc = "Add a cursor then move down"},
-    {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i", "x"}, desc = "Add a cursor then move down"},
-    {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "x"}, desc = "Add a cursor then move up"},
-    {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i", "x"}, desc = "Add a cursor then move up"},
-    {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}, desc = "Add or remove a cursor"},
-    {"<Leader>a", "<Cmd>MultipleCursorsAddMatches<CR>", mode = {"n", "x"}, desc = "Add cursors to the word under the cursor"},
+    {"<C-j>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "x"}, desc = "Add cursor and move down"},
+    {"<C-k>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "x"}, desc = "Add cursor and move up"},
+
+    {"<C-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = {"n", "i", "x"}, desc = "Add cursor and move up"},
+    {"<C-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = {"n", "i", "x"}, desc = "Add cursor and move down"},
+
+    {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}, desc = "Add or remove cursor"},
+
+    {"<Leader>a", "<Cmd>MultipleCursorsAddMatches<CR>", mode = {"n", "x"}, desc = "Add cursors to cword"},
+    {"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}, desc = "Add cursors to cword in previous area"},
+
+    {"<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Add cursor and jump to next cword"},
+    {"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Jump to next cword"},
+
+    {"<Leader>l", "<Cmd>MultipleCursorsLock<CR>", mode = {"n", "x"}, desc = "Lock virtual cursors"},
   },
 },
 ```
 
-This creates a number of key mappings:
-
-- `Ctrl+j` and `Ctrl+Down`: Add a new cursor then move the real cursor down
-- `Ctrl+k` and `Ctrl+Up`: Add a new cursor then move the real cursor up
-- `Ctrl+LeftClick`: Add a new cursor (or remove an existing cursor) at the clicked position
-- `Leader+a`: Add new cursors to matches to the pattern under the cursor
+`Ctrl + j` or `Ctrl + Down` will add a new virtual cursor and move the real cursor down, and `Ctrl + k` or `Ctrl + Up` will do the same in the upwards direction.
+`Ctrl + Left Click` will add a new virtual cursor, or remove an existing virtual cursor.
+See [Creating cursors](#Creating-cursors) for more detailed descriptions of the other commands for creating cursors.
 
 After cursors have been added, Neovim can be used mostly as normal.
 See [Supported commands](#Supported-commands) for more information.
@@ -57,16 +63,6 @@ The plugin creates a number of user commands for creating cursors:
 | `MultipleCursorsAddMatchesV` | As above, but limit matches to the previous visual area |
 | `MultipleCursorsAddJumpNextMatch` | Add a virtual cursor to the word under the cursor (in normal mode) or the visual area (in visual mode), then move the real cursor to the next match |
 | `MultipleCursorsJumpNextMatch` | Move the real cursor to the next match of the word under the cursor (in normal mode) or the visual area (in visual mode) |
-
-The additional commands can be mapped by adding them to the `keys` table, e.g.:
-
-```lua
-keys = {
-  {"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}, desc = "Add cursors to the word under the cursor, limited to the previous visual area"},
-  {"<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Add a cursor then jump to the next match of the word under the cursor"},
-  {"<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>", mode = {"n", "x"}, desc = "Jump to the next match of the word under the cursor"},
-},
-```
 
 ## Other functions
 
@@ -240,11 +236,11 @@ Each element in the `custom_key_maps` table must have three or four elements:
 - Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
 - Function: A Lua function that will be called at each cursor, which receives [`register`](https://neovim.io/doc/user/vvars.html#v%3Aregister) (note: working with virtual cursor registers is not currently implemented), [`count`](https://neovim.io/doc/user/vvars.html#v%3Acount), and optionally more, as arguments. Setting this to `nil` will disable a [default key mapping](#supported-commands).
 - Option: A optional string containing "m", "c", or "mc". These enable getting input from the user, which is then forwarded to the function:
-	- "m" indicates that a motion command is requested (i.e. operator pending mode). The motion command can can include a count in addition to the `count` variable.
-	- "c" indicates that a printable character is requested (e.g. for character search)
-	- "mc" indicates that a motion command and a printable character is requested (e.g. for a surround action)
-	- If valid input isn't given by the user the function will not be called
-	- There will be no indication that Neovim is waiting for a motion command or character
+  - "m" indicates that a motion command is requested (i.e. operator pending mode). The motion command can can include a count in addition to the `count` variable.
+  - "c" indicates that a printable character is requested (e.g. for character search)
+  - "mc" indicates that a motion command and a printable character is requested (e.g. for a surround action)
+  - If valid input isn't given by the user the function will not be called
+  - There will be no indication that Neovim is waiting for a motion command or character
 
 The following example shows how to use various options for user input:
 
