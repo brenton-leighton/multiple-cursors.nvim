@@ -441,6 +441,34 @@ function M.can_split_paste(num_lines)
   return count + 1 == num_lines
 end
 
+-- Return the index of the virtual cursor that is positioned after the real cursor
+-- Return 0 if the real cursor is after all virtual cursors
+local function get_real_cursor_index()
+
+  -- Ensure virtual_cursors is sorted
+  M.sort()
+
+  -- Position of the real cursor
+  local real_cursor_pos = vim.fn.getcurpos() -- [0, lnum, col, off, curswant]
+  local lnum = real_cursor_pos[2]
+  local col = real_cursor_pos[3]
+
+  -- Find the first virtual cursor after the real cursor
+  for idx, vc in ipairs(virtual_cursors) do
+
+    if vc.lnum > lnum then
+      return idx
+    elseif vc.lnum == lnum and vc.col > col then
+      return idx
+    end
+
+  end
+
+  -- Real cursor is after all virtual cursors
+  return 0
+
+end
+
 -- Move the line for the real cursor to the end of lines
 -- Modifies the lines variable
 function M.reorder_lines_for_split_pasting(lines)
@@ -448,32 +476,75 @@ function M.reorder_lines_for_split_pasting(lines)
   -- Ensure virtual_cursors is sorted
   M.sort()
 
-  -- Move real cursor line to the end
-  local real_cursor_pos = vim.fn.getcurpos() -- [0, lnum, col, off, curswant]
+  -- Index of the real cursor if it were in virtual cursors
+  local real_cursor_idx = get_real_cursor_index()
 
-  local cursor_line_idx = 0
-
-  for idx, vc in ipairs(virtual_cursors) do
-
-    if vc.lnum == real_cursor_pos[2] then
-      if vc.col > real_cursor_pos[3] then
-        cursor_line_idx = idx
-        break
-      end
-    else
-      if vc.lnum > real_cursor_pos[2] then
-        cursor_line_idx = idx
-        break
-      end
-    end
-
-  end
-
-  if cursor_line_idx ~= 0 then
+  if real_cursor_idx ~= 0 then
     -- Move the line for the real cursor to the end
-    local real_cursor_line = table.remove(lines, cursor_line_idx)
+    local real_cursor_line = table.remove(lines, real_cursor_idx)
     table.insert(lines, real_cursor_line)
   end
+
+end
+
+-- Insert each line of from into to
+local function concatenate_regcontents(from, to)
+  for _, line in ipairs(from) do
+    table.insert(to, line)
+  end
+end
+
+-- Return the names of any registers stored by the virtual cursors
+function M.get_registers()
+
+  local tmp = {}
+
+  for _, vc in ipairs(virtual_cursors) do
+    for key, value in pairs(vc.registers) do
+      tmp[key] = true
+    end
+  end
+
+  local registers = {}
+
+  for key, _ in pairs(tmp) do
+    table.insert(registers, key)
+  end
+
+  return registers
+
+end
+
+-- Merge registers of all cursors
+function M.merge_register_info(register)
+
+  -- Index of the real cursor if it were in virtual cursors
+  local real_cursor_idx = get_real_cursor_index()
+
+  -- Real cursor register info
+  local register_info = vim.fn.getreginfo(register)
+
+  -- To store concatenated lines
+  local regcontents = {}
+
+  for idx, vc in ipairs(virtual_cursors) do
+    if real_cursor_idx == idx then
+      -- Insert the real cursor lines first
+      concatenate_regcontents(register_info.regcontents, regcontents)
+    end
+
+    -- Insert virtual cursor register lines
+    concatenate_regcontents(vc.registers[register].regcontents, regcontents)
+  end
+
+  -- Real cursor is after all virtual cursors
+  if real_cursor_idx == 0 then
+    concatenate_regcontents(register_info.regcontents, regcontents)
+  end
+
+  -- Update register info
+  register_info.regcontents = regcontents
+  vim.fn.setreg(register, register_info)
 
 end
 
