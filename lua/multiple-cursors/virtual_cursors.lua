@@ -473,8 +473,16 @@ end
 
 local function set_real_cursor_lnum(lnum)
   local pos = vim.fn.getcurpos()
+
   pos[2] = lnum
-  pos[3] = common.get_col(lnum, pos[5])
+
+  if not vim.o.startofline then
+    pos[3] = common.get_col(lnum, pos[5])
+  else
+    pos[3] = vim.fn.match(vim.fn.getline(lnum), "\\S") + 1
+    pos[5] = pos[3]
+  end
+
   vim.fn.cursor({pos[2], pos[3], 0, pos[5]})
 end
 
@@ -501,8 +509,6 @@ function M.go_to(lnum)
 
   ignore_cursor_movement = true
 
-  -- ToDo vim.o.startofline
-
   for idx, vc in ipairs(virtual_cursors) do
 
     if real_cursor_idx == idx then
@@ -513,9 +519,18 @@ function M.go_to(lnum)
 
     -- Set virtual cursor lnum
     extmarks.update_virtual_cursor_position(vc)
+
     vc.lnum = lnum
-    vc.col = common.get_col(lnum, vc.curswant)
+
+    if not vim.o.startofline then
+      vc.col = common.get_col(lnum, vc.curswant)
+    else
+      vc.col = vim.fn.match(vim.fn.getline(lnum), "\\S") + 1
+      vc.curswant = vc.col
+    end
+
     extmarks.update_virtual_cursor_extmarks(vc)
+
     lnum = lnum + 1
   end
 
