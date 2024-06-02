@@ -79,6 +79,11 @@ function M.get_num_virtual_cursors()
   return #virtual_cursors
 end
 
+-- Is the locked variable true
+function M.is_locked()
+  return locked
+end
+
 -- Sort virtual cursors by position
 function M.sort()
   table.sort(virtual_cursors)
@@ -487,9 +492,13 @@ local function set_real_cursor_lnum(lnum)
 end
 
 -- Move the highest cursor to lnum and subsequent cursors to subsequent lines
+-- This function does nothing if locked is true so real cursor still needs to be
+-- moved
 function M.go_to(lnum)
 
-  -- ToDo locked?
+  if locked then
+    return
+  end
 
   local num_lines = vim.fn.line("$")
   local num_cursors = #virtual_cursors + 1

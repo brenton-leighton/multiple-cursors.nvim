@@ -59,15 +59,25 @@ end
 
 -- Go to
 function M.gg()
-  virtual_cursors.go_to(vim.v.count1)
+  if not virtual_cursors.is_locked() then
+    virtual_cursors.go_to(vim.v.count1)
+  else
+    -- Just move the real cursor
+    common.feedkeys(nil, vim.v.count, "gg", nil)
+  end
 end
 
 function M.G()
-  if vim.v.count == 0 then
-    -- Move cursors to end of buffer
-    virtual_cursors.go_to(vim.fn.line("$"))
+  if not virtual_cursors.is_locked() then
+    if vim.v.count == 0 then
+      -- Move cursors to end of buffer
+      virtual_cursors.go_to(vim.fn.line("$"))
+    else
+      virtual_cursors.go_to(vim.v.count1)
+    end
   else
-    virtual_cursors.go_to(vim.v.count1)
+    -- Just move the real cursor
+    common.feedkeys(nil, vim.v.count, "G", nil)
   end
 end
 
