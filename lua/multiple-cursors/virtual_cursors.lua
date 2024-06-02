@@ -469,6 +469,66 @@ function M.visual_mode_delete_yank(register, cmd)
 end
 
 
+-- Go to commands ("G" and "gg") -----------------------------------------------
+
+local function set_real_cursor_lnum(lnum)
+  local pos = vim.fn.getcurpos()
+  pos[2] = lnum
+  pos[3] = common.get_col(lnum, pos[5])
+  vim.fn.cursor({pos[2], pos[3], 0, pos[5]})
+end
+
+-- Move the highest cursor to lnum and subsequent cursors to subsequent lines
+function M.go_to(lnum)
+
+  -- ToDo locked?
+
+  local num_lines = vim.fn.line("$")
+  local num_cursors = #virtual_cursors + 1
+
+  -- Do nothing if the number of cursors is greater than the number of lines
+  if num_cursors > num_lines then
+    return
+  end
+
+  -- Modify lnum if cursors will go past the buffer
+  if (lnum + num_cursors - 1) > num_lines then
+    lnum = num_lines - num_cursors + 1
+  end
+
+  -- Index of the real cursor if it were in virtual cursors
+  local real_cursor_idx = get_real_cursor_index()
+
+  ignore_cursor_movement = true
+
+  -- ToDo vim.o.startofline
+
+  for idx, vc in ipairs(virtual_cursors) do
+
+    if real_cursor_idx == idx then
+      -- Set the real cursor first
+      set_real_cursor_lnum(lnum)
+      lnum = lnum + 1
+    end
+
+    -- Set virtual cursor lnum
+    extmarks.update_virtual_cursor_position(vc)
+    vc.lnum = lnum
+    vc.col = common.get_col(lnum, vc.curswant)
+    extmarks.update_virtual_cursor_extmarks(vc)
+    lnum = lnum + 1
+  end
+
+  -- Real cursor is after the virtual cursors
+  if real_cursor_idx == 0 then
+    set_real_cursor_lnum(lnum)
+  end
+
+  ignore_cursor_movement = false
+
+end
+
+
 -- Split pasting ---------------------------------------------------------------
 
 -- Does the number of lines match the number of editable cursors + 1 (for the

@@ -57,4 +57,18 @@ function M.percent()
   common.feedkeys(nil, 0, "%", nil)
 end
 
+-- Go to
+function M.gg()
+  virtual_cursors.go_to(vim.v.count1)
+end
+
+function M.G()
+  if vim.v.count == 0 then
+    -- Move cursors to end of buffer
+    virtual_cursors.go_to(vim.fn.line("$"))
+  else
+    virtual_cursors.go_to(vim.v.count1)
+  end
+end
+
 return M
