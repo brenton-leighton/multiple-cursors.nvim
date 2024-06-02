@@ -131,7 +131,7 @@ The following commands are supported while using multiple cursors:
 | Visual | Change | `c` | This command is implemented as a delete then switch to insert mode |
 | All | Paste | | [Split pasting](#enable_split_paste) is enabled by default |
 | Insert/replace/visual | Exit to normal mode | `<Esc>` | |
-| Normal | Exit multiple cursors | `<Esc>` | Clears all virtual cursors. <br/> Registers for the virtual cursors will be lost. |
+| Normal | Exit multiple cursors | `<Esc>` | Clears all virtual cursors. <br/> Virtual cursor registers are merged into the real registers. |
 | Normal | Undo | `u` | Also exits multiple cursors, because cursor positions can't be restored by undo |
 
 ### Registers
@@ -140,6 +140,8 @@ The delete, yank, and put commands support named registers in addition to the un
 
 If the put command is used and a virtual cursor doesn't have a register available, the register for the real cursor will be used.
 This means that if you use delete/yank before creating multiple cursors, add cursors, and then use the put command, the same text will be put to each cursor.
+
+When exiting multiple cursors, any virtual cursor register will be merged into the matching real register.
 
 ### Notable unsupported functionality
 
