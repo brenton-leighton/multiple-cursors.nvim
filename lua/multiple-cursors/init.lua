@@ -35,6 +35,9 @@ local post_hook = nil
 
 local bufnr = nil
 
+local remove_in_opposite_direction = nil
+local direction = 0 -- 0: unknown, 1: down, 2: up
+
 local match_visiable_only = nil
 
 default_key_maps = {
@@ -317,6 +320,7 @@ function M.deinit(clear_virtual_cursors)
       restore_cursor_position()
       virtual_cursors.clear()
       bufnr = nil
+      direction = 0
       vim.api.nvim_del_autocmd(buf_enter_autocmd_id)
       buf_enter_autocmd_id = nil
     end
@@ -409,12 +413,67 @@ end
 
 -- Add a virtual cursor at the real cursor position, then move the real cursor up
 function M.add_cursor_up()
-  return add_virtual_cursor_at_real_cursor(false)
+  -- If a cursor has already been added in the down direction
+  if remove_in_opposite_direction and direction == 1 then
+    -- Move up and remove cursor
+    if common.is_mode("n") then
+      for i = 1, vim.v.count1 do
+        vim.cmd("normal! k")
+        local lnum = vim.fn.line(".")
+        virtual_cursors.remove_by_lnum(lnum)
+      end
+    elseif common.is_mode("v") then
+      for i = 1, vim.v.count1 do
+        local v_lnum, v_col, lnum, col, curswant = common.get_visual_area()
+        common.set_visual_area(v_lnum - 1, v_col, lnum - 1, col)
+        virtual_cursors.remove_by_lnum(v_lnum - 1)
+      end
+    end
+
+    if virtual_cursors.get_num_virtual_cursors() == 0 then
+      M.deinit(true) -- Deinitialise if there are no more cursors
+    end
+  else
+    if remove_in_opposite_direction and direction == 0 then
+      direction = 2
+    end
+
+    -- Add a cursor and move up
+    add_virtual_cursor_at_real_cursor(false)
+  end
 end
 
 -- Add a virtual cursor at the real cursor position, then move the real cursor down
 function M.add_cursor_down()
-  return add_virtual_cursor_at_real_cursor(true)
+
+  -- If a cursor has already been added in the up direction
+  if remove_in_opposite_direction and direction == 2 then
+    -- Move down and remove any virtual cursor
+    if common.is_mode("n") then
+      for i = 1, vim.v.count1 do
+        vim.cmd("normal! j")
+        local lnum = vim.fn.line(".")
+        virtual_cursors.remove_by_lnum(lnum)
+      end
+    elseif common.is_mode("v") then
+      for i = 1, vim.v.count1 do
+        local v_lnum, v_col, lnum, col, curswant = common.get_visual_area()
+        common.set_visual_area(v_lnum + 1, v_col, lnum + 1, col)
+        virtual_cursors.remove_by_lnum(v_lnum + 1)
+      end
+    end
+
+    if virtual_cursors.get_num_virtual_cursors() == 0 then
+      M.deinit(true) -- Deinitialise if there are no more cursors
+    end
+  else
+    if remove_in_opposite_direction and direction == 0 then
+      direction = 1
+    end
+
+    -- Add a cursor and move down
+    add_virtual_cursor_at_real_cursor(true)
+  end
 end
 
 -- Add or delete a virtual cursor at the mouse position
@@ -659,6 +718,8 @@ function M.setup(opts)
   opts = opts or {}
 
   local custom_key_maps = opts.custom_key_maps or {}
+
+  remove_in_opposite_direction = opts.remove_in_opposite_direction or true
 
   local enable_split_paste = opts.enable_split_paste or true
 
