@@ -46,6 +46,34 @@ local function check_for_collisions()
 
 end
 
+-- Return the index of the virtual cursor that is positioned after the real cursor
+-- Return 0 if the real cursor is after all virtual cursors
+local function get_real_cursor_index()
+
+  -- Ensure virtual_cursors is sorted
+  M.sort()
+
+  -- Position of the real cursor
+  local real_cursor_pos = vim.fn.getcurpos() -- [0, lnum, col, off, curswant]
+  local lnum = real_cursor_pos[2]
+  local col = real_cursor_pos[3]
+
+  -- Find the first virtual cursor after the real cursor
+  for idx, vc in ipairs(virtual_cursors) do
+
+    if vc.lnum > lnum then
+      return idx
+    elseif vc.lnum == lnum and vc.col > col then
+      return idx
+    end
+
+  end
+
+  -- Real cursor is after all virtual cursors
+  return 0
+
+end
+
 -- Get the number of virtual cursors
 function M.get_num_virtual_cursors()
   return #virtual_cursors
@@ -458,34 +486,6 @@ function M.can_split_paste(num_lines)
   return count + 1 == num_lines
 end
 
--- Return the index of the virtual cursor that is positioned after the real cursor
--- Return 0 if the real cursor is after all virtual cursors
-local function get_real_cursor_index()
-
-  -- Ensure virtual_cursors is sorted
-  M.sort()
-
-  -- Position of the real cursor
-  local real_cursor_pos = vim.fn.getcurpos() -- [0, lnum, col, off, curswant]
-  local lnum = real_cursor_pos[2]
-  local col = real_cursor_pos[3]
-
-  -- Find the first virtual cursor after the real cursor
-  for idx, vc in ipairs(virtual_cursors) do
-
-    if vc.lnum > lnum then
-      return idx
-    elseif vc.lnum == lnum and vc.col > col then
-      return idx
-    end
-
-  end
-
-  -- Real cursor is after all virtual cursors
-  return 0
-
-end
-
 -- Move the line for the real cursor to the end of lines
 -- Modifies the lines variable
 function M.reorder_lines_for_split_pasting(lines)
@@ -503,6 +503,9 @@ function M.reorder_lines_for_split_pasting(lines)
   end
 
 end
+
+
+-- Merge registers on exit -----------------------------------------------------
 
 -- Insert each line of from into to
 local function concatenate_regcontents(from, to)
