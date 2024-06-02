@@ -352,128 +352,212 @@ function M.normal_escape()
   common.feedkeys(nil, 0, "<Esc>", nil)
 end
 
--- Add a virtual cursor then move the real cursor up or down
-local function add_virtual_cursor_at_real_cursor(down)
-  -- Initialise if this is the first cursor
-  M.init()
-
-  -- If visual mode
-  if common.is_mode("v") then
-
-    -- Add count1 virtual cursors
-    local count1 = vim.v.count1
-
-    for i = 1, count1 do
-      -- Get the current visual area
-      local v_lnum, v_col, lnum, col, curswant = common.get_visual_area()
-
-      -- Add a virtual cursor with the visual area
-      virtual_cursors.add_with_visual_area(lnum, col, curswant, v_lnum, v_col, true)
-
-      -- Move the real cursor visual area
-      if down then
-        common.set_visual_area(v_lnum + 1, v_col, lnum + 1, col)
-      else
-        common.set_visual_area(v_lnum - 1, v_col, lnum - 1, col)
-      end
-    end
-
-  elseif common.is_mode("n") then  -- If normal mode
-
-    -- Add count1 virtual cursors
-    for i = 1, vim.v.count1 do
-      -- Add virtual cursor at the real cursor position
-      local pos = vim.fn.getcurpos()
-      virtual_cursors.add(pos[2], pos[3], pos[5], true)
-
-      -- Move the real cursor
-      if down then
-        vim.cmd("normal! j")
-      else
-        vim.cmd("normal! k")
-      end
-    end
-
-  else -- Insert or replace mode
-
-    -- Add one virtual cursor at the real cursor position
+-- Add a virtual cursor to the real cursor position, then move (normal mode)
+local function add_virtual_cursor_and_move(count1, down)
+  for i = 1, count1 do
+    -- Get the real cursor position
     local pos = vim.fn.getcurpos()
+
+    -- Add virtual cursor at the real cursor position
     virtual_cursors.add(pos[2], pos[3], pos[5], true)
 
     -- Move the real cursor
     if down then
-      common.feedkeys(nil, 0, "<Down>", nil)
+      vim.cmd("normal! j")
     else
-      common.feedkeys(nil, 0, "<Up>", nil)
+      vim.cmd("normal! k")
+    end
+  end
+end
+
+-- Add a virtual cursor to the real cursor position, then move (visual mode)
+local function add_virtual_cursor_and_move_v(count1, down)
+  for i = 1, count1 do
+    -- Get the current visual area
+    local v_lnum, v_col, lnum, col, curswant = common.get_visual_area()
+
+    -- Add a virtual cursor with the visual area
+    virtual_cursors.add_with_visual_area(lnum, col, curswant, v_lnum, v_col, true)
+
+    -- Move the real cursor visual area
+    if down then
+      common.set_visual_area(v_lnum + 1, v_col, lnum + 1, col)
+    else
+      common.set_visual_area(v_lnum - 1, v_col, lnum - 1, col)
+    end
+  end
+end
+
+-- Add a virtual cursor to the real cursor position, then move (insert/replace
+-- mode)
+local function add_virtual_cursor_and_move_i(down)
+  -- Get the real cursor position
+  local pos = vim.fn.getcurpos()
+
+  -- Add virtual cursor at the real cursor position
+  virtual_cursors.add(pos[2], pos[3], pos[5], true)
+
+  -- Move the real cursor
+  if down then
+    common.feedkeys(nil, 0, "<Down>", nil)
+  else
+    common.feedkeys(nil, 0, "<Up>", nil)
+  end
+end
+
+-- Move the real cursor, then remove any virtual cursor on the same line
+-- (normal mode)
+local function move_and_remove_virtual_cursor(count1, down)
+  for i = 1, count1 do
+    if down then
+      vim.cmd("normal! j")
+    else
+      vim.cmd("normal! k")
     end
 
+    local lnum = vim.fn.line(".")
+    virtual_cursors.remove_by_lnum(lnum)
+  end
+end
+
+-- Move the real cursor, then remove any virtual cursor on the same line (visual
+-- mode)
+local function move_and_remove_virtual_cursor_v(count1, down)
+  for i = 1, count1 do
+    local v_lnum, v_col, lnum, col, curswant = common.get_visual_area()
+
+    if down then
+      v_lnum = v_lnum + 1
+      lnum = lnum + 1
+    else
+      v_lnum = v_lnum - 1
+      lnum = lnum - 1
+    end
+
+    common.set_visual_area(v_lnum, v_col, lnum, col)
+    virtual_cursors.remove_by_lnum(v_lnum)
+  end
+end
+
+-- Move the real cursor, then remove any virtual cursor on the same line
+-- (insert/replace mode)
+local function move_and_remove_virtual_cursor_i(down)
+
+  local lnum = vim.fn.line(".")
+
+  if down then
+    lnum = lnum + 1
+    if lnum > vim.fn.line("$") then
+      -- Past end of buffer
+      return
+    end
+  else
+    lnum = lnum - 1
+    if lnum < 1 then
+      -- Before start of buffer
+      return
+    end
+  end
+
+  virtual_cursors.remove_by_lnum(lnum)
+
+  -- Move the real cursor (this will be occur later in the event loop)
+  if down then
+    common.feedkeys(nil, 0, "<Down>", nil)
+  else
+    common.feedkeys(nil, 0, "<Up>", nil)
   end
 
 end
 
--- Add a virtual cursor at the real cursor position, then move the real cursor up
+-- Add a virtual cursor at the real cursor position, then move the real cursor
+-- up
+-- If remove_in_opposite_direction is true and cursors have previously been
+-- added in the downward direction, move up and remove any virtual cursor on the
+-- same line
 function M.add_cursor_up()
-  -- If a cursor has already been added in the down direction
+
+  -- If a cursor has already been added in the opposite direction
   if remove_in_opposite_direction and direction == 1 then
-    -- Move up and remove cursor
-    if common.is_mode("n") then
-      for i = 1, vim.v.count1 do
-        vim.cmd("normal! k")
-        local lnum = vim.fn.line(".")
-        virtual_cursors.remove_by_lnum(lnum)
-      end
-    elseif common.is_mode("v") then
-      for i = 1, vim.v.count1 do
-        local v_lnum, v_col, lnum, col, curswant = common.get_visual_area()
-        common.set_visual_area(v_lnum - 1, v_col, lnum - 1, col)
-        virtual_cursors.remove_by_lnum(v_lnum - 1)
-      end
+
+    -- Move up and remove any virtual cursor on the same line
+    if common.is_mode("n") then -- Normal mode
+      move_and_remove_virtual_cursor(vim.v.count1, false)
+    elseif common.is_mode("v") then -- Visual mode
+      move_and_remove_virtual_cursor_v(vim.v.count1, false)
+    else -- Insert/replace mode
+      move_and_remove_virtual_cursor_i(false)
     end
 
+    -- Deinitialise if there are no more cursors
     if virtual_cursors.get_num_virtual_cursors() == 0 then
-      M.deinit(true) -- Deinitialise if there are no more cursors
+      M.deinit(true)
     end
   else
+    -- Set direction to up
     if remove_in_opposite_direction and direction == 0 then
       direction = 2
     end
 
+    -- Initialise if this is the first cursor
+    M.init()
+
     -- Add a cursor and move up
-    add_virtual_cursor_at_real_cursor(false)
+    if common.is_mode("n") then -- Normal mode
+      add_virtual_cursor_and_move(vim.v.count1, false)
+    elseif common.is_mode("v") then -- Visual mode
+      add_virtual_cursor_and_move_v(vim.v.count1, false)
+    else -- Insert or replace mode
+      add_virtual_cursor_and_move_i(false)
+    end
+
   end
+
 end
 
--- Add a virtual cursor at the real cursor position, then move the real cursor down
+-- Add a virtual cursor at the real cursor position, then move the real cursor
+-- down
+-- If remove_in_opposite_direction is true and cursors have previously been
+-- added in the upward direction, move down and remove any virtual cursor on the
+-- same line
 function M.add_cursor_down()
 
-  -- If a cursor has already been added in the up direction
+  -- If a cursor has already been added in the opposite direction
   if remove_in_opposite_direction and direction == 2 then
-    -- Move down and remove any virtual cursor
-    if common.is_mode("n") then
-      for i = 1, vim.v.count1 do
-        vim.cmd("normal! j")
-        local lnum = vim.fn.line(".")
-        virtual_cursors.remove_by_lnum(lnum)
-      end
-    elseif common.is_mode("v") then
-      for i = 1, vim.v.count1 do
-        local v_lnum, v_col, lnum, col, curswant = common.get_visual_area()
-        common.set_visual_area(v_lnum + 1, v_col, lnum + 1, col)
-        virtual_cursors.remove_by_lnum(v_lnum + 1)
-      end
+
+    -- Move up and remove any virtual cursor on the same line
+    if common.is_mode("n") then -- Normal mode
+      move_and_remove_virtual_cursor(vim.v.count1, true)
+    elseif common.is_mode("v") then -- Visual mode
+      move_and_remove_virtual_cursor_v(vim.v.count1, true)
+    else -- Insert/replace mode
+      move_and_remove_virtual_cursor_i(true)
     end
 
+    -- Deinitialise if there are no more cursors
     if virtual_cursors.get_num_virtual_cursors() == 0 then
-      M.deinit(true) -- Deinitialise if there are no more cursors
+      M.deinit(true)
     end
   else
+    -- Set direction to down
     if remove_in_opposite_direction and direction == 0 then
       direction = 1
     end
 
+    -- Initialise if this is the first cursor
+    M.init()
+
     -- Add a cursor and move down
-    add_virtual_cursor_at_real_cursor(true)
+    if common.is_mode("n") then -- Normal mode
+      add_virtual_cursor_and_move(vim.v.count1, true)
+    elseif common.is_mode("v") then -- Visual mode
+      add_virtual_cursor_and_move_v(vim.v.count1, true)
+    else -- Insert or replace mode
+      add_virtual_cursor_and_move_i(true)
+    end
+
   end
+
 end
 
 -- Add or delete a virtual cursor at the mouse position
