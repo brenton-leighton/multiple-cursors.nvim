@@ -283,19 +283,38 @@ function M.init()
   end
 end
 
+-- Merge all virtual cursor registers into the real cursor register
+local function merge_registers()
+
+  -- Get names of registers stored in virtual cursors
+  local registers = virtual_cursors.get_registers()
+
+  -- For each register
+  for _, register in ipairs(registers) do
+    -- Concatenate
+    virtual_cursors.merge_register_info(register)
+  end
+
+end
+
+-- Restore cursor to the position of the oldest virtual cursor
+local function restore_cursor_position()
+
+  local pos = virtual_cursors.get_exit_pos()
+
+  if pos then
+    vim.fn.cursor({pos[1], pos[2], 0, pos[3]})
+  end
+
+end
+
 -- Deinitialise
 function M.deinit(clear_virtual_cursors)
   if initialised then
 
     if clear_virtual_cursors then
-
-      -- Restore cursor to the position of the oldest virtual cursor
-      local pos = virtual_cursors.get_exit_pos()
-
-      if pos then
-        vim.fn.cursor({pos[1], pos[2], 0, pos[3]})
-      end
-
+      merge_registers()
+      restore_cursor_position()
       virtual_cursors.clear()
       bufnr = nil
       vim.api.nvim_del_autocmd(buf_enter_autocmd_id)
