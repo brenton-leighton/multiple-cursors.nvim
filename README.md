@@ -56,8 +56,8 @@ The plugin creates a number of user commands for creating cursors:
 
 | Command | Description |
 | --- | --- |
-| `MultipleCursorsAddDown` | Add a new virtual cursor, then move the real cursor down. </br> In normal or visual modes multiple new virtual cursors can be added with a `count`. |
-| `MultipleCursorsAddUp` | Add a new virtual cursor, then move the real cursor up. </br> In normal or visual modes multiple new virtual cursors can be added with a `count`. |
+| `MultipleCursorsAddDown` | Add a new virtual cursor, then move the real cursor down. </br> If cursors have previously been added in the up direction, this function will instead move the real cursor down and remove any virtual cursor on the same line. See [remove_in_opposite_direction](#remove_in_opposite_direction) for more information. </br> In normal or visual modes multiple new virtual cursors can be added with a `count`. |
+| `MultipleCursorsAddUp` | Add a new virtual cursor, then move the real cursor up. </br> If cursors have previously been added in the down direction, this function will instead move the real cursor up and remove any virtual cursor on the same line. See [remove_in_opposite_direction](#remove_in_opposite_direction) for more information. </br> In normal or visual modes multiple new virtual cursors can be added with a `count`. |
 | `MultipleCursorsMouseAddDelete` | Add a new virtual cursor to the mouse click position, or remove an existing cursor |
 | `MultipleCursorsAddMatches` | Search for the word under the cursor (in normal mode) or the visual area (in visual mode) and add a new cursor to each match. By default cursors are only added to matches in the visible buffer. |
 | `MultipleCursorsAddMatchesV` | As above, but limit matches to the previous visual area |
@@ -191,6 +191,14 @@ Options can be configured by providing an options table to the setup function, e
   },
 },
 ```
+
+### `remove_in_opposite_direction`
+
+Default value: `true`
+
+With this enabled, when `MultipleCursorsAddUp` or `MultipleCursorsAddDown` are used to add cursors, the command for adding in the opposite direction will instead remove a virtual cursor. The initial direction is stored until multiple cursors is exited.
+
+Disabling this will mean that cursors are always added when using the `MultipleCursorsAddUp` and `MultipleCursorsAddDown` commands (unless there is an existing cursor in the position).
 
 ### `enable_split_paste`
 

@@ -90,6 +90,23 @@ function M.add(lnum, col, curswant, add_seq)
   M.add_with_visual_area(lnum, col, curswant, 0, 0, add_seq)
 end
 
+function M.remove_by_lnum(lnum)
+
+  local delete = false
+
+  for _, vc in ipairs(virtual_cursors) do
+    if vc.lnum == lnum then
+      vc.delete = true
+      delete = true
+    end
+  end
+
+  if delete then
+    clean_up()
+  end
+
+end
+
 -- Add a new virtual cursor, or delete if there's already an existing virtual
 -- cursor
 function M.add_or_delete(lnum, col)
