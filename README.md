@@ -106,6 +106,7 @@ The following commands are supported while using multiple cursors:
 | All | Text object motion | `<C-Left>` `<C-Right>` | |
 | Normal/visual | Text object motion | `w` `W` `e` `E` `b` `B` `ge` `gE` | |
 | Normal/visual | Percent symbol | `%` | Count is ignored, i.e. [jump to match of item under cursor](https://neovim.io/doc/user/motion.html#%25) only |
+| Normal | Go to | `gg` `G` | Moves the first cursor in the buffer to line `count` (or line 1 for `gg` with no count) and subsequent cursors to subsequent lines. </br> If cursors will be positioned past the end of the buffer (like for the `G` command with no count), cursors are placed in order on the last lines of the buffer. |
 | Normal | Delete | `x` `<Del>` `X` `d` `dd` `D` | `d` doesn't indicate that it's waiting for a motion. <br/> See [Registers](#registers) for information on how registers work. |
 | Normal | Change | `c` `cc` `C` `s` | These commands are implemented as a delete then switch to insert mode. <br/> `c` doesn't indicate that it's waiting for a motion, and using a `w` or `W` motion may not behave exactly correctly. <br/> The `cc` command won't auto indent. <br/> See [Registers](#registers) for information on how registers work. |
 | Normal | Replace | `r` | |

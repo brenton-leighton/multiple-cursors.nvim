@@ -46,9 +46,42 @@ local function check_for_collisions()
 
 end
 
+-- Return the index of the virtual cursor that is positioned after the real cursor
+-- Return 0 if the real cursor is after all virtual cursors
+local function get_real_cursor_index()
+
+  -- Ensure virtual_cursors is sorted
+  M.sort()
+
+  -- Position of the real cursor
+  local real_cursor_pos = vim.fn.getcurpos() -- [0, lnum, col, off, curswant]
+  local lnum = real_cursor_pos[2]
+  local col = real_cursor_pos[3]
+
+  -- Find the first virtual cursor after the real cursor
+  for idx, vc in ipairs(virtual_cursors) do
+
+    if vc.lnum > lnum then
+      return idx
+    elseif vc.lnum == lnum and vc.col > col then
+      return idx
+    end
+
+  end
+
+  -- Real cursor is after all virtual cursors
+  return 0
+
+end
+
 -- Get the number of virtual cursors
 function M.get_num_virtual_cursors()
   return #virtual_cursors
+end
+
+-- Is the locked variable true
+function M.is_locked()
+  return locked
 end
 
 -- Sort virtual cursors by position
@@ -441,6 +474,85 @@ function M.visual_mode_delete_yank(register, cmd)
 end
 
 
+-- Go to commands ("G" and "gg") -----------------------------------------------
+
+local function set_real_cursor_lnum(lnum)
+  local pos = vim.fn.getcurpos()
+
+  pos[2] = lnum
+
+  if not vim.o.startofline then
+    pos[3] = common.get_col(lnum, pos[5])
+  else
+    pos[3] = vim.fn.match(vim.fn.getline(lnum), "\\S") + 1
+    pos[5] = pos[3]
+  end
+
+  vim.fn.cursor({pos[2], pos[3], 0, pos[5]})
+end
+
+-- Move the highest cursor to lnum and subsequent cursors to subsequent lines
+-- This function does nothing if locked is true so real cursor still needs to be
+-- moved
+function M.go_to(lnum)
+
+  if locked then
+    return
+  end
+
+  local num_lines = vim.fn.line("$")
+  local num_cursors = #virtual_cursors + 1
+
+  -- Do nothing if the number of cursors is greater than the number of lines
+  if num_cursors > num_lines then
+    return
+  end
+
+  -- Modify lnum if cursors will go past the buffer
+  if (lnum + num_cursors - 1) > num_lines then
+    lnum = num_lines - num_cursors + 1
+  end
+
+  -- Index of the real cursor if it were in virtual cursors
+  local real_cursor_idx = get_real_cursor_index()
+
+  ignore_cursor_movement = true
+
+  for idx, vc in ipairs(virtual_cursors) do
+
+    if real_cursor_idx == idx then
+      -- Set the real cursor first
+      set_real_cursor_lnum(lnum)
+      lnum = lnum + 1
+    end
+
+    -- Set virtual cursor lnum
+    extmarks.update_virtual_cursor_position(vc)
+
+    vc.lnum = lnum
+
+    if not vim.o.startofline then
+      vc.col = common.get_col(lnum, vc.curswant)
+    else
+      vc.col = vim.fn.match(vim.fn.getline(lnum), "\\S") + 1
+      vc.curswant = vc.col
+    end
+
+    extmarks.update_virtual_cursor_extmarks(vc)
+
+    lnum = lnum + 1
+  end
+
+  -- Real cursor is after the virtual cursors
+  if real_cursor_idx == 0 then
+    set_real_cursor_lnum(lnum)
+  end
+
+  ignore_cursor_movement = false
+
+end
+
+
 -- Split pasting ---------------------------------------------------------------
 
 -- Does the number of lines match the number of editable cursors + 1 (for the
@@ -456,34 +568,6 @@ function M.can_split_paste(num_lines)
   end
 
   return count + 1 == num_lines
-end
-
--- Return the index of the virtual cursor that is positioned after the real cursor
--- Return 0 if the real cursor is after all virtual cursors
-local function get_real_cursor_index()
-
-  -- Ensure virtual_cursors is sorted
-  M.sort()
-
-  -- Position of the real cursor
-  local real_cursor_pos = vim.fn.getcurpos() -- [0, lnum, col, off, curswant]
-  local lnum = real_cursor_pos[2]
-  local col = real_cursor_pos[3]
-
-  -- Find the first virtual cursor after the real cursor
-  for idx, vc in ipairs(virtual_cursors) do
-
-    if vc.lnum > lnum then
-      return idx
-    elseif vc.lnum == lnum and vc.col > col then
-      return idx
-    end
-
-  end
-
-  -- Real cursor is after all virtual cursors
-  return 0
-
 end
 
 -- Move the line for the real cursor to the end of lines
@@ -503,6 +587,9 @@ function M.reorder_lines_for_split_pasting(lines)
   end
 
 end
+
+
+-- Merge registers on exit -----------------------------------------------------
 
 -- Insert each line of from into to
 local function concatenate_regcontents(from, to)

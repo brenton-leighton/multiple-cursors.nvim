@@ -76,6 +76,8 @@ default_key_maps = {
 
   -- Other
   {{"n", "x"}, "%", normal_mode_motion.percent},
+  {"n", "gg", normal_mode_motion.gg},
+  {"n", "G", normal_mode_motion.G},
 
 
   -- Normal mode edit ----------------------------------------------------------
