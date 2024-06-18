@@ -32,6 +32,36 @@ local function get_lengths(line, col, word)
 
 end
 
+-- Insert the given word at each virtual cursor, after removing any characters
+-- that match the start of the word
+function M.complete(word)
+
+  virtual_cursors.edit_with_cursor(function(vc)
+
+    local line = vim.fn.getline(vc.lnum)
+
+    -- Get the number of characters before the cursor that match the word (and
+    -- also the number of characters to remove after the cursor in replace mode)
+    local num_before, num_after = get_lengths(line, vc.col, word)
+
+    -- Delete any characters before the cursor that belong to the completion word
+    if num_before > 0 then
+      vim.cmd("normal! \"_" .. num_before .. "X")
+    end
+
+    -- Delete characters after the cursor for replace mode
+    if common.is_mode("R") or common.is_mode("Rc") then
+      if num_after > 0 then
+        vim.cmd("normal! \"_" .. num_after .. "x")
+      end
+    end
+
+    -- Put the completion word
+    vim.api.nvim_put({word}, "c", false, true)
+
+  end)
+end
+
 -- Insert the completion word if selected
 -- Used directly by insert mode mappings or by complete_done_pre
 -- Returns true if a completion item was inserted, and false if not
@@ -44,31 +74,7 @@ function M.complete_if_selected()
 
     -- Get the word
     local word = complete_info.items[complete_info.selected + 1].word
-
-    virtual_cursors.edit_with_cursor(function(vc)
-
-      -- Remove the part of the word that triggered the completion
-      local line = vim.fn.getline(vc.lnum)
-
-      local num_before, num_after = get_lengths(line, vc.col, word)
-
-      -- Delete any characters before the cursor that belong to the completion word
-      if num_before > 0 then
-        vim.cmd("normal! \"_" .. num_before .. "X")
-      end
-
-      -- Delete characters after the cursor for replace mode
-      if common.is_mode("R") or common.is_mode("Rc") then
-        if num_after > 0 then
-          vim.cmd("normal! \"_" .. num_after .. "x")
-        end
-      end
-
-      -- Put the completion word
-      vim.api.nvim_put({word}, "c", false, true)
-
-    end)
-
+    M.complete(word)
     completed = true
 
     return true
@@ -82,6 +88,7 @@ end
 -- Callback for the CompleteDonePre event
 function M.complete_done_pre(event)
 
+  -- If completed is true then complete_if_selected() was already called directly
   if not completed then
     M.complete_if_selected()
   end
