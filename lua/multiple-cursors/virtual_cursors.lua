@@ -232,6 +232,14 @@ end
 
 function M.toggle_lock()
   locked = not locked
+
+  local locked_hl = {}
+  if locked then
+    locked_hl = extmarks.get_hl('MultipleCursorsLockCursor') or {}
+  else
+    locked_hl = extmarks.get_hl('MultipleCursorsCursor') or {}
+  end
+  vim.api.nvim_set_hl(0, 'MultipleCursorsCursor', locked_hl)
 end
 
 
