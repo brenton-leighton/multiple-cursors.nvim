@@ -277,7 +277,7 @@ function M.visit_all(func)
   end
 
   -- Restore cursor
-  vim.fn.cursor({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
+  vim.fn.cursor({cursor_pos[2], vim.fn.virtcol2col(0, cursor_pos[2], cursor_pos[5])})
 
   clean_up()
   check_for_collisions()

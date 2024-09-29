@@ -92,8 +92,8 @@ function M.save_cursor()
   local pos = vim.fn.getcurpos()
 
   cursor_lnum = pos[2]  -- Save lnum in case the cursor is lost
-  local col = pos[3]
   cursor_curswant = pos[5]  -- Save curswant
+  local col = vim.fn.virtcol2col(0, cursor_lnum, cursor_curswant)
 
   -- Create an invisible extmark
   cursor_mark_id = set_extmark(cursor_lnum, col, cursor_mark_id, "", 0)
@@ -123,7 +123,7 @@ function M.restore_cursor()
         curswant = col
       end
 
-      vim.fn.cursor({lnum, col, 0, curswant})
+      vim.fn.cursor(lnum, col)
     else
       -- extmark gone, restore from lnum
       vim.fn.cursor({cursor_lnum, 1, 0, 1})
