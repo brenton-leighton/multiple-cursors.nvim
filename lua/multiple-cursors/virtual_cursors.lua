@@ -232,6 +232,14 @@ end
 
 function M.toggle_lock()
   locked = not locked
+
+  local locked_hl = {}
+  if locked then
+    locked_hl = extmarks.get_hl('MultipleCursorsLockCursor') or {}
+  else
+    locked_hl = extmarks.get_hl('MultipleCursorsCursor') or {}
+  end
+  vim.api.nvim_set_hl(0, 'MultipleCursorsCursor', locked_hl)
 end
 
 
@@ -277,7 +285,7 @@ function M.visit_all(func)
   end
 
   -- Restore cursor
-  vim.fn.cursor({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
+  vim.fn.cursor({cursor_pos[2], vim.fn.virtcol2col(0, cursor_pos[2], cursor_pos[5])})
 
   clean_up()
   check_for_collisions()

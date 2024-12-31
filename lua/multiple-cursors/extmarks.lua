@@ -1,7 +1,11 @@
 local M = {}
 
 local cursor_hl_group = "MultipleCursorsCursor"
+local lockcursor_hl_group = "MultipleCursorsLockCursor"
 local visual_hl_group = "MultipleCursorsVisual"
+local cursor_hl = nil
+local lockcursor_hl = nil
+local visual_hl = nil
 
 local common = require("multiple-cursors.common")
 
@@ -37,6 +41,16 @@ function M.setup()
     default = true,
   })
 
+  vim.api.nvim_set_hl(0, lockcursor_hl_group, {
+    link = "lCursor",
+    default = true,
+  })
+
+  -- Save default highlight settings
+  cursor_hl     = vim.api.nvim_get_hl(0, {name = cursor_hl_group})
+  lockcursor_hl = vim.api.nvim_get_hl(0, {name = lockcursor_hl_group})
+  visual_hl     = vim.api.nvim_get_hl(0, {name = visual_hl_group})
+
   -- Create a namespace for the extmarks
   highlight_namespace_id = vim.api.nvim_create_namespace("multiple-cursors")
 
@@ -45,6 +59,19 @@ end
 -- Clear all extmarks
 function M.clear()
   vim.api.nvim_buf_clear_namespace(0, highlight_namespace_id, 0, -1)
+end
+
+-- Get default highlight setting
+function M.get_hl(name)
+  if name == cursor_hl_group then
+    return cursor_hl
+  elseif name == lockcursor_hl_group then
+	return lockcursor_hl
+  elseif name == visual_hl_group then
+	return visual_hl
+  else
+	return nil
+  end
 end
 
 local function set_extmark(lnum, col, mark_id, hl_group, priority)
@@ -92,8 +119,8 @@ function M.save_cursor()
   local pos = vim.fn.getcurpos()
 
   cursor_lnum = pos[2]  -- Save lnum in case the cursor is lost
-  local col = pos[3]
   cursor_curswant = pos[5]  -- Save curswant
+  local col = vim.fn.virtcol2col(0, cursor_lnum, cursor_curswant)
 
   -- Create an invisible extmark
   cursor_mark_id = set_extmark(cursor_lnum, col, cursor_mark_id, "", 0)
@@ -123,7 +150,7 @@ function M.restore_cursor()
         curswant = col
       end
 
-      vim.fn.cursor({lnum, col, 0, curswant})
+      vim.fn.cursor(lnum, col)
     else
       -- extmark gone, restore from lnum
       vim.fn.cursor({cursor_lnum, 1, 0, 1})

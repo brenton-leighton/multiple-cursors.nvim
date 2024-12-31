@@ -129,14 +129,14 @@ function VirtualCursor:save_cursor_position()
   local pos = vim.fn.getcurpos()
 
   self.lnum = pos[2]
-  self.col = pos[3]
   self.curswant = pos[5]
+  self.col = vim.fn.virtcol2col(0, self.lnum, self.curswant)
 
 end
 
 -- Set the real cursor position from the virtual cursor
 function VirtualCursor:set_cursor_position()
-  vim.fn.cursor({self.lnum, self.col, 0, self.curswant})
+  vim.fn.cursor(self.lnum, self.col)
 end
 
 -- Save the current visual area to the virtual cursor
