@@ -96,7 +96,7 @@ local function virtual_cursor_insert_mode_backspace(vc)
     for i = 1, count do vim.cmd("normal! \"_X") end
 
     vc.col = vc.col - count
-    vc.curswant = vc.col
+    vc.curswant = -1
   end
 
 end
@@ -110,7 +110,7 @@ local function virtual_cursor_replace_mode_backspace(vc)
     -- Move to end of previous line
     vc.lnum = vc.lnum - 1
     vc.col = common.get_max_col(vc.lnum)
-    vc.curswant = vc.col
+    vc.curswant = -1
     return
   end
 
@@ -119,7 +119,7 @@ local function virtual_cursor_replace_mode_backspace(vc)
 
   -- Move left
   vc.col = vc.col - count
-  vc.curswant = vc.col
+  vc.curswant = -1
 
 end
 
@@ -202,7 +202,7 @@ function M.virtual_cursor_carriage_return(vc)
     vim.cmd("normal! ==^\"_x")
     vc:save_cursor_position()
     vc.col = common.get_col(vc.lnum, vc.col + 1) -- Shift cursor 1 right limited to max col
-    vc.curswant = vc.col
+    vc.curswant = -1
   end
 end
 

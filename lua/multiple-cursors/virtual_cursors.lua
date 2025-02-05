@@ -535,7 +535,7 @@ function M.go_to(lnum)
       vc.col = common.get_col(lnum, vc.curswant)
     else
       vc.col = vim.fn.match(vim.fn.getline(lnum), "\\S") + 1
-      vc.curswant = vc.col
+      vc.curswant = -1
     end
 
     extmarks.update_virtual_cursor_extmarks(vc)

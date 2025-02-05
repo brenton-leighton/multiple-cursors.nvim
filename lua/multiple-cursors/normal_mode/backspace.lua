@@ -11,14 +11,14 @@ local function backspace_one_virtual_cursor(vc, count1)
     -- No line change
     if vc.col > count1 then
       vc.col = vc.col - count1
-      vc.curswant = vc.col
+      vc.curswant = -1
       return
     end
 
     -- First line, go to first column
     if vc.lnum == 1 then
       vc.col = 1
-      vc.curswant = vc.col
+      vc.curswant = -1
       return
     end
 
@@ -27,7 +27,7 @@ local function backspace_one_virtual_cursor(vc, count1)
     vc.col = common.get_max_col(vc.lnum)
   end
 
-  vc.curswant = vc.col
+  vc.curswant = -1
 
 end
 
