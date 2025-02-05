@@ -241,6 +241,13 @@ local function create_autocmds()
       callback = normal_mode_mode_change.mode_changed,
     })
 
+    -- Mode changed from insert to normal
+    vim.api.nvim_create_autocmd({"ModeChanged"}, {
+      group = autocmd_group_id,
+      pattern = "i:n",
+      callback = insert_mode_escape.mode_changed,
+    })
+
     -- If there are custom key maps, reset the custom key maps on the LazyLoad
     -- event (when a plugin has been loaded)
     -- This is to fix an issue with using a command from a plugin that was lazy
