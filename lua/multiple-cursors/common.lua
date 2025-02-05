@@ -93,6 +93,16 @@ function M.curswant2col(lnum, curswant)
   return M.limit_col(lnum, col)
 end
 
+-- Is lnum, col before the first non-whitespace character
+function M.is_before_first_non_whitespace_char(lnum, col)
+  local idx = vim.fn.match(vim.fn.getline(lnum), "\\S")
+  if idx < 0 then
+    return true
+  else
+    return col <= idx + 1
+  end
+end
+
 -- Get current visual area
 -- Returns v_lnum, v_col, lnum, col, curswant
 function M.get_visual_area()

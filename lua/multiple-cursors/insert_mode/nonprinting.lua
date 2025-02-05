@@ -4,16 +4,6 @@ local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
 local insert_mode_completion = require("multiple-cursors.insert_mode.completion")
 
--- Is lnum, col before the first non-whitespace character
-local function is_before_first_non_whitespace_char(lnum, col)
-  local idx = vim.fn.match(vim.fn.getline(lnum), "\\S")
-  if idx < 0 then
-    return true
-  else
-    return col <= idx + 1
-  end
-end
-
 
 -- Backspace -------------------------------------------------------------------
 
@@ -42,7 +32,7 @@ local function count_spaces_back(lnum, col)
   -- Indentation
   local stop = vim.opt.shiftwidth._value
 
-  if not is_before_first_non_whitespace_char(lnum, col) then
+  if not common.is_before_first_non_whitespace_char(lnum, col) then
     -- Tabbing
     if vim.opt.softtabstop._value == 0 then
       return 1
@@ -247,7 +237,7 @@ local function virtual_cursor_tab(vc)
 
   if expandtab then
     -- Spaces
-    if is_before_first_non_whitespace_char(vc.lnum, vc.col) then
+    if common.is_before_first_non_whitespace_char(vc.lnum, vc.col) then
       -- Indenting
       put_multiple(" ", get_num_spaces_to_put(shiftwidth, vc.col))
     else
