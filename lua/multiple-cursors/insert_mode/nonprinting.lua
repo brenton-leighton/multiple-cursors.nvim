@@ -34,10 +34,10 @@ local function count_spaces_back(lnum, col)
 
   if not common.is_before_first_non_whitespace_char(lnum, col) then
     -- Tabbing
-    if vim.opt.softtabstop._value == 0 then
+    if vim.opt.tabstop._value == 0 then
       return 1
     else
-      stop = vim.opt.softtabstop._value
+      stop = vim.opt.tabstop._value
     end
   end
 
@@ -232,7 +232,6 @@ local function virtual_cursor_tab(vc)
 
   local expandtab = vim.opt.expandtab._value
   local tabstop = vim.opt.tabstop._value
-  local softtabstop = vim.opt.softtabstop._value
   local shiftwidth = vim.opt.shiftwidth._value
 
   if expandtab then
@@ -242,11 +241,7 @@ local function virtual_cursor_tab(vc)
       put_multiple(" ", get_num_spaces_to_put(shiftwidth, vc.col))
     else
       -- Tabbing
-      if softtabstop == 0 then
-        put_multiple(" ", get_num_spaces_to_put(tabstop, vc.col))
-      else
-        put_multiple(" ", get_num_spaces_to_put(softtabstop, vc.col))
-      end
+      put_multiple(" ", get_num_spaces_to_put(tabstop, vc.col))
     end
   else -- noexpandtab
     vim.api.nvim_put({"\t"}, "c", false, true)
