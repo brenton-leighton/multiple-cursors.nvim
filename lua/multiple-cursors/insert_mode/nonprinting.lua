@@ -201,7 +201,7 @@ function M.virtual_cursor_carriage_return(vc)
     vim.api.nvim_put({"", "x"}, "c", false, true)
     vim.cmd("normal! ==^\"_x")
     vc:save_cursor_position()
-    vc.col = common.get_col(vc.lnum, vc.col + 1) -- Shift cursor 1 right limited to max col
+    vc.col = common.limit_col(vc.lnum, vc.col + 1) -- Shift cursor 1 right limited to max col
     vc.curswant = -1
   end
 end

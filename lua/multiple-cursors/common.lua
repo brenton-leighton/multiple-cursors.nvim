@@ -82,9 +82,15 @@ function M.get_max_col(lnum)
   end
 end
 
+-- Limit col to line length
+function M.limit_col(lnum, col)
+  return vim.fn.min({M.get_max_col(lnum), col})
+end
+
 -- Get a column position for a given curswant
-function M.get_col(lnum, curswant)
-  return vim.fn.min({M.get_max_col(lnum), curswant})
+function M.curswant2col(lnum, curswant)
+  local col = vim.fn.virtcol2col(0, lnum, curswant)
+  return M.limit_col(lnum, col)
 end
 
 -- Get current visual area
