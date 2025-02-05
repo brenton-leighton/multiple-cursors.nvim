@@ -249,8 +249,7 @@ local function virtual_cursor_tab(vc)
       end
     end
   else -- noexpandtab
-    -- TODO
-    return
+    vim.api.nvim_put({"\t"}, "c", false, true)
   end
 
 end
