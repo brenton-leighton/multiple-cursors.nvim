@@ -15,6 +15,11 @@ local cursor_curswant = nil
 local visual_area_start_mark_id = nil
 local visual_area_end_mark_id = nil
 
+local function is_tab(lnum, col)
+  local line = vim.fn.getline(lnum)
+  return vim.fn.strgetchar(line, col-1) == vim.fn.char2nr("\t")
+end
+
 function M.setup()
 
   -- Global highlight groups which can be overridden by the user
@@ -63,17 +68,44 @@ local function set_extmark(lnum, col, mark_id, hl_group, priority)
     col = line_length + 1
     opts.virt_text = {{" ", hl_group}}
     opts.virt_text_pos = "overlay"
+    opts.hl_mode = "combine"
+
   else
-    -- Otherwise highlight the character
+    -- If the character under the cursor a tab
+    if is_tab(lnum, col) then
+      -- If insert or replace mode
+      if common.is_mode_insert_replace() then
+				-- Highlight is the start of the tab
+        opts.virt_text = {{" ", hl_group}}
 
-    -- Convert col to char index
-    local line = vim.fn.getline(lnum)
-    local col_char = vim.fn.charidx(line, col - 1)
+      else
+        -- Add blank spaces to move the highlight to the end of the tab
+        local blank = {" ", ""}
 
-    -- end_col is the byte index of the next character
-    opts.end_col = vim.fn.byteidx(line, col_char + 1)
+        local width = common.is_before_first_non_whitespace_char(lnum, col) and
+            vim.opt.shiftwidth._value or
+            vim.opt.tabstop._value
 
-    opts.hl_group = hl_group
+        if width == 4 then
+          blank = {"   ", ""}
+        elseif width == 6 then
+          blank = {"     ", ""}
+        elseif width == 8 then
+          blank = {"       ", ""}
+        end
+
+        opts.virt_text = {blank, {" ", hl_group}}
+      end
+
+      opts.virt_text_pos = "overlay"
+      opts.hl_mode = "combine"
+
+    else
+      -- Otherwise highlight the character
+      opts.end_col = col
+      opts.hl_group = hl_group
+    end
+
   end
 
   if priority ~= 0 then
@@ -117,11 +149,6 @@ function M.restore_cursor()
       local lnum = extmark_pos[1] + 1
       local col = extmark_pos[2] + 1
       local curswant = cursor_curswant
-
-      -- Maintain curswant = vim.v.maxcol if the cursor is still at the end of the line
-      if curswant < vim.v.maxcol and col < common.get_max_col(lnum) then
-        curswant = col
-      end
 
       vim.fn.cursor({lnum, col, 0, curswant})
     else
@@ -332,11 +359,6 @@ function M.update_virtual_cursor_position(vc)
       -- Update the virtual cursor position
       vc.lnum = extmark_pos[1] + 1
       vc.col = extmark_pos[2] + 1
-
-      -- Maintain curswant = vim.v.maxcol if the cursor is still at the end of the line
-      if vc.curswant < vim.v.maxcol and vc.col < common.get_max_col(vc.lnum) then
-        vc.curswant = vc.col
-      end
     else
       -- The extmark is gone, mark the virtual cursor for removal
       vc.delete = true

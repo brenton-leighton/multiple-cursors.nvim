@@ -27,7 +27,7 @@ end
 local function _i()
   -- curswant is lost
   virtual_cursors.visit_all(function(vc)
-    vc.curswant = vc.col
+    vc.curswant = -1
   end)
 end
 
@@ -48,10 +48,10 @@ local function _O()
   virtual_cursors.visit_all(function(vc)
     if vc.lnum == 1 then -- First line, move to start of line
       vc.col = 1
-      vc.curswant = 1
+      vc.curswant = -1
     else -- Move to end of previous line
       vc.lnum = vc.lnum - 1
-      vc.col = common.get_col(vc.lnum, vim.v.maxcol)
+      vc.col = common.limit_col(vc.lnum, vim.v.maxcol)
       vc.curswant = vim.v.maxcol
     end
   end)
@@ -79,8 +79,8 @@ local function _v()
 
     -- Move cursor forward if there's a count
     if count > 0 then
-      vc.col = common.get_col(vc.lnum, vc.col + count)
-      vc.curswant = vc.col
+      vc.col = common.limit_col(vc.lnum, vc.col + count)
+      vc.curswant = -1
     end
 
   end)

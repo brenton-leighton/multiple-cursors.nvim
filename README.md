@@ -509,5 +509,4 @@ where `lnum` is the line number of the new cursor, `col` is the column, and `cur
 ## Notes and known issues
 
 - In insert/replace mode, `Backspace`, `Delete`, `Enter`, or `Tab` may behave incorrectly, in particular with less common indentation options. Please use the [Issues](https://github.com/brenton-leighton/multiple-cursors.nvim/issues) page to report issues.
-- Cursors may not be positioned correctly when moving up or down over extended characters, or when using the mouse to add a cursor to an extended character
 - When virtual cursors are locked, switching to or from visual mode won't update the virtual cursors and should be avoided

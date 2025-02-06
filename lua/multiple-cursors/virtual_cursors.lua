@@ -482,7 +482,7 @@ local function set_real_cursor_lnum(lnum)
   pos[2] = lnum
 
   if not vim.o.startofline then
-    pos[3] = common.get_col(lnum, pos[5])
+    pos[3] = common.curswant2col(lnum, pos[5])
   else
     pos[3] = vim.fn.match(vim.fn.getline(lnum), "\\S") + 1
     pos[5] = pos[3]
@@ -532,10 +532,10 @@ function M.go_to(lnum)
     vc.lnum = lnum
 
     if not vim.o.startofline then
-      vc.col = common.get_col(lnum, vc.curswant)
+      vc.col = common.curswant2col(lnum, vc.curswant)
     else
       vc.col = vim.fn.match(vim.fn.getline(lnum), "\\S") + 1
-      vc.curswant = vc.col
+      vc.curswant = -1
     end
 
     extmarks.update_virtual_cursor_extmarks(vc)

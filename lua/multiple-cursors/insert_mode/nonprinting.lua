@@ -4,16 +4,6 @@ local common = require("multiple-cursors.common")
 local virtual_cursors = require("multiple-cursors.virtual_cursors")
 local insert_mode_completion = require("multiple-cursors.insert_mode.completion")
 
--- Is lnum, col before the first non-whitespace character
-local function is_before_first_non_whitespace_char(lnum, col)
-  local idx = vim.fn.match(vim.fn.getline(lnum), "\\S")
-  if idx < 0 then
-    return true
-  else
-    return col <= idx + 1
-  end
-end
-
 
 -- Backspace -------------------------------------------------------------------
 
@@ -42,12 +32,12 @@ local function count_spaces_back(lnum, col)
   -- Indentation
   local stop = vim.opt.shiftwidth._value
 
-  if not is_before_first_non_whitespace_char(lnum, col) then
+  if not common.is_before_first_non_whitespace_char(lnum, col) then
     -- Tabbing
-    if vim.opt.softtabstop._value == 0 then
+    if vim.opt.tabstop._value == 0 then
       return 1
     else
-      stop = vim.opt.softtabstop._value
+      stop = vim.opt.tabstop._value
     end
   end
 
@@ -96,7 +86,7 @@ local function virtual_cursor_insert_mode_backspace(vc)
     for i = 1, count do vim.cmd("normal! \"_X") end
 
     vc.col = vc.col - count
-    vc.curswant = vc.col
+    vc.curswant = -1
   end
 
 end
@@ -110,7 +100,7 @@ local function virtual_cursor_replace_mode_backspace(vc)
     -- Move to end of previous line
     vc.lnum = vc.lnum - 1
     vc.col = common.get_max_col(vc.lnum)
-    vc.curswant = vc.col
+    vc.curswant = -1
     return
   end
 
@@ -119,7 +109,7 @@ local function virtual_cursor_replace_mode_backspace(vc)
 
   -- Move left
   vc.col = vc.col - count
-  vc.curswant = vc.col
+  vc.curswant = -1
 
 end
 
@@ -201,8 +191,8 @@ function M.virtual_cursor_carriage_return(vc)
     vim.api.nvim_put({"", "x"}, "c", false, true)
     vim.cmd("normal! ==^\"_x")
     vc:save_cursor_position()
-    vc.col = common.get_col(vc.lnum, vc.col + 1) -- Shift cursor 1 right limited to max col
-    vc.curswant = vc.col
+    vc.col = common.limit_col(vc.lnum, vc.col + 1) -- Shift cursor 1 right limited to max col
+    vc.curswant = -1
   end
 end
 
@@ -242,25 +232,19 @@ local function virtual_cursor_tab(vc)
 
   local expandtab = vim.opt.expandtab._value
   local tabstop = vim.opt.tabstop._value
-  local softtabstop = vim.opt.softtabstop._value
   local shiftwidth = vim.opt.shiftwidth._value
 
   if expandtab then
     -- Spaces
-    if is_before_first_non_whitespace_char(vc.lnum, vc.col) then
+    if common.is_before_first_non_whitespace_char(vc.lnum, vc.col) then
       -- Indenting
       put_multiple(" ", get_num_spaces_to_put(shiftwidth, vc.col))
     else
       -- Tabbing
-      if softtabstop == 0 then
-        put_multiple(" ", get_num_spaces_to_put(tabstop, vc.col))
-      else
-        put_multiple(" ", get_num_spaces_to_put(softtabstop, vc.col))
-      end
+      put_multiple(" ", get_num_spaces_to_put(tabstop, vc.col))
     end
   else -- noexpandtab
-    -- TODO
-    return
+    vim.api.nvim_put({"\t"}, "c", false, true)
   end
 
 end
