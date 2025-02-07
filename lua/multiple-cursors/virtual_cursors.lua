@@ -247,12 +247,9 @@ end
 
 -- Visitors --------------------------------------------------------------------
 
--- Visit all virtual cursors
-function M.visit_all(func)
-
-  if locked then
-    return
-  end
+-- Visit all virtual cursors even if locked
+-- This allows for changing to/from visual mode
+function M.visit_all_ignore_lock(func)
 
   -- Save cursor position
   -- This is because changing virtualedit causes curswant to be reset
@@ -291,6 +288,17 @@ function M.visit_all(func)
 
   clean_up()
   check_for_collisions()
+
+end
+
+-- Visit all virtual cursors if not locked
+function M.visit_all(func)
+
+  if locked then
+    return
+  end
+
+  M.visit_all_ignore_lock(func)
 
 end
 
