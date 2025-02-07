@@ -71,7 +71,7 @@ end
 
 local function _v()
 
-  virtual_cursors.visit_all(function(vc)
+  virtual_cursors.visit_all_ignore_lock(function(vc)
 
     -- Save cursor position as visual area start
     vc.visual_start_lnum = vc.lnum

@@ -466,13 +466,17 @@ This plugin uses the following highlight groups:
 
 - `MultipleCursorsCursor`: The cursor part of a virtual cursor (links to `Cursor` by default)
 - `MultipleCursorsVisual`: The visual area part of a virtual cursor (links to `Visual` by default)
+- `MultipleCursorsLockedCursor`: The cursor part of a virtual cursor, when virtual cursors are locked (links to `Cursor` by default)
+- `MultipleCursorsLockedVisual`: The visual area part of a virtual cursor, when virtual cursors are locked (links to `Visual` by default)
 
 For example, colours can be defined in the `config` function of the [plugin spec](https://github.com/folke/lazy.nvim#-plugin-spec):
 
 ```lua
 config = function(opts)
-  vim.api.nvim_set_hl(0, "MultipleCursorsCursor", {bg="#FFFFFF", fg="#000000"})
-  vim.api.nvim_set_hl(0, "MultipleCursorsVisual", {bg="#CCCCCC", fg="#000000"})
+  vim.api.nvim_set_hl(0, "MultipleCursorsCursor", {bg="#999999", fg="#000000"})
+  vim.api.nvim_set_hl(0, "MultipleCursorsVisual", {bg="#777777", fg="#BBBBBB"})
+  vim.api.nvim_set_hl(0, "MultipleCursorsLockedCursor", {bg="#666666", fg="#222222"})
+  vim.api.nvim_set_hl(0, "MultipleCursorsLockedVisual", {bg="#555555", fg="#999999"})
 
   require("multiple-cursors").setup(opts)
 end,
