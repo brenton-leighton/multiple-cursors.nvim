@@ -191,6 +191,7 @@ function M.clear()
   virtual_cursors = {}
   next_seq = 1
   locked = false
+  extmarks.set_locked(false)
 end
 
 function M.update_extmarks()
@@ -231,7 +232,16 @@ function M.cursor_moved()
 end
 
 function M.toggle_lock()
+
   locked = not locked
+
+  -- Update extmarks
+  extmarks.set_locked(locked)
+
+  for idx, vc in ipairs(virtual_cursors) do
+    extmarks.update_virtual_cursor_extmarks(vc)
+  end
+
 end
 
 
