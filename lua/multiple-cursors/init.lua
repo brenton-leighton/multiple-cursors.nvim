@@ -692,7 +692,7 @@ function M.add_cursors_to_matches_v() _add_cursors_to_matches(true) end
 -- Add cursors to the visual area
 function M.add_cursors_to_visual_area()
 
-  local lnum1, col, lnum2, _, _ = common.get_visual_area()
+  local lnum1, _, lnum2, col, _ = common.get_visual_area()
 
   -- In visual line mode add cursors to the start of each line
   if common.is_mode("V") then
