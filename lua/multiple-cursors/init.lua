@@ -689,6 +689,55 @@ function M.add_cursors_to_matches() _add_cursors_to_matches(false) end
 -- Add cursors to each match of cword or visual area, but only within the previous visual area
 function M.add_cursors_to_matches_v() _add_cursors_to_matches(true) end
 
+-- Add cursors to the visual area
+function M.add_cursors_to_visual_area()
+
+  local lnum1, col, lnum2, _, _ = common.get_visual_area()
+
+  -- In visual line mode add cursors to the start of each line
+  if common.is_mode("V") then
+    col = 1
+  end
+
+  -- Exit visual mode
+  common.feedkeys(nil, 0, "<Esc>", nil)
+
+  -- Don't add cursors if the area is on a single line
+  if lnum1 == lnum2 then
+    return
+  end
+
+  -- Initialise if not already
+  M.init()
+
+  -- Direction
+  local step = 1
+  if lnum1 < lnum2 then
+    -- Downwards
+    if remove_in_opposite_direction and direction == 0 then
+      direction = 1
+    end
+  else
+    -- Upwards
+    step  = -1
+    if remove_in_opposite_direction and direction == 0 then
+      direction = 2
+    end
+  end
+
+  -- End before the line with the real cursor
+  local end_lnum = lnum1 < lnum2 and lnum2 - 1 or lnum2 + 1
+
+  -- Add virtual cursors
+  for lnum = lnum1, end_lnum, step do
+    virtual_cursors.add(lnum, col, -1, true)
+  end
+
+  -- Move the real cursor
+  vim.fn.cursor({lnum, col, 0, -1})
+
+end
+
 -- Add a virtual cursor to the start of the word under the cursor (or visual area), then move the
 -- cursor to to the next match
 function M.add_cursor_and_jump_to_next_match()
@@ -843,6 +892,7 @@ function M.setup(opts)
 
   vim.api.nvim_create_user_command("MultipleCursorsAddMatches", M.add_cursors_to_matches, {})
   vim.api.nvim_create_user_command("MultipleCursorsAddMatchesV", M.add_cursors_to_matches_v, {})
+  vim.api.nvim_create_user_command("MultipleCursorsAddVisualArea", M.add_cursors_to_visual_area, {})
 
   vim.api.nvim_create_user_command("MultipleCursorsAddJumpNextMatch", M.add_cursor_and_jump_to_next_match, {})
   vim.api.nvim_create_user_command("MultipleCursorsJumpNextMatch", M.jump_to_next_match, {})

@@ -27,6 +27,8 @@ For [lazy.nvim](https://github.com/folke/lazy.nvim), add a section to the plugin
 
     {"<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = {"n", "i"}, desc = "Add or remove cursor"},
 
+    {"<Leader>m", "<Cmd>MultipleCursorsAddVisualArea<CR>", mode = {"x"}, desc = "Add cursors to the lines of the visual area"},
+
     {"<Leader>a", "<Cmd>MultipleCursorsAddMatches<CR>", mode = {"n", "x"}, desc = "Add cursors to cword"},
     {"<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = {"n", "x"}, desc = "Add cursors to cword in previous area"},
 
@@ -59,6 +61,7 @@ The plugin creates a number of user commands for creating cursors:
 | `MultipleCursorsAddDown` | Add a new virtual cursor, then move the real cursor down. </br> If cursors have previously been added in the up direction, this function will instead move the real cursor down and remove any virtual cursor on the same line. See [remove_in_opposite_direction](#remove_in_opposite_direction) for more information. </br> In normal or visual modes multiple new virtual cursors can be added with a `count`. |
 | `MultipleCursorsAddUp` | Add a new virtual cursor, then move the real cursor up. </br> If cursors have previously been added in the down direction, this function will instead move the real cursor up and remove any virtual cursor on the same line. See [remove_in_opposite_direction](#remove_in_opposite_direction) for more information. </br> In normal or visual modes multiple new virtual cursors can be added with a `count`. |
 | `MultipleCursorsMouseAddDelete` | Add a new virtual cursor to the mouse click position, or remove an existing cursor |
+| `MultipleCursorsAddVisualArea` | Add virtual cursors to each line of the visual area |
 | `MultipleCursorsAddMatches` | Search for the word under the cursor (in normal mode) or the visual area (in visual mode) and add a new cursor to each match. By default cursors are only added to matches in the visible buffer. |
 | `MultipleCursorsAddMatchesV` | As above, but limit matches to the previous visual area |
 | `MultipleCursorsAddJumpNextMatch` | Add a virtual cursor to the word under the cursor (in normal mode) or the visual area (in visual mode), then move the real cursor to the next match |
