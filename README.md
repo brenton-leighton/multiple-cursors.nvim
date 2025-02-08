@@ -66,6 +66,8 @@ The plugin creates a number of user commands for creating cursors:
 | `MultipleCursorsAddMatchesV` | As above, but limit matches to the previous visual area |
 | `MultipleCursorsAddJumpNextMatch` | Add a virtual cursor to the word under the cursor (in normal mode) or the visual area (in visual mode), then move the real cursor to the next match |
 | `MultipleCursorsJumpNextMatch` | Move the real cursor to the next match of the word under the cursor (in normal mode) or the visual area (in visual mode) |
+| `MultipleCursorsAddJumpPrevMatch` | Add a virtual cursor to the word under the cursor (in normal mode) or the visual area (in visual mode), then move the real cursor to the previous match |
+| `MultipleCursorsJumpPrevMatch` | Move the real cursor to the previous match of the word under the cursor (in normal mode) or the visual area (in visual mode) |
 
 ## Other functions
 

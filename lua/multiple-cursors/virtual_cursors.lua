@@ -140,6 +140,40 @@ function M.remove_by_lnum(lnum)
 
 end
 
+function M.remove_by_pos(lnum, col)
+
+  local delete = false
+
+  for _, vc in ipairs(virtual_cursors) do
+    if vc.lnum == lnum and vc.col == col then
+      vc.delete = true
+      delete = true
+    end
+  end
+
+  if delete then
+    clean_up()
+  end
+
+end
+
+function M.remove_by_visual_area(visual_start_lnum, visual_start_col, lnum, col)
+
+  local delete = false
+
+  for _, vc in ipairs(virtual_cursors) do
+    if vc.visual_start_lnum == visual_start_lnum and vc.visual_start_col == visual_start_col and vc.lnum == lnum and vc.col == col then
+      vc.delete = true
+      delete = true
+    end
+  end
+
+  if delete then
+    clean_up()
+  end
+
+end
+
 -- Add a new virtual cursor, or delete if there's already an existing virtual
 -- cursor
 function M.add_or_delete(lnum, col)

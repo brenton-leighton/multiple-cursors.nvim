@@ -740,7 +740,7 @@ end
 
 -- Add a virtual cursor to the start of the word under the cursor (or visual area), then move the
 -- cursor to to the next match
-function M.add_cursor_and_jump_to_next_match()
+local function add_cursor_and_jump_to_match(backward)
 
   -- Get the visual area if in visual mode
   local is_v, lnum1, col1, lnum2, col2 = maybe_get_normalised_visual_area()
@@ -749,7 +749,7 @@ function M.add_cursor_and_jump_to_next_match()
   local pattern = get_search_pattern()
 
   -- Get a match without moving the cursor if there are already virtual cursors
-  local match = search.get_next_match(pattern, not initialised)
+  local match = search.get_next_match(pattern, backward, not initialised)
 
   if match == nil then
     return
@@ -770,6 +770,9 @@ function M.add_cursor_and_jump_to_next_match()
     -- Move cursor to match
     vim.fn.cursor({match_lnum1, match_col1, 0, match_col1})
 
+    -- Remove any existing virtual cursor
+    virtual_cursors.remove_by_pos(match_lnum1, match_col1)
+
   else  -- Visual mode
     -- Add virtual cursor to cursor position
     virtual_cursors.add_with_visual_area(lnum2, col2, col2, lnum1, col1, true)
@@ -778,18 +781,28 @@ function M.add_cursor_and_jump_to_next_match()
     local match_col2 = match_col1 + string.len(pattern) - 1
     common.set_visual_area(match_lnum1, match_col1, match_lnum1, match_col2)
 
+    virtual_cursors.remove_by_visual_area(match_lnum1, match_col1, match_lnum1, match_col2)
+
   end
 
 end
 
+function M.add_cursor_and_jump_to_next_match()
+  add_cursor_and_jump_to_match(false)
+end
+
+function M.add_cursor_and_jump_to_previous_match()
+  add_cursor_and_jump_to_match(true)
+end
+
 -- Move the cursor to the next match of the word under the cursor (or saved visual area, if any)
-function M.jump_to_next_match()
+local function jump_to_match(backward)
 
   -- Get the search pattern
   local pattern = get_search_pattern()
 
   -- Get a match without moving the cursor
-  local match = search.get_next_match(pattern, false)
+  local match = search.get_next_match(pattern, backward, false)
 
   if match == nil then
     return
@@ -798,14 +811,29 @@ function M.jump_to_next_match()
   local match_lnum1 = match[1]
   local match_col1 = match[2]
 
-  -- Move cursor to match
   if not common.is_mode("v") then
-    vim.fn.cursor({match[1], match[2], 0, match[2]})
+    -- Move cursor to match
+    vim.fn.cursor({match_lnum1, match_col1, 0, match_col1})
+
+    -- Remove any existing virtual cursor
+    virtual_cursors.remove_by_pos(match_lnum1, match_col1)
   else
+    -- Move visual area to match
     local match_col2 = match_col1 + string.len(pattern) - 1
     common.set_visual_area(match_lnum1, match_col1, match_lnum1, match_col2)
+
+    -- Remove any existing virtual cursor
+    virtual_cursors.remove_by_visual_area(match_lnum1, match_col1, match_lnum1, match_col2)
   end
 
+end
+
+function M.jump_to_next_match()
+  jump_to_match(false)
+end
+
+function M.jump_to_previous_match()
+  jump_to_match(true)
 end
 
 -- Add a new cursor at given position
@@ -895,7 +923,9 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("MultipleCursorsAddVisualArea", M.add_cursors_to_visual_area, {})
 
   vim.api.nvim_create_user_command("MultipleCursorsAddJumpNextMatch", M.add_cursor_and_jump_to_next_match, {})
+  vim.api.nvim_create_user_command("MultipleCursorsAddJumpPrevMatch", M.add_cursor_and_jump_to_previous_match, {})
   vim.api.nvim_create_user_command("MultipleCursorsJumpNextMatch", M.jump_to_next_match, {})
+  vim.api.nvim_create_user_command("MultipleCursorsJumpPrevMatch", M.jump_to_previous_match, {})
 
   vim.api.nvim_create_user_command("MultipleCursorsLock", M.lock, {})
 end
