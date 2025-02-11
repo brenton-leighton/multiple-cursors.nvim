@@ -458,7 +458,7 @@ The best solution seems to be [disabling the command](https://github.com/folke/w
 {
   "folke/which-key.nvim",
   opts = {},
-  config = function(opts)
+  config = function(_, opts)
     require("which-key.plugins.presets").operators["v"] = nil
     require("which-key").setup(opts)
   end,
@@ -477,7 +477,7 @@ This plugin uses the following highlight groups:
 For example, colours can be defined in the `config` function of the [plugin spec](https://github.com/folke/lazy.nvim#-plugin-spec):
 
 ```lua
-config = function(opts)
+config = function(_, opts)
   vim.api.nvim_set_hl(0, "MultipleCursorsCursor", {bg="#999999", fg="#000000"})
   vim.api.nvim_set_hl(0, "MultipleCursorsVisual", {bg="#777777", fg="#BBBBBB"})
   vim.api.nvim_set_hl(0, "MultipleCursorsLockedCursor", {bg="#666666", fg="#222222"})
