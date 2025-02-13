@@ -19,7 +19,7 @@ local insert_mode_completion = require("multiple-cursors.insert_mode.completion"
 local insert_mode_escape = require("multiple-cursors.insert_mode.escape")
 
 local visual_mode_modify_area = require("multiple-cursors.visual_mode.modify_area")
-local visual_mode_delete_yank_change = require("multiple-cursors.visual_mode.delete_yank_change")
+local visual_mode_delete_yank_change_put = require("multiple-cursors.visual_mode.delete_yank_change_put")
 local visual_mode_edit = require("multiple-cursors.visual_mode.edit")
 local visual_mode_escape = require("multiple-cursors.visual_mode.escape")
 
@@ -171,9 +171,9 @@ default_key_maps = {
   {"x", "i", visual_mode_modify_area.i},
 
   -- Delete, yank, change
-  {"x", {"d", "<Del>"}, visual_mode_delete_yank_change.d},
-  {"x", "y", visual_mode_delete_yank_change.y},
-  {"x", "c", visual_mode_delete_yank_change.c},
+  {"x", {"d", "<Del>"}, visual_mode_delete_yank_change_put.d},
+  {"x", "y", visual_mode_delete_yank_change_put.y},
+  {"x", "c", visual_mode_delete_yank_change_put.c},
 
   -- Indentation
   {"x", ">", visual_mode_edit.indent},
