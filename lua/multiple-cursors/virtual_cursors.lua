@@ -645,6 +645,10 @@ end
 
 -- Insert each line of from into to
 local function concatenate_regcontents(from, to)
+  if not from then
+    return
+  end
+
   for _, line in ipairs(from) do
     table.insert(to, line)
   end
