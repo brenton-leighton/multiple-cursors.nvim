@@ -553,6 +553,47 @@ function M.visual_mode_delete_yank(register, cmd)
 
 end
 
+-- Visual mode p and P commands
+function M.visual_mode_put(register, count, cmd)
+
+  -- Determine which registers to use
+  local tmp = which_registers(register)
+
+  if tmp == 0 then
+    return
+  end
+
+  local use_vc_registers = tmp == 2
+
+  M.visual_mode(function(vc, idx)
+
+    local register_info = nil
+
+    -- If the virtual cursor has data for the register
+    if use_vc_registers then
+      -- Save the register
+      register_info = vim.fn.getreginfo(register)
+      -- Set the register from the virtual cursor
+      vc:set_register(register)
+    end
+
+    -- Put the register
+    common.normal_bang(register, count, cmd, nil)
+
+    -- Save the register for "p"
+    if cmd == "p" then
+      vc:save_register(register)
+    end
+
+    -- Restore the real register
+    if register_info then
+      vim.fn.setreg(register, register_info)
+    end
+
+  end)
+
+end
+
 
 -- Go to commands ("G" and "gg") -----------------------------------------------
 

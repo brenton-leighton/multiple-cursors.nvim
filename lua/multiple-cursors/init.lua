@@ -174,6 +174,8 @@ default_key_maps = {
   {"x", {"d", "<Del>"}, visual_mode_delete_yank_change_put.d},
   {"x", "y", visual_mode_delete_yank_change_put.y},
   {"x", "c", visual_mode_delete_yank_change_put.c},
+  {"x", "p", visual_mode_delete_yank_change_put.p},
+  {"x", "P", visual_mode_delete_yank_change_put.P},
 
   -- Indentation
   {"x", ">", visual_mode_edit.indent},

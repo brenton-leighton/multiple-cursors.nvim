@@ -20,4 +20,15 @@ function M.c()
   common.feedkeys(nil, 0, "i", nil)
 end
 
+-- Put
+local function visual_mode_put_and_feedkeys(cmd)
+  local register = vim.v.register
+  local count = vim.v.count
+  virtual_cursors.visual_mode_put(register, count, cmd)
+  common.feedkeys(register, count, cmd, nil)
+end
+
+function M.p() visual_mode_put_and_feedkeys("p") end
+function M.P() visual_mode_put_and_feedkeys("P") end
+
 return M
