@@ -430,35 +430,63 @@ function M.normal_mode_delete_yank(register, count, cmd, motion_cmd)
 
 end
 
+-- Determine which register(s) to use for the put command
+-- If every virtual cursor has a register, use them
+-- Otherwise use the real register
+-- If the real register isn't occupied, then fail
+--
+-- Returns:
+--   2 for virtual cursor registers
+--   1 for real register
+--   0 for failure
+local function which_registers(register)
+
+  local use_vc_registers = true
+
+  -- Check that every virtual cursor has a register
+  for _, vc in ipairs(virtual_cursors) do
+    if vc.editable and not vc:has_register(register) then
+      use_vc_registers = false
+      break
+    end
+  end
+
+  -- Use virtual cursor registers
+  if use_vc_registers then
+    return 2
+  end
+
+  -- Return 0 if the real register doesn't have data
+  local register_info = vim.fn.getreginfo(register)
+  if next(register_info) == nil then
+    return 0
+  end
+
+  -- Use the real register
+  return 1
+
+end
+
 -- Execute a normal command to perform a put at each virtual cursor
 -- The register is first saved, the replaced by the virtual cursor register
 -- After executing the command the unnamed register is restored
 function M.normal_mode_put(register, count, cmd)
 
-  local use_own_register = true
+  -- Determine which registers to use
+  local tmp = which_registers(register)
 
-  for _, vc in ipairs(virtual_cursors) do
-    if vc.editable and not vc:has_register(register) then
-      use_own_register = false
-      break
-    end
+  if tmp == 0 then
+    return
   end
 
-  -- If not using each virtual cursor's register
-  if not use_own_register then
-    -- Return if the main register doesn't have data
-    local register_info = vim.fn.getreginfo(register)
-    if next(register_info) == nil then
-      return
-    end
-  end
+  local use_vc_registers = tmp == 2
 
   M.edit_with_cursor(function(vc, idx)
 
     local register_info = nil
 
     -- If the virtual cursor has data for the register
-    if use_own_register then
+    if use_vc_registers then
       -- Save the register
       register_info = vim.fn.getreginfo(register)
       -- Set the register from the virtual cursor
@@ -468,7 +496,7 @@ function M.normal_mode_put(register, count, cmd)
     -- Put the register
     common.normal_bang(register, count, cmd, nil)
 
-    -- Restore the register
+    -- Restore the real register
     if register_info then
       vim.fn.setreg(register, register_info)
     end
@@ -521,6 +549,47 @@ function M.visual_mode_delete_yank(register, cmd)
   M.visual_mode(function(vc, idx)
     common.normal_bang(register, 0, cmd, nil)
     vc:save_register(register)
+  end)
+
+end
+
+-- Visual mode p and P commands
+function M.visual_mode_put(register, count, cmd)
+
+  -- Determine which registers to use
+  local tmp = which_registers(register)
+
+  if tmp == 0 then
+    return
+  end
+
+  local use_vc_registers = tmp == 2
+
+  M.visual_mode(function(vc, idx)
+
+    local register_info = nil
+
+    -- If the virtual cursor has data for the register
+    if use_vc_registers then
+      -- Save the register
+      register_info = vim.fn.getreginfo(register)
+      -- Set the register from the virtual cursor
+      vc:set_register(register)
+    end
+
+    -- Put the register
+    common.normal_bang(register, count, cmd, nil)
+
+    -- Save the register for "p"
+    if cmd == "p" then
+      vc:save_register(register)
+    end
+
+    -- Restore the real register
+    if register_info then
+      vim.fn.setreg(register, register_info)
+    end
+
   end)
 
 end
@@ -645,6 +714,10 @@ end
 
 -- Insert each line of from into to
 local function concatenate_regcontents(from, to)
+  if not from then
+    return
+  end
+
   for _, line in ipairs(from) do
     table.insert(to, line)
   end
