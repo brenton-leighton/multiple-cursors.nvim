@@ -736,7 +736,7 @@ function M.add_cursors_to_visual_area()
   end
 
   -- Move the real cursor
-  vim.fn.cursor({lnum, col, 0, -1})
+  vim.fn.cursor({lnum2, col, 0, -1})
 
 end
 
