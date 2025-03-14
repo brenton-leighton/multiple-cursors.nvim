@@ -732,11 +732,15 @@ function M.add_cursors_to_visual_area()
 
   -- Add virtual cursors
   for lnum = lnum1, end_lnum, step do
-    virtual_cursors.add(lnum, col, -1, true)
+    -- Limit col to the normal mode line length
+    local max_col = vim.fn.max({common.get_length_of_line(lnum), 1})
+    local limited_col = vim.fn.min({max_col, col})
+
+    virtual_cursors.add(lnum, limited_col, -1, true)
   end
 
   -- Move the real cursor
-  vim.fn.cursor({lnum, col, 0, -1})
+  vim.fn.cursor({lnum2, col, 0, -1})
 
 end
 
