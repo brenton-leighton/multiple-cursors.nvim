@@ -13,6 +13,16 @@ This plugin also has the ability to do "split pasting": When pasting text, if th
 
 For [lazy.nvim](https://github.com/folke/lazy.nvim), add a section to the plugins table, e.g.:
 
+Make sure you have nvim-autopairs, plugin installed. 
+if not add both the plugins to your lua file.
+```lua
+{
+    'windwp/nvim-autopairs',
+    event = "InsertEnter",
+    config = true
+},
+```
+
 ```lua
 {
   "brenton-leighton/multiple-cursors.nvim",
