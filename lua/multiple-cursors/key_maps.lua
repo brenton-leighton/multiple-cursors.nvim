@@ -291,6 +291,8 @@ function M.set_custom()
           wrapped_func = function() custom_function_with_char(func) end
         elseif opt == "mc" then -- Standard character
           wrapped_func = function() custom_function_with_motion_then_char(func) end
+        elseif opt == "nowrap" then
+          wrapped_func = func
         end
       end
 
