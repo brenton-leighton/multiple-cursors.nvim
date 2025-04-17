@@ -257,7 +257,7 @@ Each element in the `custom_key_maps` table must have three or four elements:
   - "mc" indicates that a motion command and a printable character is requested (e.g. for a surround action)
   - If valid input isn't given by the user the function will not be called
   - There will be no indication that Neovim is waiting for a motion command or character
-  - The "nowrap" option is for using an internal function, e.g. for [alternative keyboard layouts](alternative-keyboard-layouts). Custom key map functions are typically executed for every virtual cursor, but internal functions already do this, so the "nowrap" option causes the given function to be called only once.
+  - The "nowrap" option is for using an internal function, e.g. for [alternative keyboard layouts](#alternative-keyboard-layouts). Custom key map functions are typically executed for every virtual cursor, but internal functions already do this, so the "nowrap" option causes the given function to be called only once.
 
 The following example shows how to use various options for user input:
 
