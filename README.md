@@ -251,12 +251,13 @@ Each element in the `custom_key_maps` table must have three or four elements:
 - Mode (string|table): Mode short-name string (`"n"`, `"i"` or `"x"`), or a table of mode short-name strings (for visual mode it's currently only possible to move the cursor)
 - Mapping lhs (string|table): [Left-hand side](https://neovim.io/doc/user/map.html#%7Blhs%7D) of a mapping string, e.g. `">>"`, `"<Tab>"`, or `"<C-/>"`, or a table of lhs strings
 - Function: A Lua function that will be called at each cursor, which receives [`register`](https://neovim.io/doc/user/vvars.html#v%3Aregister) (note: working with virtual cursor registers is not currently implemented), [`count`](https://neovim.io/doc/user/vvars.html#v%3Acount), and optionally more, as arguments. Setting this to `nil` will disable a [default key mapping](#supported-commands).
-- Option: A optional string containing "m", "c", or "mc". These enable getting input from the user, which is then forwarded to the function:
+- Option: A optional string containing "m", "c", "mc", or "nowrap". "m", "c", and "mc" enable getting input from the user, which is then forwarded to the function:
   - "m" indicates that a motion command is requested (i.e. operator pending mode). The motion command can can include a count in addition to the `count` variable.
   - "c" indicates that a printable character is requested (e.g. for character search)
   - "mc" indicates that a motion command and a printable character is requested (e.g. for a surround action)
   - If valid input isn't given by the user the function will not be called
   - There will be no indication that Neovim is waiting for a motion command or character
+  - The "nowrap" option is for using an internal function, e.g. for [alternative keyboard layouts](#alternative-keyboard-layouts). Custom key map functions are typically executed for every virtual cursor, but internal functions already do this, so the "nowrap" option causes the given function to be called only once.
 
 The following example shows how to use various options for user input:
 
@@ -284,6 +285,30 @@ opts = {
     end, "mc"}
   },
 },
+```
+
+### Alternative keyboard layouts
+
+The "nowrap" option for a [custom key map](#custom_key_maps) allows for using internal functions.
+This can be used to remap keys for alternative keyboard layouts, e.g. for the Colemak layout (with the `l` key for changing to insert mode):
+
+```lua
+opts = {
+  custom_key_maps = {
+    -- Remap j, k, and l to n, e, and i
+    {{"n", "x"}, "n", function() require("multiple-cursors.normal_mode.motion").j() end, "nowrap"},
+    {{"n", "x"}, "e", function() require("multiple-cursors.normal_mode.motion").k() end, "nowrap"},
+    {{"n", "x"}, "i", function() require("multiple-cursors.normal_mode.motion").l() end, "nowrap"},
+
+    -- Remap i and I to l and L
+    {{"n", "x"}, "l", function() require("multiple-cursors.normal_mode_mode_change.i() end, "nowrap"},
+    {{"n", "x"}, "L", function() require("multiple-cursors.normal_mode_mode_change.I() end, "nowrap"},
+
+    -- Disable j and k
+    {{"n", "x"}, "j", nil },
+    {{"n", "x"}, "k", nil },
+  }
+}
 ```
 
 ## Plugin compatibility
