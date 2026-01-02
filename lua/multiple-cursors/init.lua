@@ -853,6 +853,24 @@ function M.add_cursor(lnum, col, curswant)
 
 end
 
+local function align_insert_spaces_or_tabs(num)
+  local expandtab = vim.opt.expandtab._value
+  local tabstop = vim.opt.tabstop._value
+
+  if expandtab then
+    -- Spaces
+    for i = 1, num do
+      vim.api.nvim_put({" "}, "c", false, true)
+    end
+  else
+    -- Tabs
+    num = math.floor(num/tabstop)
+    for i = 1, num do
+      vim.api.nvim_put({"\t"}, "c", false, true)
+    end
+  end
+end
+
 -- Insert spaces before each cursor to align them all to the rightmost cursor
 function M.align()
 
@@ -871,16 +889,12 @@ function M.align()
   -- For each virtual cursor, insert spaces to move the cursor to col
   virtual_cursors.edit_with_cursor(function(vc)
     local num = col - vc.col
-    for i = 1, num do
-      vim.api.nvim_put({" "}, "c", false, true)
-    end
+    align_insert_spaces_or_tabs(num)
   end)
 
   -- Insert spaces for the real cursor
   local num = col - vim.fn.col(".")
-  for i = 1, num do
-    vim.api.nvim_put({" "}, "c", false, true)
-  end
+  align_insert_spaces_or_tabs(num)
 
 end
 
