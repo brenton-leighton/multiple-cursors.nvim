@@ -137,14 +137,14 @@ local function with_onemore(func)
   local ve = vim.wo.ve
 
   -- Enable one more while saving/restoring cursor
-  local cursor_pos = vim.fn.getcurpos()
+  local cursor_pos = vim.fn.getcursorcharpos()
   vim.wo.ve = "onemore"
   vim.fn.cursor({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
 
   func()
 
   -- Disable one more while saving/restoring cursor
-  local cursor_pos = vim.fn.getcurpos()
+  local cursor_pos = vim.fn.getcursorcharpos()
   vim.wo.ve = ve
   vim.fn.cursor({cursor_pos[2], cursor_pos[3], cursor_pos[4], cursor_pos[5]})
 

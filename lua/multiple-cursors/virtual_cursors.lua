@@ -54,7 +54,7 @@ local function get_real_cursor_index()
   M.sort()
 
   -- Position of the real cursor
-  local real_cursor_pos = vim.fn.getcurpos() -- [0, lnum, col, off, curswant]
+  local real_cursor_pos = vim.fn.getcursorcharpos() -- [0, lnum, col, off, curswant]
   local lnum = real_cursor_pos[2]
   local col = real_cursor_pos[3]
 
@@ -248,7 +248,7 @@ function M.cursor_moved()
   end
 
   -- Get real cursor position
-  local pos = vim.fn.getcurpos() -- [0, lnum, col, off, curswant]
+  local pos = vim.fn.getcursorcharpos() -- [0, lnum, col, off, curswant]
 
   for idx = #virtual_cursors, 1, -1 do
     local vc = virtual_cursors[idx]
@@ -295,7 +295,7 @@ function M.visit_all_ignore_lock(func)
 
   -- Save cursor position
   -- This is because changing virtualedit causes curswant to be reset
-  local cursor_pos = vim.fn.getcurpos()
+  local cursor_pos = vim.fn.getcursorcharpos()
 
   -- Save virtualedit
   local ve = vim.wo.ve
@@ -606,7 +606,7 @@ end
 -- Go to commands ("G" and "gg") -----------------------------------------------
 
 local function set_real_cursor_lnum(lnum)
-  local pos = vim.fn.getcurpos()
+  local pos = vim.fn.getcursorcharpos()
 
   pos[2] = lnum
 

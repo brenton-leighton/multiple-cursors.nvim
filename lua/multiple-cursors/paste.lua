@@ -71,7 +71,7 @@ local function virtual_cursor_visual_mode_paste(lines, vc)
   common.normal_bang("_", 0, "d", nil)
 
   -- Get cursor position
-  local cursor_pos = vim.fn.getcurpos()
+  local cursor_pos = vim.fn.getcursorcharpos()
   local eol_after = cursor_pos[3] >= common.get_max_col(cursor_pos[2])
 
   if eol_before and eol_after then

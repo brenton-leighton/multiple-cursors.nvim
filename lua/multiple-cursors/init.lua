@@ -367,7 +367,7 @@ end
 local function add_virtual_cursor_and_move(count1, down)
   for i = 1, count1 do
     -- Get the real cursor position
-    local pos = vim.fn.getcurpos()
+    local pos = vim.fn.getcursorcharpos()
 
     -- Add virtual cursor at the real cursor position
     virtual_cursors.add(pos[2], pos[3], pos[5], true)
@@ -403,7 +403,7 @@ end
 -- mode)
 local function add_virtual_cursor_and_move_i(down)
   -- Get the real cursor position
-  local pos = vim.fn.getcurpos()
+  local pos = vim.fn.getcursorcharpos()
 
   -- Add virtual cursor at the real cursor position
   virtual_cursors.add(pos[2], pos[3], pos[5], true)
@@ -787,7 +787,7 @@ local function add_cursor_and_jump_to_match(backward)
   -- Normal mode
   if not is_v then
     -- Add virtual cursor to cursor position
-    local pos = vim.fn.getcurpos()
+    local pos = vim.fn.getcursorcharpos()
     virtual_cursors.add(pos[2], pos[3], pos[5], true)
 
     -- Move cursor to match
@@ -879,7 +879,7 @@ function M.align()
   end
 
   -- Find the column of the rightmost cursor
-  local col = vim.fn.col(".")
+  local col = vim.fn.charcol(".")
 
   virtual_cursors.visit_all(function(vc)
     col = vim.fn.max({col, vc.col})
@@ -894,7 +894,7 @@ function M.align()
   end)
 
   -- Insert spaces for the real cursor
-  local num = col - vim.fn.col(".")
+  local num = col - vim.fn.charcol(".")
   for i = 1, num do
     vim.api.nvim_put({" "}, "c", false, true)
   end

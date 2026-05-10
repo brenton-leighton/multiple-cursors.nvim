@@ -95,7 +95,7 @@ function M.get_matches_and_move_cursor(word, limit_to_visible, limit_to_prev_vis
   end
 
   -- Save real cursor position
-  local cursor_pos = vim.fn.getcurpos()
+  local cursor_pos = vim.fn.getcursorcharpos()
 
   virtual_cursors.set_ignore_cursor_movement(true)
 

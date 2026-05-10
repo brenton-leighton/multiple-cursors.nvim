@@ -170,7 +170,7 @@ local function _C()
 
   -- Real cursor
   -- If the cursor is at the start of the line and count > 1
-  if vim.fn.getcurpos()[3] == 1 and count > 1 then
+  if vim.fn.getcursorcharpos()[3] == 1 and count > 1 then
     -- Delete and open a new line
     common.normal_bang(register, count, "D", nil)
     common.normal_bang(nil, 0, "O", nil)

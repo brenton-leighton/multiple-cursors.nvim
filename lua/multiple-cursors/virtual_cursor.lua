@@ -126,7 +126,7 @@ end
 -- Save the real cursor position to the virtual cursor
 function VirtualCursor:save_cursor_position()
 
-  local pos = vim.fn.getcurpos()
+  local pos = vim.fn.getcursorcharpos()
 
   self.lnum = pos[2]
   self.col = pos[3]
@@ -143,7 +143,7 @@ end
 function VirtualCursor:save_visual_area()
 
   -- Save the current visual area start position
-  local visual_start_pos = vim.fn.getpos("v")
+  local visual_start_pos = vim.fn.getcharpos("v")
   self.visual_start_lnum = visual_start_pos[2]
   self.visual_start_col = visual_start_pos[3]
 

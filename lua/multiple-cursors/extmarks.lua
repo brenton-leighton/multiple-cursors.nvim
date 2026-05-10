@@ -125,7 +125,7 @@ end
 -- Save the cursor to a hidden extmark to track movement due to changes
 function M.save_cursor()
 
-  local pos = vim.fn.getcurpos()
+  local pos = vim.fn.getcursorcharpos()
 
   cursor_lnum = pos[2]  -- Save lnum in case the cursor is lost
   local col = pos[3]
